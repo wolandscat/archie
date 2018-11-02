@@ -22,6 +22,7 @@ package org.openehr.bmm.core;
  */
 
 import org.openehr.bmm.BmmConstants;
+import org.openehr.bmm.persistence.PersistedBmmClass;
 import org.openehr.bmm.persistence.serializer.Serialize;
 import org.openehr.bmm.persistence.validation.BmmDefinitions;
 import org.openehr.odin.CompositeOdinObject;
@@ -484,6 +485,28 @@ public class BmmClass extends BmmClassifier implements Serializable {
         target.setPackage(this.getPackage());
         target.setBmmModel(this.getBmmModel());
         return target;
+    }
+
+    /**
+     * Method creates a PersistedBmmClass from an in-memory BmmClass
+     * representation.
+     *
+     * @return
+     */
+    public PersistedBmmClass convertToPersistedBmmClass() {
+        PersistedBmmClass persistedBmmClass = new PersistedBmmClass(name);
+        persistedBmmClass.setAbstract(isAbstract);
+        if(ancestors != null) {
+            for (BmmClass ancestor : getAncestors().values()) {
+                persistedBmmClass.addAncestor(ancestor.getName());
+            }
+        }
+        if(properties != null) {
+            for(BmmProperty<?> property : getProperties().values()) {
+                persistedBmmClass.addProperty(property.convertToPersistentBmmProperty());
+            }
+        }
+        return persistedBmmClass;
     }
 
     public Boolean hasPropertyWithName(String propertyName) {

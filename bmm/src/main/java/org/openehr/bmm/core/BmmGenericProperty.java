@@ -24,13 +24,22 @@ package org.openehr.bmm.core;
 import org.openehr.bmm.BmmConstants;
 import org.openehr.bmm.core.BmmGenericType;
 import org.openehr.bmm.core.BmmProperty;
+import org.openehr.bmm.persistence.PersistedBmmGenericProperty;
 import org.openehr.odin.utils.OdinSerializationUtils;
 
 import java.io.Serializable;
 
 public class BmmGenericProperty extends BmmProperty implements Serializable {
 
-    private BmmGenericType genericTypeDef;//fix to call it typeDef once fix has been made to this attribute in parent class;
+    private BmmGenericType genericTypeDef;//TODO fix to call it typeDef once fix has been made to this attribute in parent class;
+
+    public BmmGenericProperty() {}
+
+    public BmmGenericProperty(String name, boolean isMandatory, BmmGenericType genericTypeDef) {
+        setName(name);
+        setMandatory(isMandatory);
+        this.genericTypeDef = genericTypeDef;
+    }
 
     public BmmGenericType getGenericTypeDef() {
         return genericTypeDef;
@@ -40,39 +49,20 @@ public class BmmGenericProperty extends BmmProperty implements Serializable {
         this.genericTypeDef = genericTypeDef;
     }
 
-//    public String toString() {
-//        return serialize();
-//    }
-//
-//    public String serialize() {
-//        return serialize(0);
-//    }
-
-//    public String serialize(int indentation) {
-//        StringBuilder builder = new StringBuilder();
-//        int indentCount = indentation;
-//        indentBy(builder, indentCount);
-//        builder.append("[\"").append(getName()).append("\"] = (").append(BmmProperty.P_BMM_GENERIC_PROPERTY).append(") <").append("\n");
-//        indentCount++;
-//        indentBy(builder, indentCount);
-//        builder.append(OdinSerializationUtils.buildOdinStringObjectPropertyInitialization(BmmConstants.BMM_PROPERTY_NAME, getName()));
-//        indentBy(builder, indentCount);
-//        builder.append(BmmConstants.BMM_PROPERTY_TYPE_DEF).append(" = <").append("\n");
-//        indentCount++;
-//        indentBy(builder, indentCount);
-////        builder.append(OdinSerializationUtils.buildOdinStringObjectPropertyInitialization(BmmConstants.BMM_PROPERTY_ROOT_TYPE, getGenericTypeDef().getRootType()));
-//        indentBy(builder, indentCount);
-////        builder.append(OdinSerializationUtils.buildOdinListPropertyInitialization(BmmConstants.BMM_PROPERTY_GENERIC_PARAMETERS, getGenericTypeDef().getGenericParameters()));
-//        indentCount--;
-//        indentBy(builder, indentCount);
-//        builder.append(">").append("\n");
-//        if(getMandatory() != null && getMandatory()) {
-//            indentBy(builder, indentCount);
-//            builder.append(OdinSerializationUtils.buildOdinBooleanObjectPropertyInitialization(BmmConstants.BMM_PROPERTY_IS_MANDATORY, true));
-//        }
-//        indentCount--;
-//        indentBy(builder, indentCount);
-//        builder.append(">").append("\n");
-//        return builder.toString();
-//    }
+    /**
+     * Method attempts to convert BmmGenericProperty into a PersistedBmmGenericProperty.
+     *
+     * @return
+     */
+    @Override
+    public PersistedBmmGenericProperty convertToPersistentBmmProperty() {
+        PersistedBmmGenericProperty property = new PersistedBmmGenericProperty(getName(), getMandatory());
+        property.setDocumentation(getDocumentation());
+        property.setImInfrastructure(getImInfrastructure());
+        property.setImRuntime(getImRuntime());
+        if(genericTypeDef != null) {
+            property.setTypeDefinition(genericTypeDef.convertToPersistedBmmGenericType());
+        }
+        return property;
+    }
 }

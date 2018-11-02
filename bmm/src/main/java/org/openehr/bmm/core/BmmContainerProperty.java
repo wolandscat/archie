@@ -24,6 +24,7 @@ package org.openehr.bmm.core;
 import com.nedap.archie.base.MultiplicityInterval;
 import org.openehr.bmm.BmmConstants;
 import org.openehr.bmm.BmmMultiplicityInterval;
+import org.openehr.bmm.persistence.PersistedBmmContainerProperty;
 import org.openehr.odin.utils.OdinSerializationUtils;
 
 /**
@@ -38,9 +39,17 @@ public class BmmContainerProperty extends BmmProperty<BmmContainerType> {
      */
     private MultiplicityInterval cardinality;
 
+    /**
+     * No-arg constructor.
+     */
     public BmmContainerProperty() {
     }
 
+    /**
+     *
+     * @param name The name of the container property.
+     * @param type The container type.
+     */
     public BmmContainerProperty(String name, BmmContainerType type) {
         super(name, type);
     }
@@ -61,6 +70,21 @@ public class BmmContainerProperty extends BmmProperty<BmmContainerType> {
      */
     public void setCardinality(MultiplicityInterval cardinality) {
         this.cardinality = cardinality;
+    }
+
+    /**
+     * Method attempts to convert BmmContainerProperty into a PersistedBmmContainerProperty.
+     *
+     * @return
+     */
+    @Override
+    public PersistedBmmContainerProperty convertToPersistentBmmProperty() {
+        PersistedBmmContainerProperty property = new PersistedBmmContainerProperty(getName(), getMandatory(), getType().convertToPersistedBmmContainerType());
+        if(cardinality != null) {
+            BmmMultiplicityInterval interval = new BmmMultiplicityInterval(cardinality.getLower(), cardinality.isLowerUnbounded(), cardinality.getUpper(), cardinality.isUpperUnbounded());
+            property.setCardinality(interval);
+        }
+        return property;
     }
 
 }

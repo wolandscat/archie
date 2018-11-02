@@ -69,6 +69,18 @@ public class PersistedBmmContainerProperty extends PersistedBmmProperty<Persiste
     }
 
     /**
+     * Creates a new named property that is mandatory with the specified type.
+     *
+     * @param name
+     * @param isMandatory
+     * @param type
+     */
+    public PersistedBmmContainerProperty(String name, boolean isMandatory,PersistedBmmContainerType type) {
+        this(name, isMandatory);
+        setTypeDefinition(type);
+    }
+
+    /**
      * Returns the cardinality of this container.
      *
      * @return

@@ -23,6 +23,7 @@ package org.openehr.bmm.core;
 
 import org.openehr.bmm.core.BmmClass;
 import org.openehr.bmm.core.BmmType;
+import org.openehr.bmm.persistence.PersistedBmmContainerType;
 
 /**
  * Type reference that specifies containers with one generic parameter.
@@ -102,4 +103,20 @@ public class BmmContainerType extends BmmType {
 
     @Override
     public String toDisplayString() {return getTypeName();}
+
+    /**
+     * Method converts a BmmContainerType to its persistent corresponding form.
+     *
+     * @return
+     */
+    public PersistedBmmContainerType convertToPersistedBmmContainerType() {
+        PersistedBmmContainerType persistedBmmContainerType = new PersistedBmmContainerType();
+        if(containerType != null) {
+            persistedBmmContainerType.setContainerType(containerType.getName());
+        }
+        if(baseType != null && baseType.getBaseClass() != null) {
+            persistedBmmContainerType.setType(baseType.getBaseClass().getName());
+        }
+        return persistedBmmContainerType;
+    }
 }

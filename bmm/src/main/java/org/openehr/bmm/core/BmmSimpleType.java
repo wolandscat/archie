@@ -23,6 +23,7 @@ package org.openehr.bmm.core;
 
 import org.openehr.bmm.core.BmmClass;
 import org.openehr.bmm.core.BmmType;
+import org.openehr.bmm.persistence.PersistedBmmSimpleType;
 
 import java.io.Serializable;
 
@@ -65,4 +66,12 @@ public class BmmSimpleType extends BmmType implements Serializable {
 
     @Override
     public String toDisplayString() {return getTypeName();}
+
+    public PersistedBmmSimpleType convertToPersistedBmmSimpleType() {
+        PersistedBmmSimpleType persistedBmmSimpleType = new PersistedBmmSimpleType();
+        if(baseClass != null) {
+            persistedBmmSimpleType.setType(baseClass.getName());
+        }
+        return persistedBmmSimpleType;
+    }
 }

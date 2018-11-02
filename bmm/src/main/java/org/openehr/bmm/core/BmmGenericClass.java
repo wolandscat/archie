@@ -21,6 +21,8 @@ package org.openehr.bmm.core;
  * Author: Claude Nanjo
  */
 
+import org.openehr.bmm.persistence.PersistedBmmClass;
+
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -165,5 +167,16 @@ public class BmmGenericClass extends BmmClass implements Serializable {
         BmmGenericClass target = (BmmGenericClass)super.duplicate();
         target.setGenericParameters(this.getGenericParameters());
         return target;
+    }
+
+    @Override
+    public PersistedBmmClass convertToPersistedBmmClass() {
+        PersistedBmmClass persistedBmmClass = super.convertToPersistedBmmClass();
+        if(genericParameters != null) {
+            for(BmmGenericParameter parameter: genericParameters.values()) {
+                persistedBmmClass.addGenericParameterDefinition(parameter.convertToPersistedBmmGenericParameter());
+            }
+        }
+        return persistedBmmClass;
     }
 }

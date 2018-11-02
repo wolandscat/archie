@@ -22,6 +22,8 @@ package org.openehr.bmm.core;
  */
 
 
+import org.openehr.bmm.persistence.PersistedBmmGenericParameter;
+
 import java.io.Serializable;
 
 /**
@@ -132,6 +134,19 @@ public class BmmGenericParameter extends BmmTypeElement implements Serializable 
      */
     public String getTypeSignature() {
         throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    /**
+     * Method converts a BmmGenericParameter to its corresponding PersistedBmmGenericParameter.
+     *
+     * @return
+     */
+    public PersistedBmmGenericParameter convertToPersistedBmmGenericParameter() {
+        PersistedBmmGenericParameter genericParameter = new PersistedBmmGenericParameter(name);
+        if(conformsToType != null) {
+            genericParameter.setConformsToType(getConformsToType().getName());
+        }
+        return genericParameter;
     }
 }
 

@@ -74,6 +74,11 @@ public class PersistedBmmSingleProperty extends PersistedBmmProperty<PersistedBm
         setType(type);
     }
 
+    public PersistedBmmSingleProperty(String name, boolean isMandatory, PersistedBmmSimpleType type) {
+        this(name, isMandatory, type.getType());
+        setTypeReference(type);
+    }
+
     /**
      * If the type is a simple type, then this attribute will hold the type name. If the type is a container or generic,
      * then type_ref will hold the type definition. The resulting type is generated in type_def.

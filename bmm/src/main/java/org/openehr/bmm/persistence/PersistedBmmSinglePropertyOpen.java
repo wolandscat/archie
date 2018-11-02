@@ -65,6 +65,16 @@ public class PersistedBmmSinglePropertyOpen extends PersistedBmmProperty<Persist
         this.type = type;
     }
 
+    public PersistedBmmSinglePropertyOpen(String name, boolean isMandatory, String type) {
+        this(name, type);
+        setMandatory(isMandatory);
+    }
+
+    public PersistedBmmSinglePropertyOpen(String name, boolean isMandatory, PersistedBmmOpenType type) {
+        this(name, isMandatory, type.getType());
+        setTypeReference(type);
+    }
+
     /**
      * Returns type definition of this property, if not a simple String type reference.
      * @return

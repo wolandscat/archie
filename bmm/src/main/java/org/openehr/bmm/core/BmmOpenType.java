@@ -22,6 +22,7 @@ package org.openehr.bmm.core;
  */
 
 import org.openehr.bmm.core.BmmType;
+import org.openehr.bmm.persistence.PersistedBmmOpenType;
 
 import java.io.Serializable;
 
@@ -70,5 +71,18 @@ public class BmmOpenType extends BmmType implements Serializable {
     @Override
     public BmmClass getBaseClass() {
         return getGenericConstraint().getConformsToType();
+    }
+
+    /**
+     * Method converts BmmOpenType to corresponding persisted form.
+     *
+     * @return
+     */
+    public PersistedBmmOpenType convertToPersistedBmmOpenType() {
+       PersistedBmmOpenType persistedBmmOpenType = new PersistedBmmOpenType();
+       if(genericConstraint != null) {
+           persistedBmmOpenType.setType(genericConstraint.getName());
+       }
+       return persistedBmmOpenType;
     }
 }

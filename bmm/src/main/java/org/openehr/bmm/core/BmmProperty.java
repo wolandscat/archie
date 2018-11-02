@@ -24,6 +24,9 @@ package org.openehr.bmm.core;
 import com.nedap.archie.base.MultiplicityInterval;
 import org.openehr.bmm.BmmConstants;
 import org.openehr.bmm.BmmMultiplicityInterval;
+import org.openehr.bmm.persistence.PersistedBmmProperty;
+import org.openehr.bmm.persistence.PersistedBmmSingleProperty;
+import org.openehr.bmm.persistence.PersistedBmmSinglePropertyOpen;
 import org.openehr.odin.CompositeOdinObject;
 import org.openehr.odin.IntegerIntervalObject;
 import org.openehr.odin.OdinAttribute;
@@ -46,11 +49,11 @@ public class BmmProperty<T extends BmmType> extends BmmModelElement implements S
 	/**
 	 * True if this property is mandatory in its class.
 	 */
-	private Boolean isMandatory;
+	private Boolean isMandatory = false;
 	/**
 	 * True if this property is computed rather than stored in objects of this class.
 	 */
-	private Boolean isComputed;
+	private Boolean isComputed = false;
 	/**
 	 * Formal type of this property.
 	 */
@@ -58,11 +61,11 @@ public class BmmProperty<T extends BmmType> extends BmmModelElement implements S
 	/**
 	 * True if this property is marked with info model 'im_runtime' property.
 	 */
-	private Boolean isImRuntime;
+	private Boolean isImRuntime = false;
 	/**
 	 * True if this property was marked with info model 'im_infrastructure' flag.
 	 */
-	private Boolean isImInfrastructure;
+	private Boolean isImInfrastructure = false;
 
 	public BmmProperty() {
 	}
@@ -222,6 +225,28 @@ public class BmmProperty<T extends BmmType> extends BmmModelElement implements S
 		property.setMandatory(this.isMandatory);
 		property.setType(this.type);
 		property.setDocumentation(this.getDocumentation());
+		return property;
+	}
+
+	/**
+	 * Method attempts to convert BmmProperty into a PersistedBmmProperty. Method returns
+	 * null if property type cannot be determined.
+	 *
+	 * @return
+	 */
+	public PersistedBmmProperty convertToPersistentBmmProperty() {
+		PersistedBmmProperty property = null;
+		if(type instanceof BmmSimpleType) {
+			property = new PersistedBmmSingleProperty(name, isMandatory, ((BmmSimpleType) type).convertToPersistedBmmSimpleType());
+			property.setDocumentation(getDocumentation());
+			property.setImInfrastructure(getImInfrastructure());
+			property.setImRuntime(getImRuntime());
+		} else if(type instanceof BmmOpenType) {
+			property = new PersistedBmmSinglePropertyOpen(name, isMandatory, ((BmmOpenType) type).convertToPersistedBmmOpenType());
+			property.setDocumentation(getDocumentation());
+			property.setImInfrastructure(getImInfrastructure());
+			property.setImRuntime(getImRuntime());
+		}
 		return property;
 	}
 }

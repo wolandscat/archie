@@ -21,6 +21,8 @@ package org.openehr.bmm.core;
  * Author: Claude Nanjo
  */
 
+import org.openehr.bmm.persistence.PersistedBmmGenericType;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,6 +116,23 @@ public class BmmGenericType extends BmmType implements Serializable {
         return builder.toString();
     }
 
+    /**
+     * Converts BmmGenericType to its persisted equivalent.
+     *
+     * @return
+     */
+    public PersistedBmmGenericType convertToPersistedBmmGenericType() {
+        PersistedBmmGenericType persistedBmmGenericType = new PersistedBmmGenericType();
+        if(getBaseClass() != null) {
+            persistedBmmGenericType.setRootType(getBaseClass().getName());
+        }
+        if(getGenericParameters() != null) {
+            for (BmmType genericParameter : getGenericParameters()) {
+                persistedBmmGenericType.addGenericParameter(genericParameter.getTypeName());
+            }
+        }
+        return persistedBmmGenericType;
+    }
 
     @Override
     public String toDisplayString() {return getTypeName();}

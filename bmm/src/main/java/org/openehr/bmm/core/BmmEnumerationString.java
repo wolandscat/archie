@@ -22,6 +22,7 @@ package org.openehr.bmm.core;
  */
 
 import org.openehr.bmm.core.BmmEnumeration;
+import org.openehr.bmm.persistence.PersistedBmmEnumerationString;
 
 import java.io.Serializable;
 

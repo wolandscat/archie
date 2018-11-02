@@ -37,6 +37,8 @@ public class PersistedBmmOpenType extends PersistedBmmType<BmmOpenType> implemen
 
     public static final String P_BMM_OPEN_TYPE = "P_BMM_OPEN_TYPE";
 
+    public PersistedBmmOpenType() {}
+
     public PersistedBmmOpenType(String type) {
         this.type = type;
     }
