@@ -47,7 +47,7 @@ public class ArchieRMInfoLookup extends ReflectionModelInfoLookup {
             //this is an abstract class and cannot be created. Create point event instead
             return PointEvent.class;
         }
-        return getClass(rmTypename);
+        return super.getClassToBeCreated(rmTypename);
     }
 
     @Override
