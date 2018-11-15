@@ -38,11 +38,15 @@ If you want to depend on just the AOM and BMM, without any reference model imple
 ## Build
 
 [![Build Status](https://travis-ci.org/openEHR/archie.svg?branch=master)](https://travis-ci.org/openEHR/archie)
+<<<<<<< HEAD
 
 
 the following is from the old repository and not up to date, but gives an impression:
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/dda8ce2b837a40b5b50cf52dae95764d)](https://www.codacy.com/app/pieter-bos/archie?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nedap/archie&amp;utm_campaign=Badge_Grade)
 [![Codecov Badge](https://img.shields.io/codecov/c/github/nedap/archie.svg)](https://codecov.io/gh/nedap/archie)
+=======
+[![codecov](https://codecov.io/gh/openEHR/archie/branch/master/graph/badge.svg)](https://codecov.io/gh/openEHR/archie)
+>>>>>>> 21fd0c8a... Merge pull request #64 from openEHR/enable_jacoco
 
 You need Java 8 to build. Check out the source and type:
 
