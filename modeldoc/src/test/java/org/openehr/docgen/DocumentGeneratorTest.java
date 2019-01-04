@@ -3,13 +3,16 @@ package org.openehr.docgen;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.openehr.bmm.rmaccess.ReferenceModelAccess;
+import org.openehr.bmm.v2.persistence.PBmmSchema;
+import org.openehr.bmm.v2.persistence.odin.BmmOdinParser;
+import org.openehr.bmm.v2.validation.BmmRepository;
+import org.openehr.bmm.v2.validation.BmmSchemaConverter;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
@@ -32,32 +35,36 @@ import static org.junit.Assert.*;
 @Ignore
 public class DocumentGeneratorTest {
 
-    private ReferenceModelAccess access;
+    private BmmRepository repo;
 
     @Before
-    public void setup() {
-        try {
-            List<String> schemaDirectories = new ArrayList<>();
-            String path = DocumentGeneratorTest.class.getResource("/cimi/CIMI-RM-3.0.5.bmm").getFile();
-            path = path.substring(0, path.lastIndexOf('/'));
-            schemaDirectories.add(path);
-            access = new ReferenceModelAccess();
-            access.setSchemaDirectories(schemaDirectories);
-            //access.initializeAll();
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("Error initializing test");
+    public void setup() throws Exception {
+        repo = new BmmRepository();
+        repo.addPersistentSchema(parse("/cimi/CIMI-RM-3.0.5.bmm"));
+        repo.addPersistentSchema(parse("/cimi/CIMI_RM_CLINICAL.v.0.0.3.bmm"));
+        repo.addPersistentSchema(parse("/cimi/CIMI_RM_CORE.v.0.0.3.bmm"));
+        repo.addPersistentSchema(parse("/cimi/CIMI_RM_FOUNDATION.v.0.0.3.bmm"));
+
+
+        BmmSchemaConverter converter = new BmmSchemaConverter(repo);
+        converter.validateAndConvertRepository();
+    }
+
+    private PBmmSchema parse(String name) throws IOException {
+        try(InputStream stream = getClass().getResourceAsStream(name)) {//"/testbmm/TestBmm1.bmm")) {
+            return BmmOdinParser.convert(stream);
         }
     }
+
     @Test
     public void generateDocument() throws Exception {
-        assertNotNull(access.getValidModels().get("cimi_rm_clinical_0.0.3".toUpperCase()));
+
         DocumentGenerator generator = new DocumentGenerator();
         File file = new File(DocumentGeneratorTest.class.getResource("/templates/").getFile());
         assertTrue(file.isDirectory());
         generator.configure(file);
         generator.setOutputDirectory("/Users/cnanjo/work/cimi_doc");
-        generator.generateDocument(access.getValidModels().get("cimi_rm_clinical_0.0.3".toUpperCase()));
+        generator.generateDocument(repo.getModel("cimi_rm_clinical_0.0.3".toUpperCase()).getModel());
     }
 
 }

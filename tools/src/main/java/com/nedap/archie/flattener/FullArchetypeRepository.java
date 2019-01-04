@@ -7,7 +7,6 @@ import com.nedap.archie.archetypevalidator.ArchetypeValidator;
 import com.nedap.archie.archetypevalidator.ValidationResult;
 import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.rminfo.ReferenceModels;
-import org.openehr.bmm.rmaccess.ReferenceModelAccess;
 
 import java.util.List;
 
@@ -63,11 +62,6 @@ public interface FullArchetypeRepository extends ArchetypeRepository {
         }
         ArchetypeValidator validator = new ArchetypeValidator(models);
         return validator.validate(archetype, this);
-    }
-
-    default void compile(ReferenceModels models, ReferenceModelAccess bmmModels) {
-        ArchetypeValidator validator = new ArchetypeValidator(models, bmmModels);
-        compile(validator);
     }
 
     default void compile(ArchetypeValidator validator) {

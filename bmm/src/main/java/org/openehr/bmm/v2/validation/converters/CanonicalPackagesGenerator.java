@@ -1,12 +1,9 @@
 package org.openehr.bmm.v2.validation.converters;
 
-import org.openehr.bmm.persistence.BmmIncludeSpecification;
-
 import org.openehr.bmm.persistence.validation.BmmDefinitions;
 import org.openehr.bmm.v2.persistence.PBmmPackage;
 import org.openehr.bmm.v2.persistence.PBmmSchema;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 

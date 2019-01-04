@@ -7,9 +7,8 @@ import com.nedap.archie.aom.profile.AomProfiles;
 import com.nedap.archie.base.MultiplicityInterval;
 import org.openehr.bmm.core.BmmModel;
 import org.openehr.bmm.persistence.validation.BmmDefinitions;
-import org.openehr.bmm.rmaccess.ReferenceModelAccess;
-import org.openehr.bmm.v2.validation.BmmValidationResult;
 import org.openehr.bmm.v2.validation.BmmRepository;
+import org.openehr.bmm.v2.validation.BmmValidationResult;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MetaModels implements MetaModelInterface {
 
     private final ReferenceModels models;
-    private final ReferenceModelAccess bmmModels;
     private final BmmRepository bmmRepository;
     private AomProfiles aomProfiles;
 
@@ -43,31 +41,14 @@ public class MetaModels implements MetaModelInterface {
     private Map<String, String> overriddenMetaModelVersions = new ConcurrentHashMap<>();
 
 
-    public MetaModels(ReferenceModels models, ReferenceModelAccess bmmModels, AomProfiles profiles) {
-        this.models = models;
-        this.bmmModels = bmmModels;
-        this.aomProfiles = profiles;
-        this.bmmRepository = null;
-    }
-
-    public MetaModels(ReferenceModels models, ReferenceModelAccess bmmModels) {
-        this.models = models;
-        this.bmmModels = bmmModels;
-        aomProfiles = new AomProfiles();
-        this.bmmRepository = null;
-    }
-
-
     public MetaModels(ReferenceModels models, BmmRepository repository) {
         this.models = models;
-        this.bmmModels = null;
         this.bmmRepository = repository;
         aomProfiles = new AomProfiles();
     }
 
     public MetaModels(ReferenceModels models, BmmRepository repository, AomProfiles profiles) {
         this.models = models;
-        this.bmmModels = null;
         this.bmmRepository = repository;
         aomProfiles = profiles;
     }
@@ -138,8 +119,6 @@ public class MetaModels implements MetaModelInterface {
         if(bmmRepository != null) {
             BmmValidationResult validationResult = bmmRepository.getModelByClosure(BmmDefinitions.publisherQualifiedRmClosureName(rmPublisher, rmPackage) + "_" +  rmRelease);
             selectedBmmModel = validationResult == null ? null : validationResult.getModel();
-        } else if(bmmModels != null) {
-            selectedBmmModel = bmmModels.getReferenceModelForClosure(BmmDefinitions.publisherQualifiedRmClosureName(rmPublisher, rmPackage), rmRelease);
         }
 
         for(AomProfile profile:aomProfiles.getProfiles()) {
@@ -170,10 +149,6 @@ public class MetaModels implements MetaModelInterface {
 
     public ReferenceModels getReferenceModels() {
         return models;
-    }
-
-    public ReferenceModelAccess getReferenceModelAccess() {
-        return bmmModels;
     }
 
     public BmmRepository getBmmRepository() {

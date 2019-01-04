@@ -13,7 +13,6 @@ import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 import com.nedap.archie.flattener.OverridingInMemFullArchetypeRepository;
 import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.rminfo.ReferenceModels;
-import org.openehr.bmm.rmaccess.ReferenceModelAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,14 +38,8 @@ public class ArchetypeValidator {
     private List<ArchetypeValidation> validationsPhase3;
 
 
-
-
     public ArchetypeValidator(ReferenceModels models) {
-        this(models, null);
-    }
-
-    public ArchetypeValidator(ReferenceModels models, ReferenceModelAccess bmmModels) {
-        this(new MetaModels(models, bmmModels));
+        this(new MetaModels(models, null));
     }
 
     public ArchetypeValidator(MetaModels models) {
