@@ -36,7 +36,7 @@ public class DvQuantity extends DvAmount<Double> {
     @Deprecated
     @JsonIgnore
     @Nullable
-    private transient CodePhrase property;
+    private transient DvCodedText property;
 
     @Nullable
     public Long getPrecision() {
@@ -65,12 +65,12 @@ public class DvQuantity extends DvAmount<Double> {
     }
 
     @Deprecated
-    public CodePhrase getProperty() {
+    public DvCodedText getProperty() {
         return property;
     }
 
     @Deprecated
-    public void setProperty(CodePhrase property) {
+    public void setProperty(DvCodedText property) {
         this.property = property;
     }
 }

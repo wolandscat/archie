@@ -18,7 +18,7 @@ public class OriginalVersion<Type> extends Version<Type> {
     @Nullable
     private ObjectVersionId precedingVersionUid;
     @Nullable
-    private List<ObjectVersionId> otherInputVersionUids = new ArrayList<>();
+    private List<ObjectVersionId> otherInputVersionIds = new ArrayList<>();
 
     private DvCodedText lifecycleState;
     @Nullable
@@ -46,12 +46,12 @@ public class OriginalVersion<Type> extends Version<Type> {
     }
 
     @Nullable
-    public List<ObjectVersionId> getOtherInputVersionUids() {
-        return otherInputVersionUids;
+    public List<ObjectVersionId> getOtherInputVersionIds() {
+        return otherInputVersionIds;
     }
 
-    public void setOtherInputVersionUids(@Nullable List<ObjectVersionId> otherInputVersionUids) {
-        this.otherInputVersionUids = otherInputVersionUids;
+    public void setOtherInputVersionIds(@Nullable List<ObjectVersionId> otherInputVersionIds) {
+        this.otherInputVersionIds = otherInputVersionIds;
     }
 
     @Override

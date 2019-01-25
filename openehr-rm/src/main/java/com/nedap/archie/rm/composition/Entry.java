@@ -23,7 +23,7 @@ import java.util.List;
         "subject",
         "provider",
         "otherParticipations",
-        "workflowId"
+        "workFlowId"
 })
 public abstract class Entry extends ContentItem {
 
@@ -31,8 +31,8 @@ public abstract class Entry extends ContentItem {
     private CodePhrase encoding;
     @Nullable
 
-    @XmlElement(name = "workflow_id")
-    private ObjectRef workflowId;
+    @XmlElement(name = "work_flow_id")
+    private ObjectRef workFlowId;
     private PartyProxy subject;
     @Nullable
     private PartyProxy provider;
@@ -87,11 +87,11 @@ public abstract class Entry extends ContentItem {
     }
 
     @Nullable    
-    public ObjectRef getWorkflowId() {
-        return workflowId;
+    public ObjectRef getWorkFlowId() {
+        return workFlowId;
     }
 
-    public void setWorkflowId(@Nullable ObjectRef workflowId) {
-        this.workflowId = workflowId;
+    public void setWorkFlowId(@Nullable ObjectRef workFlowId) {
+        this.workFlowId = workFlowId;
     }
 }

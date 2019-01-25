@@ -20,7 +20,7 @@ public class AuditDetails extends RMObject {
 
     private String systemId;
     @XmlElement(name="time_committed")
-    private DvDateTime timeCommitted;
+    private DvDateTime timeCommited;
     private DvCodedText changeType;
     @Nullable
     private DvText description;
@@ -34,12 +34,12 @@ public class AuditDetails extends RMObject {
         this.systemId = systemId;
     }
 
-    public DvDateTime getTimeCommitted() {
-        return timeCommitted;
+    public DvDateTime getTimeCommited() {
+        return timeCommited;
     }
 
-    public void setTimeCommitted(DvDateTime timeCommitted) {
-        this.timeCommitted = timeCommitted;
+    public void setTimeCommited(DvDateTime timeCommited) {
+        this.timeCommited = timeCommited;
     }
 
     public DvCodedText getChangeType() {
