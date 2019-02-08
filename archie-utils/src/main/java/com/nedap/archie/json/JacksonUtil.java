@@ -2,14 +2,21 @@ package com.nedap.archie.json;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.nedap.archie.base.OpenEHRBase;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import java.io.IOException;
 
 /**
  * Class to obtain an ObjectMapper that works with both archie RM and AOM objects, serializing into
@@ -58,6 +65,7 @@ public class JacksonUtil {
 
         objectMapper.registerModule(new JavaTimeModule());
 
+        objectMapper.enable(MapperFeature.USE_BASE_TYPE_AS_DEFAULT_IMPL);
 
         TypeResolverBuilder typeResolverBuilder = new ArchieTypeResolverBuilder()
                 .init(JsonTypeInfo.Id.NAME, new OpenEHRTypeNaming())
@@ -65,7 +73,19 @@ public class JacksonUtil {
                 .typeIdVisibility(true)
                 .inclusion(JsonTypeInfo.As.PROPERTY);
 
+        //@type is always allowed as an extra property, even if we don't expect it.
+        objectMapper.addHandler(new DeserializationProblemHandler() {
+            @Override
+            public boolean handleUnknownProperty(DeserializationContext ctxt, JsonParser p, JsonDeserializer<?> deserializer, Object beanOrClass, String propertyName) throws IOException {
+                if (propertyName.equalsIgnoreCase("@type")) {
+                    return true;
+                }
+                return super.handleUnknownProperty(ctxt, p, deserializer, beanOrClass, propertyName);
+            }
+        });
+
         objectMapper.setDefaultTyping(typeResolverBuilder);
+
     }
 
     /**
