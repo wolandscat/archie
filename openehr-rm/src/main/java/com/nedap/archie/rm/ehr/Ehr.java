@@ -20,7 +20,7 @@ import java.util.List;
  * Created by pieter.bos on 08/07/16.
  */
 @XmlRootElement(name="EHR")
-@XmlType(name = "ARCHETYPE_HRID", propOrder = {
+@XmlType(name = "EHR", propOrder = {
         "systemId",
         "ehrId",
         "timeCreated",

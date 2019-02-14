@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name="AUDIT_DETAILS", propOrder = {
-        "system_id",
+        "systemId",
         "committer",
         "timeCommitted",
         "changeType",
