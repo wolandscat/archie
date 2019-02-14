@@ -15,8 +15,8 @@ import java.util.List;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "FOLDER", propOrder = {
-        "items",
-        "folders"
+        "folders",
+        "items"
 })
 public class Folder extends Locatable {
     @Nullable

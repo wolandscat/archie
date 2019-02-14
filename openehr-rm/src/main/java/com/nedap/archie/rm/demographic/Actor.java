@@ -14,7 +14,10 @@ import java.util.List;
  * Created by pieter.bos on 08/07/16.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="ACTOR")
+@XmlType(name="ACTOR", propOrder = {
+        "roles",
+        "languages"
+})
 public abstract class Actor extends Party {
 
     @Nullable

@@ -17,7 +17,13 @@ import java.util.List;
  * Created by pieter.bos on 08/07/16.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="PARTY")
+@XmlType(name="PARTY", propOrder = {
+        "identities",
+        "contacts",
+        "relationships",
+        "reverseRelationships",
+        "details"
+})
 public abstract class Party extends Locatable {
 
     private List<PartyIdentity> identities = new ArrayList<>();

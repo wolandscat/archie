@@ -5,12 +5,18 @@ import com.nedap.archie.rm.support.identification.ObjectRef;
 import com.nedap.archie.rm.generic.AuditDetails;
 import com.nedap.archie.rm.support.identification.HierObjectId;
 
+import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by pieter.bos on 08/07/16.
  */
+@XmlType(name="CONTRIBUTION", propOrder = {
+        "uid",
+        "versions",
+        "audit"
+})
 public class Contribution extends RMObject {
 
     private HierObjectId uid;

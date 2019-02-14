@@ -44,4 +44,31 @@ public class JAXBUtil {
             }
         }
     }
+
+    public static synchronized JAXBContext createAOMContext() {
+        try {
+            List<Class> classes = new ArrayList<>();
+            classes.addAll(ArchieAOMInfoLookup.getInstance().getRmTypeNameToClassMap().values());
+            //classes.addAll(ArchieRMInfoLookup.getInstance().getRmTypeNameToClassMap().values());
+            //extra classes from the adapters package that are not directly referenced.\
+            classes.add(XmlResourceDescriptionItem.class);
+            return JAXBContext.newInstance(classes.toArray(new Class[0]));
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);//programmer error, tests will fail
+        }
+    }
+
+    public static synchronized JAXBContext createRMContext() {
+        try {
+            List<Class> classes = new ArrayList<>();
+           // classes.addAll(ArchieAOMInfoLookup.getInstance().getRmTypeNameToClassMap().values());
+            classes.addAll(ArchieRMInfoLookup.getInstance().getRmTypeNameToClassMap().values());
+            //extra classes from the adapters package that are not directly referenced.\
+            //classes.add(XmlResourceDescriptionItem.class);
+            return JAXBContext.newInstance(classes.toArray(new Class[0]));
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);//programmer error, tests will fail
+        }
+    }
+
 }

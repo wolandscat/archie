@@ -11,6 +11,7 @@ import com.nedap.archie.rm.generic.PartySelf;
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -18,9 +19,12 @@ import javax.xml.bind.annotation.XmlType;
 public class EhrStatus extends Locatable {
 
     private PartySelf subject;
+    @XmlElement(name="is_queryable")
     private boolean isQueryable;
+    @XmlElement(name="is_modifiable")
     private boolean isModifiable;
     @Nullable
+    @XmlElement(name="other_details")
     private ItemStructure otherDetails;
 
     public PartySelf getSubject() {
