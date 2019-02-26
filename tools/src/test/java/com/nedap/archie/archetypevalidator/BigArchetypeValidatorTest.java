@@ -16,7 +16,6 @@ import com.nedap.archie.rminfo.ReferenceModels;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.openehr.bmm.rmaccess.ReferenceModelAccess;
 import org.openehr.bmm.v2.validation.BmmRepository;
 import org.openehr.referencemodels.BuiltinReferenceModels;
 import org.reflections.Reflections;

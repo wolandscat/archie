@@ -4,9 +4,16 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 import org.apache.commons.io.FileUtils;
-import org.openehr.bmm.core.*;
-import org.openehr.bmm.persistence.PersistedBmmModelElement;
-import org.openehr.docgen.model.*;
+import org.openehr.bmm.core.BmmClass;
+import org.openehr.bmm.core.BmmContainerProperty;
+import org.openehr.bmm.core.BmmModel;
+import org.openehr.bmm.core.BmmPackage;
+import org.openehr.bmm.core.BmmPackageContainer;
+import org.openehr.docgen.model.ClassDetails;
+import org.openehr.docgen.model.ClassListItem;
+import org.openehr.docgen.model.PackageListItem;
+import org.openehr.docgen.model.PackageTreeNode;
+import org.openehr.docgen.model.PropertyDetails;
 import org.openehr.utils.file.FileAndDirUtils;
 
 import java.io.File;
@@ -15,9 +22,14 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.openehr.bmm.persistence.PersistedBmmModelElement.revertSafeString;
 
 /**
  * Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
@@ -413,5 +425,19 @@ public class DocumentGenerator {
     protected String getCurrentTime(SimpleDateFormat format) {
         Date date = new Date();
         return format.format(date);
+    }
+
+    /**
+     * Required to escape special BMM characters
+     * @param documentation
+     * @return
+     */
+    public static String revertSafeString(String documentation) {
+        String safeString = documentation;
+        safeString = safeString.replaceAll("&quot;","\"");
+        safeString = safeString.replaceAll("&lt;", "<");
+        safeString = safeString.replaceAll("&gt;", ">");
+        safeString = safeString.replaceAll("&#47;", "/");
+        return safeString;
     }
 }

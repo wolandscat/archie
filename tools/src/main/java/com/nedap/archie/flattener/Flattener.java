@@ -3,24 +3,16 @@ package com.nedap.archie.flattener;
 import com.nedap.archie.adlparser.modelconstraints.ReflectionConstraintImposer;
 import com.nedap.archie.aom.*;
 import com.nedap.archie.aom.utils.ArchetypeParsePostProcesser;
-
-import com.nedap.archie.base.MultiplicityInterval;
-import com.nedap.archie.paths.PathSegment;
-import com.nedap.archie.paths.PathUtil;
-import com.nedap.archie.query.AOMPathQuery;
-import com.nedap.archie.query.APathQuery;
-import com.nedap.archie.query.ComplexObjectProxyReplacement;
 import com.nedap.archie.rminfo.MetaModels;
-
 import com.nedap.archie.rminfo.ReferenceModels;
-import org.openehr.bmm.rmaccess.ReferenceModelAccess;
 import org.openehr.bmm.v2.validation.BmmRepository;
-
-import static com.nedap.archie.flattener.FlattenerUtil.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+
+import static com.nedap.archie.flattener.FlattenerUtil.getPossiblyOverridenListValue;
+import static com.nedap.archie.flattener.FlattenerUtil.getPossiblyOverridenValue;
 
 /**
  * Flattener. For single use only, create a new flattener for every flatten-action you want to do!

@@ -22,12 +22,6 @@ package org.openehr.bmm.core;
  */
 
 import com.nedap.archie.base.MultiplicityInterval;
-import org.openehr.bmm.BmmConstants;
-import org.openehr.bmm.BmmMultiplicityInterval;
-import org.openehr.odin.CompositeOdinObject;
-import org.openehr.odin.IntegerIntervalObject;
-import org.openehr.odin.OdinAttribute;
-import org.openehr.odin.utils.OdinSerializationUtils;
 
 import java.io.Serializable;
 

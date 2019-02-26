@@ -21,11 +21,6 @@ package org.openehr.bmm.core;
  * Author: Claude Nanjo
  */
 
-import org.openehr.bmm.BmmConstants;
-import org.openehr.bmm.core.BmmGenericType;
-import org.openehr.bmm.core.BmmProperty;
-import org.openehr.odin.utils.OdinSerializationUtils;
-
 import java.io.Serializable;
 
 public class BmmGenericProperty extends BmmProperty implements Serializable {
