@@ -12,7 +12,14 @@ import javax.xml.bind.annotation.XmlType;
  * Created by pieter.bos on 04/11/15.
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
-@XmlType(name = "DV_INTERVAL")
+@XmlType(name = "DV_INTERVAL", propOrder = {
+        "lower",
+        "upper",
+        "lowerIncluded",
+        "upperIncluded",
+        "lowerUnbounded",
+        "upperUnbounded"
+})
 public class DvInterval<Type extends DvOrdered> extends DataValue {
 
     private final Interval<DvOrdered> interval = new Interval<DvOrdered>();

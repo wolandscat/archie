@@ -1,5 +1,6 @@
 package com.nedap.archie.xml;
 
+import com.google.common.collect.Lists;
 import com.nedap.archie.rminfo.ArchieAOMInfoLookup;
 import com.nedap.archie.rminfo.ArchieRMInfoLookup;
 import com.nedap.archie.xml.types.XmlResourceDescriptionItem;
@@ -44,4 +45,25 @@ public class JAXBUtil {
             }
         }
     }
+
+    public static synchronized JAXBContext createAOMContext() {
+        try {
+            List<Class> classes = Lists.newArrayList(ArchieAOMInfoLookup.getInstance().getRmTypeNameToClassMap().values());
+            //extra classes from the adapters package that are not directly referenced.\
+            classes.add(XmlResourceDescriptionItem.class);
+            return JAXBContext.newInstance(classes.toArray(new Class[0]));
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);//programmer error, tests will fail
+        }
+    }
+
+    public static synchronized JAXBContext createRMContext() {
+        try {
+            List<Class> classes = Lists.newArrayList(ArchieRMInfoLookup.getInstance().getRmTypeNameToClassMap().values());
+            return JAXBContext.newInstance(classes.toArray(new Class[0]));
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);//programmer error, tests will fail
+        }
+    }
+
 }
