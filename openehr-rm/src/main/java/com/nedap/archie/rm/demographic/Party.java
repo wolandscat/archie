@@ -2,6 +2,7 @@ package com.nedap.archie.rm.demographic;
 
 import com.nedap.archie.rm.archetyped.Locatable;
 import com.nedap.archie.rm.datastructures.ItemStructure;
+import com.nedap.archie.rm.datavalues.DvText;
 import com.nedap.archie.rm.support.identification.LocatableRef;
 
 import javax.annotation.Nullable;
@@ -16,7 +17,13 @@ import java.util.List;
  * Created by pieter.bos on 08/07/16.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="PARTY")
+@XmlType(name="PARTY", propOrder = {
+        "identities",
+        "contacts",
+        "relationships",
+        "reverseRelationships",
+        "details"
+})
 public abstract class Party extends Locatable {
 
     private List<PartyIdentity> identities = new ArrayList<>();
@@ -94,5 +101,12 @@ public abstract class Party extends Locatable {
     public void addRelationship(PartyRelationship relationship) {
         this.relationships.add(relationship);
         this.setThisAsParent(relationship, "relationships");
+    }
+
+    /**
+     * Type of party, such as PERSON, ORGANISATION, etc. Role name, e.g. general practitioner , nurse , private citizen . Taken from inherited name attribute.
+     */
+    public DvText getType() {
+        return getName();
     }
 }

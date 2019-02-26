@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.List;
  * Created by pieter.bos on 04/11/15.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name="PATHABLE")
 public abstract class Pathable extends RMObject {
     //TODO: implement according to spec: pathExists(path), pathUnique(path), pathOfItem(pathable)
 

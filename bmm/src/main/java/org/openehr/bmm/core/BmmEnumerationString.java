@@ -21,8 +21,6 @@ package org.openehr.bmm.core;
  * Author: Claude Nanjo
  */
 
-import org.openehr.bmm.core.BmmEnumeration;
-
 import java.io.Serializable;
 
 /**

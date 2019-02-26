@@ -22,9 +22,12 @@ package org.openehr.bmm.core;
  */
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * Abstraction of a BMM model component that contains packages and classes.

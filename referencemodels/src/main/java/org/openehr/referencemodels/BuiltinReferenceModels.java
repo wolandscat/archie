@@ -5,7 +5,6 @@ import com.nedap.archie.aom.profile.AomProfiles;
 import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.rminfo.ModelInfoLookup;
 import com.nedap.archie.rminfo.ReferenceModels;
-import org.openehr.bmm.rmaccess.ReferenceModelAccess;
 import org.openehr.bmm.v2.persistence.odin.BmmOdinParser;
 import org.openehr.bmm.v2.validation.BmmSchemaConverter;
 import org.openehr.bmm.v2.validation.BmmRepository;
@@ -33,36 +32,9 @@ public class BuiltinReferenceModels {
     /**
      * Static cache
      */
-    private static ReferenceModelAccess access;
     private static AomProfiles aomProfiles;
 
     private static BmmRepository bmmRepository;
-
-    /**
-     * Returns the built in BMM Reference Models
-     * @return
-     */
-    public static ReferenceModelAccess getBMMReferenceModels() {
-        if(access != null) {
-            return access;
-        }
-        Reflections bmm = new Reflections("bmm", new ResourcesScanner());
-        Set<String> resources = bmm.getResources(Pattern.compile(".*\\.bmm"));
-        ReferenceModelAccess access = new ReferenceModelAccess();
-        access.resetValidator();
-        for(String resourceName:resources) {
-            try(InputStream stream = BuiltinReferenceModels.class.getResourceAsStream("/" + resourceName)) { //not sure why the "/" + is needed, but it is
-                access.addSchemaInputStream(stream, resourceName);
-            } catch (IOException e) {
-                throw new RuntimeException("error loading file: " + e);
-            } catch (RuntimeException ex) {
-                logger.error("error parsing {}", resourceName, ex);
-            }
-        }
-        access.loadSchemas();
-        BuiltinReferenceModels.access = access;
-        return access;
-    }
 
     public static BmmRepository getBmmRepository() {
         if(bmmRepository != null) {

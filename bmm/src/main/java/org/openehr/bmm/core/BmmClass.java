@@ -21,17 +21,13 @@ package org.openehr.bmm.core;
  * Author: Claude Nanjo
  */
 
-import org.openehr.bmm.BmmConstants;
-import org.openehr.bmm.persistence.serializer.Serialize;
 import org.openehr.bmm.persistence.validation.BmmDefinitions;
-import org.openehr.odin.CompositeOdinObject;
-import org.openehr.odin.OdinAttribute;
-import org.openehr.odin.OdinObject;
-import org.openehr.odin.StringObject;
-import org.openehr.odin.utils.OdinSerializationUtils;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Definition of a class in an object model. A class is type that may be open or closed in terms of other types mentioned within.

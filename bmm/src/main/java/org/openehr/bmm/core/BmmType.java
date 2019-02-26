@@ -21,9 +21,6 @@ package org.openehr.bmm.core;
  * Author: Claude Nanjo
  */
 
-import org.openehr.bmm.core.BmmModelElement;
-import org.openehr.bmm.core.BmmTypeElement;
-
 import java.util.List;
 
 /**

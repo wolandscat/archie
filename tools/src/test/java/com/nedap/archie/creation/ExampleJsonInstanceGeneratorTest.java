@@ -58,6 +58,10 @@ public class ExampleJsonInstanceGeneratorTest {
         assertEquals("the default value for a string type should be \"string\"", "string", terminologyId.get("value"));
         List events = (List) data.get("events");
         assertEquals(3, events.size());
+        assertEquals("POINT_EVENT<T>", ((Map) events.get(0)).get("@type"));
+        assertEquals("POINT_EVENT<T>", ((Map) events.get(1)).get("@type"));
+        assertEquals("INTERVAL_EVENT", ((Map) events.get(2)).get("@type"));
+
 
 
     }
@@ -116,7 +120,7 @@ public class ExampleJsonInstanceGeneratorTest {
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         int numberCreated = 0, validationFailed = 0, generatedException = 0, jsonSchemaValidationRan = 0, jsonSchemaValidationFailed = 0;
         repository.compile(BuiltinReferenceModels.getMetaModels());
-        JsonSchemaValidator jsonSchemaValidator = new JsonSchemaValidator(BuiltinReferenceModels.getBMMReferenceModels().getValidModels().get("openehr_rm_1.0.4"));
+        JsonSchemaValidator jsonSchemaValidator = new JsonSchemaValidator(BuiltinReferenceModels.getBmmRepository().getModel("openehr_rm_1.0.4").getModel());
         for(ValidationResult result:repository.getAllValidationResults()) {
             if(result.passes()) {
                 String json = "";

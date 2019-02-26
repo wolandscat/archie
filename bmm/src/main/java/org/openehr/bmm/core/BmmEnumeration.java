@@ -21,12 +21,8 @@ package org.openehr.bmm.core;
  * Author: Claude Nanjo
  */
 
-import org.openehr.bmm.core.BmmClass;
-
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Definition of an enumeration type. In the BMM system, an 'enumeration' type is understood as an underlying basic type

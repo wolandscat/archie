@@ -18,7 +18,7 @@ You can depend on parts of Archie, or the entire library at once. If you want th
 
 ```gradle
 dependencies {
-    compile 'com.nedap.healthcare.archie:archie-all:0.5.4'
+    compile 'com.nedap.healthcare.archie:archie-all:0.6.1'
 }
 ```
 
@@ -28,11 +28,11 @@ or if you use maven, in your pom.xml
 <dependency>
     <groupId>com.nedap.healthcare.archie</groupId>
     <artifactId>archie-all</artifactId>
-    <version>0.5.4</version>
+    <version>0.6.1</version>
 </dependency>
 ```
 
-If you want to depend on just the AOM and BMM, without any reference model implementation, depend on com.nedap.healthcare.archie:tools:0.5.4 and com.nedap.healthcare.archie:referencemodels:0.5.4 instead
+If you want to depend on just the AOM and BMM, without any reference model implementation, depend on com.nedap.healthcare.archie:tools:0.6.1 and com.nedap.healthcare.archie:referencemodels:0.6.1 instead
 
 
 ## Build
@@ -345,7 +345,9 @@ Archie contains an implementation of the OpenEHR reference model version 1.0.4. 
 
 ### Reference model object creation
 
-The RMObjectCreator creates empty reference model objects based on constraints. It can also set values based on attribute names. You can use it to create a reference model based on an archetype and user input. To create an empty reference model based on an archetype, you could work further on this example:
+The ```ExampleJsonInstanceGenerator``` generates valid JSON instances from Operational Templates. They can be parsed and used as examples of RM Object instances, or empty RM Object instances.
+
+If you want to do this yourself, The RMObjectCreator creates empty reference model objects based on constraints. It can also set values based on attribute names. You can use it to create a reference model based on an archetype and user input. To create an empty reference model based on an archetype, you could work further on this example:
 
 
 ```java
@@ -386,6 +388,21 @@ The RMObjectCreator creates empty reference model objects based on constraints. 
 Setting primitive object values works in a similar way, with ```creator.set(...)```, or by setting them explicitly on the reference model object directly.
 
 Notice the call to ```ArchieRMInfoLookup.getInstance()```, which obtains the metadata about the reference model implementation. It can also be obtained from the result of ```BuiltinReferenceModels.getMetaModels()```, or you can define your own to make Archie work with your own reference model implementation.
+
+### Parsing JSON
+
+Parsing Reference Model objects in JSON is done the same as with parsing JSON archetypes:
+
+```java
+String json = JacksonUtil.getObjectMapper().writeValueAsString(archetype);
+RmObject rmObject = JacksonUtil.getObjectMapper().readValue(json, RmObject.class);
+```
+
+or if you already know which RM class you are expecting:
+
+```java
+Composition composition = JacksonUtil.getObjectMapper().readValue(compositionJson, Composition.class);
+```
 
 ### Reference model APath queries
 

@@ -1,5 +1,6 @@
 package com.nedap.archie.rm.generic;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.nedap.archie.rm.RMObject;
 import com.nedap.archie.rm.datavalues.DvCodedText;
 import com.nedap.archie.rm.datavalues.DvText;
@@ -15,12 +16,20 @@ import javax.xml.bind.annotation.XmlType;
  * Created by pieter.bos on 08/07/16.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="AUDIT_DETAILS")
+@XmlType(name="AUDIT_DETAILS", propOrder = {
+        "systemId",
+        "committer",
+        "timeCommitted",
+        "changeType",
+        "description"
+})
 public class AuditDetails extends RMObject {
 
+    @XmlElement(name="system_id")
     private String systemId;
     @XmlElement(name="time_committed")
-    private DvDateTime timeCommited;
+    private DvDateTime timeCommitted;
+    @XmlElement(name="change_type")
     private DvCodedText changeType;
     @Nullable
     private DvText description;
@@ -34,12 +43,13 @@ public class AuditDetails extends RMObject {
         this.systemId = systemId;
     }
 
-    public DvDateTime getTimeCommited() {
-        return timeCommited;
+    public DvDateTime getTimeCommitted() {
+        return timeCommitted;
     }
 
-    public void setTimeCommited(DvDateTime timeCommited) {
-        this.timeCommited = timeCommited;
+    @JsonAlias({"time_commited"})
+    public void setTimeCommitted(DvDateTime timeCommitted) {
+        this.timeCommitted = timeCommitted;
     }
 
     public DvCodedText getChangeType() {

@@ -1,18 +1,10 @@
 package org.openehr.bmm.v2.validation.converters;
 
 import org.openehr.bmm.core.BmmClass;
-import org.openehr.bmm.core.BmmGenericClass;
-import org.openehr.bmm.core.BmmGenericParameter;
 import org.openehr.bmm.core.BmmModel;
 import org.openehr.bmm.core.BmmPackage;
-import org.openehr.bmm.core.BmmProperty;
-import org.openehr.bmm.core.BmmType;
-import org.openehr.bmm.persistence.PersistedBmmClass;
-import org.openehr.bmm.persistence.PersistedBmmPackage;
 import org.openehr.bmm.v2.persistence.PBmmClass;
-import org.openehr.bmm.v2.persistence.PBmmGenericParameter;
 import org.openehr.bmm.v2.persistence.PBmmPackage;
-import org.openehr.bmm.v2.persistence.PBmmProperty;
 import org.openehr.bmm.v2.persistence.PBmmSchema;
 import org.openehr.bmm.v2.validation.BmmValidationResult;
 

@@ -21,13 +21,11 @@ package org.openehr.bmm.core;
  * Author: Claude Nanjo
  */
 
-import org.openehr.bmm.BmmConstants;
-import org.openehr.bmm.core.BmmClass;
-import org.openehr.bmm.core.BmmPackageContainer;
-import org.openehr.odin.utils.OdinSerializationUtils;
-
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Abstraction of a package as a tree structure whose nodes can contain other packages and classes.

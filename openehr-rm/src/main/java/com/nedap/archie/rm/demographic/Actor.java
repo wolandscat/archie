@@ -3,6 +3,7 @@ package com.nedap.archie.rm.demographic;
 import com.nedap.archie.rm.support.identification.PartyRef;
 import com.nedap.archie.rm.datavalues.DvText;
 
+import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
@@ -13,10 +14,15 @@ import java.util.List;
  * Created by pieter.bos on 08/07/16.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="ACTOR")
+@XmlType(name="ACTOR", propOrder = {
+        "roles",
+        "languages"
+})
 public abstract class Actor extends Party {
 
+    @Nullable
     private List<DvText> languages = new ArrayList<>();
+    @Nullable
     private List<PartyRef> roles = new ArrayList();
 
     public List<DvText> getLanguages() {

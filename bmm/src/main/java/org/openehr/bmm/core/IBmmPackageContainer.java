@@ -21,10 +21,6 @@ package org.openehr.bmm.core;
  * Author: Claude Nanjo
  */
 
-import org.openehr.bmm.persistence.PersistedBmmPackage;
-
-import java.util.Map;
-
 /**
  * Created by cnanjo on 4/11/16.
  */

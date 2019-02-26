@@ -3,9 +3,12 @@ package com.nedap.archie.rm.changecontrol;
 import com.nedap.archie.rm.datavalues.DvCodedText;
 import com.nedap.archie.rm.support.identification.ObjectVersionId;
 
+import javax.xml.bind.annotation.XmlType;
+
 /**
  * Created by pieter.bos on 08/07/16.
  */
+@XmlType(name="IMPORTED_VERSION")
 public class ImportedVersion extends Version {
 
     private OriginalVersion item;
@@ -38,5 +41,9 @@ public class ImportedVersion extends Version {
     @Override
     public boolean isBranch() {
         return item == null ? null : item.isBranch();//TODO: this is probably not right
+    }
+
+    public OriginalVersion getItem() {
+        return item;
     }
 }

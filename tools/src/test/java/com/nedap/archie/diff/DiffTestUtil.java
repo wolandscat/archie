@@ -1,20 +1,14 @@
 package com.nedap.archie.diff;
 
 import com.nedap.archie.aom.Archetype;
-import com.nedap.archie.flattener.ArchetypeRepository;
 import com.nedap.archie.flattener.Flattener;
-import com.nedap.archie.flattener.FullArchetypeRepository;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
-import com.nedap.archie.flattener.SimpleArchetypeRepository;
 import com.nedap.archie.flattener.specexamples.FlattenerTestUtil;
 import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.serializer.adl.ADLArchetypeSerializer;
 import com.nedap.archie.testutil.TestUtil;
-import org.openehr.bmm.rmaccess.ReferenceModelAccess;
 import org.openehr.bmm.v2.validation.BmmRepository;
 import org.openehr.referencemodels.BuiltinReferenceModels;
-
-import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 

@@ -1,25 +1,18 @@
 package com.nedap.archie.flattener;
 
+import com.nedap.archie.adlparser.modelconstraints.ReflectionConstraintImposer;
 import com.nedap.archie.aom.*;
 import com.nedap.archie.aom.utils.ArchetypeParsePostProcesser;
-
-import com.nedap.archie.base.MultiplicityInterval;
-import com.nedap.archie.paths.PathSegment;
-import com.nedap.archie.paths.PathUtil;
-import com.nedap.archie.query.AOMPathQuery;
-import com.nedap.archie.query.APathQuery;
-import com.nedap.archie.query.ComplexObjectProxyReplacement;
 import com.nedap.archie.rminfo.MetaModels;
-
 import com.nedap.archie.rminfo.ReferenceModels;
-import org.openehr.bmm.rmaccess.ReferenceModelAccess;
 import org.openehr.bmm.v2.validation.BmmRepository;
-
-import static com.nedap.archie.flattener.FlattenerUtil.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+
+import static com.nedap.archie.flattener.FlattenerUtil.getPossiblyOverridenListValue;
+import static com.nedap.archie.flattener.FlattenerUtil.getPossiblyOverridenValue;
 
 /**
  * Flattener. For single use only, create a new flattener for every flatten-action you want to do!
@@ -106,7 +99,7 @@ public class Flattener implements IAttributeFlattenerSupport {
         }
 
         metaModels.selectModel(toFlatten);
-       // new ReflectionConstraintImposer(lookup).setSingleOrMultiple(toFlatten.getDefinition());
+
         //validate that we can legally flatten first
         String parentId = toFlatten.getParentArchetypeId();
         if(parentId == null) {
@@ -185,7 +178,11 @@ public class Flattener implements IAttributeFlattenerSupport {
             TerminologyFlattener.filterLanguages((OperationalTemplate) result, removeLanguagesFromMetaData, languagesToKeep);
         }
         result.getDefinition().setArchetype(result);
-
+        result.setDescription(child.getDescription());
+        result.setOtherMetaData(child.getOtherMetaData());
+        result.setBuildUid(child.getBuildUid());
+        result.setOriginalLanguage(child.getOriginalLanguage());
+        result.setTranslations(child.getTranslations());
 
         if(child instanceof Template && !createOperationalTemplate) {
             Template resultTemplate = (Template) result;
@@ -211,6 +208,11 @@ public class Flattener implements IAttributeFlattenerSupport {
         result.setGenerated(true);
 
         ArchetypeParsePostProcesser.fixArchetype(result);
+
+        //set the single/multiple attributes correctly
+        new ReflectionConstraintImposer(metaModels.getSelectedModel())
+                .setSingleOrMultiple(result.getDefinition());
+
         return result;
     }
 

@@ -20,16 +20,28 @@ import java.util.List;
  * Created by pieter.bos on 08/07/16.
  */
 @XmlRootElement(name="EHR")
-@XmlType(name="EHR")
+@XmlType(name = "EHR", propOrder = {
+        "systemId",
+        "ehrId",
+        "timeCreated",
+        "contributions",
+        "ehrAccess",
+        "ehrStatus",
+        "directory",
+        "compositions"
+})
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Ehr extends RMObject {
 
+    @XmlElement(name="system_id")
     private HierObjectId systemId;
+    @XmlElement(name="ehr_id")
     private HierObjectId ehrId;
 
-    @Nullable
     private List<ObjectRef> contributions = new ArrayList<>();
+    @XmlElement(name="ehr_status")
     private ObjectRef ehrStatus;
+    @XmlElement(name="ehr_access")
     private ObjectRef ehrAccess;
     @Nullable
     private List<ObjectRef> compositions = new ArrayList<>();

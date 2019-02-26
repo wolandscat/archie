@@ -1,27 +1,44 @@
 package com.nedap.archie.rm.changecontrol;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.nedap.archie.rm.datavalues.DvCodedText;
 import com.nedap.archie.rm.generic.Attestation;
-import com.nedap.archie.rm.support.identification.HierObjectId;
 import com.nedap.archie.rm.support.identification.ObjectVersionId;
 
 
 import javax.annotation.Nullable;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by pieter.bos on 08/07/16.
  */
+@XmlType(name="ORIGINAL_VERSION", propOrder = {
+        "uid",
+        "data",
+        "precedingVersionUid",
+        "otherInputVersionUids",
+        "attestations",
+        "lifecycleState"
+
+})
 public class OriginalVersion<Type> extends Version<Type> {
 
     private ObjectVersionId uid;
+    @Nullable
+    @XmlElement(name="preceding_version_uid")
     private ObjectVersionId precedingVersionUid;
     @Nullable
-    private List<ObjectVersionId> otherInputVersionIds = new ArrayList<>();
+    @XmlElement(name="other_input_version_uids")
+    private List<ObjectVersionId> otherInputVersionUids = new ArrayList<>();
 
+    @XmlElement(name="lifecycle_state")
     private DvCodedText lifecycleState;
+    @Nullable
     private List<Attestation> attestations = new ArrayList<>();
+    @Nullable
     private Type data;
 
 
@@ -44,12 +61,13 @@ public class OriginalVersion<Type> extends Version<Type> {
     }
 
     @Nullable
-    public List<ObjectVersionId> getOtherInputVersionIds() {
-        return otherInputVersionIds;
+    public List<ObjectVersionId> getOtherInputVersionUids() {
+        return otherInputVersionUids;
     }
 
-    public void setOtherInputVersionIds(@Nullable List<ObjectVersionId> otherInputVersionIds) {
-        this.otherInputVersionIds = otherInputVersionIds;
+    @JsonAlias({"other_input_version_ids"})
+    public void setOtherInputVersionUids(@Nullable List<ObjectVersionId> otherInputVersionUids) {
+        this.otherInputVersionUids = otherInputVersionUids;
     }
 
     @Override
