@@ -123,10 +123,6 @@ public class RMComparedWithBmmTest {
         List<ModelDifference> foundErrors = new ArrayList<>();
 
         for(ModelDifference difference:compared) {
-//            System.out.println(MessageFormat.format("knownDifferences.add(new ModelDifference(ModelDifferenceType.{0}, \"\", \"{1}\", {2}));",
-//                    difference.getType().toString(),
-//                    difference.getClassName(),
-//                    difference.getPropertyName() == null ? "null" : '"' + difference.getPropertyName() + '"'));
             if(!knownDifferences.contains(difference)) {
                 foundErrors.add(difference);
             }
@@ -135,10 +131,6 @@ public class RMComparedWithBmmTest {
         List<ModelDifference> noLongerFoundErrors = new ArrayList<>();
 
         for(ModelDifference difference:knownDifferences) {
-//            System.out.println(MessageFormat.format("knownDifferences.add(new ModelDifference(ModelDifferenceType.{0}, \"\", \"{1}\", {2}));",
-//                    difference.getType().toString(),
-//                    difference.getClassName(),
-//                    difference.getPropertyName() == null ? "null" : '"' + difference.getPropertyName() + '"'));
             if(!compared.contains(difference)) {
                 noLongerFoundErrors.add(difference);
             }
@@ -147,5 +139,23 @@ public class RMComparedWithBmmTest {
 
         assertTrue("difference was in known difference, but is actually not a problem anymore: "+ Joiner.on("\n").join(noLongerFoundErrors), noLongerFoundErrors.isEmpty());
         assertEquals(knownDifferences.size(), compared.size());
+    }
+
+
+    /**
+     * Generate and return the code to add all modelDifferences to the knownDifferences array. useful if you have new ones
+     * and want to quickly add them without writing code :)
+     * @param modelDifferences
+     */
+    private String getCodeForModelDifferences(List<ModelDifference> modelDifferences) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for(ModelDifference difference:modelDifferences) {
+            stringBuilder.append(MessageFormat.format("knownDifferences.add(new ModelDifference(ModelDifferenceType.{0}, \"\", \"{1}\", {2}));",
+                    difference.getType().toString(),
+                    difference.getClassName(),
+                    difference.getPropertyName() == null ? "null" : '"' + difference.getPropertyName() + '"'));
+            stringBuilder.append("\n");
+        }
+        return stringBuilder.toString();
     }
 }
