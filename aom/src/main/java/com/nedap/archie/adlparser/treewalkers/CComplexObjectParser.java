@@ -5,6 +5,7 @@ import com.nedap.archie.adlparser.antlr.AdlParser.*;
 import com.nedap.archie.aom.*;
 import com.nedap.archie.base.Cardinality;
 import com.nedap.archie.base.MultiplicityInterval;
+import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.rules.Assertion;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -19,10 +20,12 @@ import java.util.List;
 public class CComplexObjectParser extends BaseTreeWalker {
 
     private final PrimitivesConstraintParser primitivesConstraintParser;
+    private final MetaModels metaModels;
 
-    public CComplexObjectParser(ANTLRParserErrors errors) {
+    public CComplexObjectParser(ANTLRParserErrors errors, MetaModels metaModels) {
         super(errors);
         primitivesConstraintParser = new PrimitivesConstraintParser(errors);
+        this.metaModels = metaModels;
     }
 
     public RulesSection parseRules(Rules_sectionContext context) {
@@ -83,7 +86,8 @@ public class CComplexObjectParser extends BaseTreeWalker {
             }
             parent.addAttribute(attribute);
             if(attribute.getCardinality() != null) {
-                attribute.setMultiple(true); //this seems to be the only way to set single or multiple without the RM. Maybe existence as well?
+                //Sort of sensible default. Will be overwritten in ADLParser with the actual value from the RM
+                attribute.setMultiple(true);
             }
         } else if (attributeDefContext.c_attribute_tuple() != null) {
             parent.addAttributeTuple(parseAttributeTuple(parent, attributeDefContext.c_attribute_tuple()));
