@@ -27,7 +27,7 @@ import java.nio.charset.Charset;
 public class ADLParser {
 
     private final MetaModels metaModels;
-    private ModelConstraintImposer modelConstraintImposer;
+    private final ModelConstraintImposer modelConstraintImposer;
     private ANTLRParserErrors errors;
 
     private Lexer lexer;
@@ -43,7 +43,8 @@ public class ADLParser {
     private boolean logEnabled = true;
 
     public ADLParser() {
-        metaModels = null;
+        this.metaModels = null;
+        this.modelConstraintImposer = null;
     }
 
     /**
@@ -55,6 +56,7 @@ public class ADLParser {
     @Deprecated
     public ADLParser(ModelConstraintImposer modelConstraintImposer) {
         this.modelConstraintImposer = modelConstraintImposer;
+        this.metaModels = null;
     }
 
 
@@ -65,6 +67,7 @@ public class ADLParser {
      */
     public ADLParser(MetaModels models) {
         this.metaModels = models;
+        this.modelConstraintImposer = null;
     }
 
     public Archetype parse(String adl) throws IOException {
@@ -87,7 +90,7 @@ public class ADLParser {
         parser.addErrorListener(errorListener);
         tree = parser.adl(); // parse
 
-        ADLListener listener = new ADLListener(errors);
+        ADLListener listener = new ADLListener(errors, metaModels);
         walker= new ParseTreeWalker();
         walker.walk(listener, tree);
         Archetype result = listener.getArchetype();

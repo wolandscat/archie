@@ -6,6 +6,7 @@ import com.nedap.archie.antlr.errors.ANTLRParserErrors;
 import com.nedap.archie.adlparser.antlr.AdlBaseListener;
 import com.nedap.archie.adlparser.antlr.AdlParser;
 import com.nedap.archie.adlparser.antlr.AdlParser.*;
+import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.serializer.odin.OdinObjectParser;
 import com.nedap.archie.serializer.odin.AdlOdinToJsonConverter;
 import com.nedap.archie.aom.*;
@@ -30,9 +31,9 @@ public class ADLListener extends AdlBaseListener {
     private CComplexObjectParser subTreeWalker;
     private TerminologyParser terminologyParser;
 
-    public ADLListener(ANTLRParserErrors errors) {
+    public ADLListener(ANTLRParserErrors errors, MetaModels metaModels) {
         this.errors = errors;
-        subTreeWalker = new CComplexObjectParser(errors);
+        subTreeWalker = new CComplexObjectParser(errors, metaModels);
         terminologyParser = new TerminologyParser(errors);
     }
 
