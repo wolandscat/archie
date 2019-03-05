@@ -21,7 +21,7 @@ wrapper {
 }
 
 allprojects {
-  version = '0.5.7'
+  version = '0.5.8'
   
   group = 'com.nedap.healthcare.archie'
   ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
