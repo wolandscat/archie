@@ -2,6 +2,7 @@ package com.nedap.archie.rm.support.identification;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.nedap.archie.rminfo.RMPropertyIgnore;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,6 +88,7 @@ public class ArchetypeID extends ObjectId {
 
     }
 
+    @RMPropertyIgnore
     public String getFullId() {
         StringBuilder result = new StringBuilder(30);
         result.append(rmOriginator);
@@ -105,6 +107,7 @@ public class ArchetypeID extends ObjectId {
         return result.toString();
     }
 
+    @RMPropertyIgnore
     public String getSemanticId() {
         StringBuilder result = new StringBuilder();
         result.append(rmOriginator);

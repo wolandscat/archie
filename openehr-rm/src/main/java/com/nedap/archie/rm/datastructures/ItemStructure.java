@@ -1,5 +1,7 @@
 package com.nedap.archie.rm.datastructures;
 
+import com.nedap.archie.rminfo.RMPropertyIgnore;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
@@ -13,7 +15,7 @@ import java.util.List;
 public abstract class ItemStructure<Type extends Item> extends DataStructure {
 
     /** In the default model it's in the subclasses, but defined here as well because it has a lot of uses */
-    //TODO: add a @MetaModelIgnore annotation - this should be ignored by the ModelInfoLookup
+    @RMPropertyIgnore
     public abstract List<Type> getItems();
 
 }
