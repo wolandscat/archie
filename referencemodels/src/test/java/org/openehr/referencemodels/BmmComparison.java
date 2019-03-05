@@ -91,7 +91,7 @@ public class BmmComparison {
         List<ModelDifference> result = new ArrayList<>();
         BmmClass flatBmmClass = classDefinition.flattenBmmClass();
         for(RMAttributeInfo attributeInfo:typeInfo.getAttributes().values()) {
-            if(attributeInfo.getField() != null && !isIgnorableModelParam(classDefinition.getName(), attributeInfo.getRmName())) {
+            if(!isIgnorableModelParam(classDefinition.getName(), attributeInfo.getRmName())) {
                 BmmProperty bmmProperty = flatBmmClass.getProperties().get(attributeInfo.getRmName());
                 if (bmmProperty == null) {
                     result.add(new ModelDifference(ModelDifferenceType.PROPERTY_MISSING_IN_BMM,
@@ -158,7 +158,7 @@ public class BmmComparison {
                     ));
         }
 
-        if(attributeInfo.isNullable() != !bmmProperty.getMandatory()) {
+        if(attributeInfo.isNullable() != !bmmProperty.getMandatory() && !bmmProperty.getComputed()) {
             result.add(new ModelDifference(ModelDifferenceType.EXISTENCE_DIFFERENCE,
                     MessageFormat.format("mandatory difference {2}: BMM: {0}, implementation: {1}", bmmProperty.getMandatory(), !attributeInfo.isNullable(), className + "." + bmmProperty.getName()),
                     className, bmmProperty.getName()));
