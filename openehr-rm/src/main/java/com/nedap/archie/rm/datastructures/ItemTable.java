@@ -1,5 +1,7 @@
 package com.nedap.archie.rm.datastructures;
 
+import com.nedap.archie.rminfo.RMPropertyIgnore;
+
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -37,6 +39,7 @@ public class ItemTable extends ItemStructure<Element> {
 
     /** This is a bit of a strange one - returns all elements present in the table. Use getRows instead*/
     @Override
+    @RMPropertyIgnore
     public List<Element> getItems() {
         if(rows == null) {
             return null;

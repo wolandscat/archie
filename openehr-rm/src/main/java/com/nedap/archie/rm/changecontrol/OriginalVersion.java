@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.nedap.archie.rm.datavalues.DvCodedText;
 import com.nedap.archie.rm.generic.Attestation;
 import com.nedap.archie.rm.support.identification.ObjectVersionId;
+import com.nedap.archie.rminfo.RMProperty;
 
 
 import javax.annotation.Nullable;
@@ -81,6 +82,7 @@ public class OriginalVersion<Type> extends Version<Type> {
     }
 
     @Override
+    @RMProperty("is_branch")
     public boolean isBranch() {
         return false;
     }

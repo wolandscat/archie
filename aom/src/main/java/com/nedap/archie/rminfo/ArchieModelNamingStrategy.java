@@ -36,7 +36,25 @@ public class ArchieModelNamingStrategy implements ModelNamingStrategy {
     }
 
     @Override
-    public String getAttributeName(Method method) {
+    public String getAttributeName(Field field, Method method) {
+        if(field != null) {
+            RMProperty annotation = field.getDeclaredAnnotation(RMProperty.class);
+            if (annotation != null) {
+                return annotation.value();
+            }
+        }
+
+        if(method != null) {
+            RMProperty annotation = method.getDeclaredAnnotation(RMProperty.class);
+            if(annotation != null) {
+                return annotation.value();
+            }
+        }
+
+        if(field != null) {
+            return snakeCaseStrategy.translate(field.getName());
+        }
+
         if(method.getName().startsWith("get") ||
                 method.getName().startsWith("set") ||
                 method.getName().startsWith("add") ) {
@@ -49,10 +67,5 @@ public class ArchieModelNamingStrategy implements ModelNamingStrategy {
             }
         }
         return method.getName();
-    }
-
-    @Override
-    public String getAttributeName(Field field) {
-        return snakeCaseStrategy.translate(field.getName());
     }
 }

@@ -2,6 +2,7 @@ package com.nedap.archie.rm.datavalues.quantity;
 
 import com.nedap.archie.base.Interval;
 import com.nedap.archie.rm.datavalues.DataValue;
+import javax.annotation.Nullable;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -24,6 +25,7 @@ public class DvInterval<Type extends DvOrdered> extends DataValue {
 
     private final Interval<DvOrdered> interval = new Interval<DvOrdered>();
 
+    @Nullable
     public DvOrdered getLower() {
         return interval.getLower();
     }
@@ -32,6 +34,7 @@ public class DvInterval<Type extends DvOrdered> extends DataValue {
         interval.setLower(lower);
     }
 
+    @Nullable
     public DvOrdered getUpper() {
         return interval.getUpper();
     }

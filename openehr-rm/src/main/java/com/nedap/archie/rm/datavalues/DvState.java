@@ -1,5 +1,7 @@
 package com.nedap.archie.rm.datavalues;
 
+import com.nedap.archie.rminfo.RMProperty;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -16,6 +18,7 @@ import javax.xml.bind.annotation.XmlType;
 public class DvState extends DataValue implements SingleValuedDataValue<DvCodedText> {
 
     @XmlElement(name = "is_terminal")
+    @RMProperty("is_terminal")
     private boolean isTerminal;
     private DvCodedText value;
     

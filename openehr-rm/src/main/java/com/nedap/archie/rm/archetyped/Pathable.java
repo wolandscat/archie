@@ -8,6 +8,8 @@ import com.nedap.archie.query.RMObjectWithPath;
 import com.nedap.archie.query.RMPathQuery;
 import com.nedap.archie.rm.RMObject;
 import com.nedap.archie.rminfo.ArchieRMInfoLookup;
+import com.nedap.archie.rminfo.RMPropertyIgnore;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
@@ -88,19 +90,7 @@ public abstract class Pathable extends RMObject {
         return parentAttributeName;
     }
 
-    /**
-     * Return the path of an item relative to this item
-     * @param item
-     * @return
-     */
-//    public String pathOfItem(Pathable item) {
-//
-//    }
-//
-//    public String path() {
-//
-//    }
-
+    @RMPropertyIgnore
     public List<PathSegment> getPathSegments() {
         Pathable parent = getParent();
         if(parent == null) {
@@ -119,6 +109,7 @@ public abstract class Pathable extends RMObject {
      * API subject to change in the future!
      * @return
      */
+    @RMPropertyIgnore
     public final String getPath() {
         return PathUtil.getPath(getPathSegments());
     }
