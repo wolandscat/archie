@@ -36,6 +36,7 @@ public abstract class DvQuantified<AccuracyType, MagnitudeType extends Comparabl
         this.magnitudeStatus = magnitudeStatus;
     }
 
+    @Nullable
     public abstract AccuracyType getAccuracy();
 
     public abstract MagnitudeType getMagnitude();

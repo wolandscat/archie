@@ -3,6 +3,7 @@ package com.nedap.archie.rm.generic;
 import com.nedap.archie.rm.datavalues.DvEHRURI;
 import com.nedap.archie.rm.datavalues.DvText;
 import com.nedap.archie.rm.datavalues.encapsulated.DvMultimedia;
+import com.nedap.archie.rminfo.RMProperty;
 
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -28,6 +29,7 @@ public class Attestation extends AuditDetails {
     private List<DvEHRURI> items = new ArrayList<>();
     private DvText reason;
     @XmlElement(name="is_pending")
+    @RMProperty("is_pending")
     private boolean isPending;
 
     @Nullable

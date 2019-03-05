@@ -154,21 +154,23 @@ public abstract class ReflectionModelInfoLookup implements ModelInfoLookup {
         }
         if(addAttributesWithoutField) {
             Set<Method> getters = ReflectionUtils.getAllMethods(clazz, (method) -> method.getName().startsWith("get") || method.getName().startsWith("is"));
-            for (Method method : getters) {
-                if(shouldAdd(method)) {
-                    addRMAttributeInfo(clazz, typeInfo, typeToken, method, fieldsByName);
+            for (Method getMethod : getters) {
+                if(shouldAdd(getMethod)) {
+                    addRMAttributeInfo(clazz, typeInfo, typeToken, getMethod, fieldsByName);
                 }
             }
         }
     }
 
     protected boolean shouldAdd(Method method) {
+        if(method == null) {
+            return true;
+        }
         //do not add private or protected properties, they will result in errors
-        return Modifier.isPublic(method.getModifiers());
+        return Modifier.isPublic(method.getModifiers()) && method.getAnnotation(RMPropertyIgnore.class) == null;
     }
 
     protected void addRMAttributeInfo(Class clazz, RMTypeInfo typeInfo, TypeToken typeToken, Method getMethod, Map<String, Field> fieldsByName) {
-        String attributeName = namingStrategy.getAttributeName(getMethod);
         String javaFieldName = null;
         if(getMethod.getName().startsWith("is")) {
             javaFieldName = lowerCaseFirstChar(getMethod.getName().substring(2));
@@ -176,6 +178,9 @@ public abstract class ReflectionModelInfoLookup implements ModelInfoLookup {
             javaFieldName = lowerCaseFirstChar(getMethod.getName().substring(3));
         }
         Field field = fieldsByName.get(javaFieldName);
+        if(field == null) {
+            field = fieldsByName.get(getMethod.getName());
+        }
         String javaFieldNameUpperCased = upperCaseFirstChar(javaFieldName);
         Method setMethod = null, addMethod = null;
 
@@ -184,11 +189,12 @@ public abstract class ReflectionModelInfoLookup implements ModelInfoLookup {
         }
         if (getMethod != null) {
             setMethod = getMethod(clazz, "set" + javaFieldNameUpperCased, getMethod.getReturnType());
-            addMethod = getAddMethod(clazz, typeToken, attributeName, javaFieldNameUpperCased, getMethod);
+            addMethod = getAddMethod(clazz, typeToken, javaFieldNameUpperCased, getMethod);
         } else {
-            logger.debug("No get method found for attribute {} on class {}", attributeName, clazz.getSimpleName());
+            logger.debug("No get method found for attribute {} on class {}", javaFieldName, clazz.getSimpleName());
         }
 
+        String attributeName = namingStrategy.getAttributeName(field, getMethod);
 
         TypeToken fieldType = typeToken.resolveType(getMethod.getGenericReturnType());;
 
@@ -220,7 +226,6 @@ public abstract class ReflectionModelInfoLookup implements ModelInfoLookup {
 
 
     private void addRMAttributeInfo(Class clazz, RMTypeInfo typeInfo, TypeToken typeToken, Field field) {
-        String attributeName = namingStrategy.getAttributeName(field);
         String javaFieldName = field.getName();
         String javaFieldNameUpperCased = upperCaseFirstChar(javaFieldName);
         Method getMethod = getMethod(clazz, "get" + javaFieldNameUpperCased);
@@ -230,12 +235,12 @@ public abstract class ReflectionModelInfoLookup implements ModelInfoLookup {
         }
         if (getMethod != null) {
             setMethod = getMethod(clazz, "set" + javaFieldNameUpperCased, getMethod.getReturnType());
-            addMethod = getAddMethod(clazz, typeToken, attributeName, javaFieldNameUpperCased, getMethod);
+            addMethod = getAddMethod(clazz, typeToken, javaFieldNameUpperCased, getMethod);
         } else {
             logger.debug("No get method found for field {} on class {}", field.getName(), clazz.getSimpleName());
         }
 
-        if(attributeName.startsWith("is")) {
+        if(javaFieldName.startsWith("is")) {
             //special case
             String fieldNameWithoutPrefix = javaFieldName.substring(2);
             String withoutPrefixUpperCased = upperCaseFirstChar(fieldNameWithoutPrefix);
@@ -247,13 +252,14 @@ public abstract class ReflectionModelInfoLookup implements ModelInfoLookup {
                     setMethod = getMethod(clazz, "set" + withoutPrefixUpperCased, getMethod.getReturnType());
                 }
                 if(addMethod == null) {
-                    addMethod = getAddMethod(clazz, typeToken, attributeName, withoutPrefixUpperCased, getMethod);
+                    addMethod = getAddMethod(clazz, typeToken, withoutPrefixUpperCased, getMethod);
                 }
             } else {
-                logger.debug("No get method found for attribute {} on class {}", attributeName, clazz.getSimpleName());
+                logger.debug("No get method found for attribute {} on class {}", javaFieldName, clazz.getSimpleName());
             }
 
         }
+        String attributeName = namingStrategy.getAttributeName(field, getMethod);
 
         TypeToken fieldType = null;
         if (getMethod != null) {
@@ -264,7 +270,7 @@ public abstract class ReflectionModelInfoLookup implements ModelInfoLookup {
 
         Class rawFieldType = fieldType.getRawType();
         Class typeInCollection = getTypeInCollection(fieldType);
-        if (setMethod != null && shouldAdd(setMethod)) {
+        if (setMethod != null && (shouldAdd(setMethod) && shouldAdd(getMethod))) {
             RMAttributeInfo attributeInfo = new RMAttributeInfo(
                     attributeName,
                     field,
@@ -301,7 +307,7 @@ public abstract class ReflectionModelInfoLookup implements ModelInfoLookup {
         return rawFieldType;
     }
 
-    private Method getAddMethod(Class clazz, TypeToken typeToken, String name, String javaFieldNameUpperCased, Method getMethod) {
+    private Method getAddMethod(Class clazz, TypeToken typeToken, String javaFieldNameUpperCased, Method getMethod) {
         Method addMethod = null;
         if (Collection.class.isAssignableFrom(getMethod.getReturnType())) {
             Type[] typeArguments = ((ParameterizedType) getMethod.getGenericReturnType()).getActualTypeArguments();
@@ -316,7 +322,7 @@ public abstract class ReflectionModelInfoLookup implements ModelInfoLookup {
                     if (allAddMethods.size() == 1) {
                         addMethod = allAddMethods.iterator().next();
                     } else {
-                        logger.debug("strange number of add methods for field {} on class {}", name, clazz.getSimpleName());
+                        logger.debug("strange number of add methods for field {} on class {}", javaFieldNameUpperCased, clazz.getSimpleName());
                     }
                 }
             }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nedap.archie.paths.PathSegment;
 import com.nedap.archie.rm.support.identification.UIDBasedId;
 import com.nedap.archie.rm.datavalues.DvText;
+import com.nedap.archie.rminfo.RMPropertyIgnore;
 
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -97,6 +98,7 @@ public abstract class Locatable extends Pathable {
 
     @Override
     @JsonIgnore
+    @RMPropertyIgnore
     public List<PathSegment> getPathSegments() {
         Pathable parent = getParent();
         if(parent == null) {
@@ -109,6 +111,7 @@ public abstract class Locatable extends Pathable {
     }
 
     @JsonIgnore
+    @RMPropertyIgnore
     public String getNameAsString() {
         return name == null ? null : name.getValue();
     }

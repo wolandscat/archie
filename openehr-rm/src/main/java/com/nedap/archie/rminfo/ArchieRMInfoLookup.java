@@ -192,7 +192,7 @@ public class ArchieRMInfoLookup extends ReflectionModelInfoLookup {
                 return false;
             }
         }
-        return (field != null && field.getAnnotation(Nullable.class) != null) || getMethod.getAnnotation(Nullable.class) != null;
+        return super.isNullable(clazz, getMethod, field);
     }
 
     public static ArchieRMInfoLookup getInstance() {
@@ -235,14 +235,6 @@ public class ArchieRMInfoLookup extends ReflectionModelInfoLookup {
             return convertTerminologyCode((TerminologyCode) object);
         }
         return object;
-    }
-
-    @Override
-    protected boolean shouldAdd(Method method) {
-        if(method.getName().equals("getPathSegments")) {
-            return false;
-        }
-        return super.shouldAdd(method);
     }
 
     private CodePhrase convertTerminologyCode(TerminologyCode terminologyCode) {

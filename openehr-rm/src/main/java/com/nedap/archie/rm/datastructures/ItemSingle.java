@@ -1,6 +1,7 @@
 package com.nedap.archie.rm.datastructures;
 
 import com.google.common.collect.Lists;
+import com.nedap.archie.rminfo.RMPropertyIgnore;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -28,6 +29,7 @@ public class ItemSingle extends ItemStructure<Element> {
     }
 
     @Override
+    @RMPropertyIgnore
     public List<Element> getItems() {
         return Lists.newArrayList(item);
     }
