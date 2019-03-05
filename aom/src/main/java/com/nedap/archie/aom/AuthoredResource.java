@@ -1,8 +1,8 @@
 package com.nedap.archie.aom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nedap.archie.base.terminology.TerminologyCode;
+import com.nedap.archie.rminfo.RMPropertyIgnore;
 import com.nedap.archie.xml.adapters.ResourceDescriptionAdapter;
 import com.nedap.archie.xml.adapters.TranslationDetailsAdapter;
 
@@ -87,6 +87,7 @@ public abstract class AuthoredResource extends ArchetypeModelObject {
     }
 
     @XmlTransient
+    @Nullable
     public Map<String, TranslationDetails> getTranslations() {
         if(content == null) {
             return null;
@@ -104,6 +105,7 @@ public abstract class AuthoredResource extends ArchetypeModelObject {
     @XmlElement(name="translations")
     @XmlJavaTypeAdapter(TranslationDetailsAdapter.class)
     @JsonIgnore
+    @RMPropertyIgnore
     public List<TranslationDetails> getTranslationList() { return new ArrayList(content.getTranslations().values());}
 
     public void setTranslationList(List<TranslationDetails> translationList) {
@@ -129,6 +131,7 @@ public abstract class AuthoredResource extends ArchetypeModelObject {
      */
     @JsonIgnore
     @XmlTransient
+    @RMPropertyIgnore
     public LanguageSection getAuthoredResourceContent() {
         return content;
     }

@@ -7,6 +7,7 @@ package com.nedap.archie.rm.ehr;
 import com.nedap.archie.rm.archetyped.Locatable;
 import com.nedap.archie.rm.datastructures.ItemStructure;
 import com.nedap.archie.rm.generic.PartySelf;
+import com.nedap.archie.rminfo.RMProperty;
 
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -18,7 +19,10 @@ import javax.xml.bind.annotation.XmlType;
 public class EhrStatus extends Locatable {
 
     private PartySelf subject;
+    
+    @RMProperty("is_queryable")
     private boolean isQueryable;
+    @RMProperty("is_modifiable")
     private boolean isModifiable;
     @Nullable
     private ItemStructure otherDetails;

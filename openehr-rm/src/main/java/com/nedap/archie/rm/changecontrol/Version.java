@@ -5,6 +5,7 @@ import com.nedap.archie.rm.support.identification.ObjectRef;
 import com.nedap.archie.rm.datavalues.DvCodedText;
 import com.nedap.archie.rm.generic.AuditDetails;
 import com.nedap.archie.rm.support.identification.ObjectVersionId;
+import com.nedap.archie.rminfo.RMProperty;
 
 import javax.annotation.Nullable;
 
@@ -60,6 +61,7 @@ public abstract class Version<Type> extends RMObject {
 //
 //    }
 
+    @RMProperty("is_branch")
     public abstract boolean isBranch();
 
 
