@@ -171,6 +171,10 @@ public class PrimitivesConstraintParser extends BaseTreeWalker {
         ContainedRegexParser.RegexContext regex = parser.regex();
         CString result = new CString();
         result.addConstraint(regex.REGEX().getText());
+        if(regex.STRING() != null) {
+            String assumedValue = regex.STRING().getText();
+            result.setAssumedValue(assumedValue.substring(1, assumedValue.length()-1));
+        }
         return result;
     }
 }
