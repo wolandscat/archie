@@ -20,7 +20,7 @@ public class RMObjectValidationMessage {
     }
 
     public RMObjectValidationMessage(ArchetypeConstraint constraint, String actualPath, String message, RMObjectValidationMessageType type) {
-        this(actualPath, constraint.getPath(), constraint.getLogicalPath(), message, type);
+        this(actualPath, constraint == null ? null : constraint.getPath(), constraint == null ? null : constraint.getLogicalPath(), message, type);
     }
 
 

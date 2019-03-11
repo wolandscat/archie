@@ -36,11 +36,6 @@ public class RMPathQuery {
 
     //TODO: get diagnostic information about where the finder stopped in the path - could be very useful!
 
-    /**
-     * Deprecated for querying RMObjects. Use RMQueryContext instead.
-     * For querying CObjects there is no other solution yet.
-     */
-    @Deprecated
     public <T> T find(ModelInfoLookup lookup, Object root) {
         Object currentObject = root;
         try {

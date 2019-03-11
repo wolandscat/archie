@@ -13,7 +13,11 @@ import java.util.Collections;
 import java.util.List;
 
 public class RMPrimitiveObjectValidation {
+
     public static List<RMObjectValidationMessage> validate(ModelInfoLookup lookup, List<RMObjectWithPath> rmObjects, String pathSoFar, CPrimitiveObject cobject) {
+        if(cobject == null) {
+            return new ArrayList<>();
+        }
         if (cobject.getSocParent() != null) {
             //validate the tuple, not the primitive object directly
             return Collections.emptyList();

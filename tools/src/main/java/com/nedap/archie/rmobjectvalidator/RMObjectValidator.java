@@ -6,6 +6,7 @@ import com.nedap.archie.aom.*;
 import com.nedap.archie.aom.terminology.ArchetypeTerm;
 import com.nedap.archie.query.RMObjectWithPath;
 import com.nedap.archie.query.RMPathQuery;
+import com.nedap.archie.rminfo.MetaModel;
 import com.nedap.archie.rminfo.ModelInfoLookup;
 import com.nedap.archie.rminfo.RMAttributeInfo;
 import com.nedap.archie.rminfo.RMTypeInfo;
@@ -25,12 +26,14 @@ import java.util.stream.Collectors;
  */
 public class RMObjectValidator extends RMObjectValidatingProcessor {
 
+    private final MetaModel metaModel;
     private APathQueryCache queryCache = new APathQueryCache();
     private ModelInfoLookup lookup;
     private ReflectionConstraintImposer constraintImposer;
 
     public RMObjectValidator(ModelInfoLookup lookup) {
         this.lookup = lookup;
+        this.metaModel = new MetaModel(lookup, null);
         constraintImposer = new ReflectionConstraintImposer(lookup);
     }
 
@@ -41,14 +44,27 @@ public class RMObjectValidator extends RMObjectValidatingProcessor {
         return getMessages();
     }
 
+    public List<RMObjectValidationMessage> validate(Object rmObject) {
+        clearMessages();
+        List<RMObjectWithPath> objects = Lists.newArrayList(new RMObjectWithPath(rmObject, ""));
+        addAllMessages(runArchetypeValidations(objects, "", null));
+        return getMessages();
+    }
+
     private List<RMObjectValidationMessage> runArchetypeValidations(List<RMObjectWithPath> rmObjects, String path, CObject cobject) {
-        List<RMObjectValidationMessage> result = new ArrayList<>(RMOccurrenceValidation.validate(rmObjects, path, cobject));
+        List<RMObjectValidationMessage> result = new ArrayList<>(RMOccurrenceValidation.validate(metaModel, rmObjects, path, cobject));
         if (rmObjects.isEmpty()) {
             //if this branch of the archetype tree is null in the reference model, we're done validating
             //this has to be done after validateOccurrences(), or required fields do not get validated
             return result;
         }
-        if (cobject instanceof CPrimitiveObject) {
+        if(cobject == null) {
+            //add default validations
+            for (RMObjectWithPath objectWithPath : rmObjects) {
+                validateObjectWithPath(result, cobject, path, objectWithPath);
+            }
+        }
+        else if (cobject instanceof CPrimitiveObject) {
             result = RMPrimitiveObjectValidation.validate(lookup, rmObjects, path, (CPrimitiveObject) cobject);
         } else {
             result = new ArrayList<>();
@@ -66,23 +82,37 @@ public class RMObjectValidator extends RMObjectValidatingProcessor {
     }
 
     private void validateObjectWithPath(List<RMObjectValidationMessage> result, CObject cobject, String path, RMObjectWithPath objectWithPath){
-        Class classInConstraint = this.lookup.getClass(cobject.getRmTypeName());
-        if (!classInConstraint.isAssignableFrom(objectWithPath.getObject().getClass())) {
-            //not a matching constraint. Cannot validate. add error message and stop validating.
-            //If another constraint is present, that one will succeed
-            result.add(new RMObjectValidationMessage(
-                    cobject,
-                    objectWithPath.getPath(),
-                    RMObjectValidationMessageIds.rm_INCORRECT_TYPE.getMessage(cobject.getRmTypeName(), objectWithPath.getObject().getClass().getSimpleName()),
-                    RMObjectValidationMessageType.WRONG_TYPE)
-            );
-        } else {
-            String pathSoFar = stripLastPathSegment(path) + objectWithPath.getPath();
+        if(cobject == null) {
             Object rmObject = objectWithPath.getObject();
-            List<CAttribute> attributes = new ArrayList<>(cobject.getAttributes());
-            attributes.addAll(getDefaultAttributeConstraints(cobject, attributes));
-            for (CAttribute attribute : attributes) {
-                validateAttributes(result, attribute, cobject, rmObject, pathSoFar);
+            if(rmObject != null) {
+                RMTypeInfo typeInfo = lookup.getTypeInfo(rmObject.getClass());
+                if (typeInfo != null) {
+                    List<CAttribute> defaultAttributes = getDefaultAttributeConstraints(typeInfo.getRmName(), Lists.newArrayList());
+                    String pathSoFar = stripLastPathSegment(path) + objectWithPath.getPath();
+                    for (CAttribute attribute : defaultAttributes) {
+                        validateAttributes(result, attribute, null, rmObject, pathSoFar);
+                    }
+                }
+            }
+        } else {
+            Class classInConstraint = this.lookup.getClass(cobject.getRmTypeName());
+            if (!classInConstraint.isAssignableFrom(objectWithPath.getObject().getClass())) {
+                //not a matching constraint. Cannot validate. add error message and stop validating.
+                //If another constraint is present, that one will succeed
+                result.add(new RMObjectValidationMessage(
+                        cobject,
+                        objectWithPath.getPath(),
+                        RMObjectValidationMessageIds.rm_INCORRECT_TYPE.getMessage(cobject.getRmTypeName(), objectWithPath.getObject().getClass().getSimpleName()),
+                        RMObjectValidationMessageType.WRONG_TYPE)
+                );
+            } else {
+                String pathSoFar = stripLastPathSegment(path) + objectWithPath.getPath();
+                Object rmObject = objectWithPath.getObject();
+                List<CAttribute> attributes = new ArrayList<>(cobject.getAttributes());
+                attributes.addAll(getDefaultAttributeConstraints(cobject, attributes));
+                for (CAttribute attribute : attributes) {
+                    validateAttributes(result, attribute, cobject, rmObject, pathSoFar);
+                }
             }
         }
     }
@@ -96,14 +126,31 @@ public class RMObjectValidator extends RMObjectValidatingProcessor {
 
         if (emptyObservationErrors.isEmpty()) {
             result.addAll(RMMultiplicityValidation.validate(attribute, pathSoFar + "/" + rmAttributeName, attributeValue));
-            if (attribute.isSingle()) {
+            if(attribute.getChildren() == null || attribute.getChildren().isEmpty()) {
+                //no child CObjects. Run default validations only
+                String query = "/" + rmAttributeName;
+                aPathQuery = queryCache.getApathQuery(query);
+                List<RMObjectWithPath> childRmObjects = aPathQuery.findList(lookup, rmObject);
+                result.addAll(runArchetypeValidations(childRmObjects, pathSoFar + query, null));
+            }
+            else if (attribute.isSingle()) {
                 validateSingleAttribute(result, attribute, rmObject, pathSoFar);
             } else {
-                for (CObject childCObject : attribute.getChildren()) {
-                    String query = "/" + rmAttributeName + "[" + childCObject.getNodeId() + "]";
+                if(attribute.getChildren() == null || attribute.getChildren().isEmpty()) {
+                    //no child CObjects. Run default validations only
+                    String query = "/" + rmAttributeName;
                     aPathQuery = queryCache.getApathQuery(query);
                     List<RMObjectWithPath> childRmObjects = aPathQuery.findList(lookup, rmObject);
-                    result.addAll(runArchetypeValidations(childRmObjects, pathSoFar + query, childCObject));
+                    result.addAll(runArchetypeValidations(childRmObjects, pathSoFar + query, null));
+                } else {
+                    for (CObject childCObject : attribute.getChildren()) {
+                        String query = "/" + rmAttributeName + "[" + childCObject.getNodeId() + "]";
+                        aPathQuery = queryCache.getApathQuery(query);
+                        List<RMObjectWithPath> childRmObjects = aPathQuery.findList(lookup, rmObject);
+                        result.addAll(runArchetypeValidations(childRmObjects, pathSoFar + query, childCObject));
+                        //TODO: find all other child RM Objects that don't match with a given node id (eg unconstraint in archetype) and
+                        //run default validations against them!
+                    }
                 }
             }
         }
@@ -111,6 +158,7 @@ public class RMObjectValidator extends RMObjectValidatingProcessor {
 
     private void validateSingleAttribute(List<RMObjectValidationMessage> result, CAttribute attribute, Object rmObject, String pathSoFar) {
         List<List<RMObjectValidationMessage>> subResults = new ArrayList<>();
+
         for (CObject childCObject : attribute.getChildren()) {
             String query = "/" + attribute.getRmAttributeName() + "[" + childCObject.getNodeId() + "]";
             RMPathQuery aPathQuery = queryCache.getApathQuery(query);
@@ -158,7 +206,7 @@ public class RMObjectValidator extends RMObjectValidatingProcessor {
 
         if (parentIsEvent && attributeIsData && attributeIsEmpty && attributeShouldNotBeEmpty) {
             String message = "Observation " + getParentObservationTerm(attribute) + " contains no results";
-            result.add(new RMObjectValidationMessage(cobject.getParent().getParent(), pathSoFar, message, RMObjectValidationMessageType.EMPTY_OBSERVATION));
+            result.add(new RMObjectValidationMessage(cobject == null ? null : cobject.getParent().getParent(), pathSoFar, message, RMObjectValidationMessageType.EMPTY_OBSERVATION));
         }
         return result;
     }
@@ -191,19 +239,31 @@ public class RMObjectValidator extends RMObjectValidatingProcessor {
         return subResult.stream().noneMatch((message) -> message.getType() == RMObjectValidationMessageType.WRONG_TYPE);
     }
 
-    private List<CAttribute> getDefaultAttributeConstraints(CObject cobject, List<CAttribute> attributes) {
+    private List<CAttribute> getDefaultAttributeConstraints(CObject cObject, List<CAttribute> attributes) {
+        List<CAttribute> result = getDefaultAttributeConstraints(cObject.getRmTypeName(), attributes);
+        for(CAttribute attribute:result) {
+           attribute.setParent(cObject);
+        }
+        return result;
+    }
+
+    private List<CAttribute> getDefaultAttributeConstraints(String rmTypeName, List<CAttribute> attributes) {
         List<CAttribute> result = new ArrayList<>();
         HashSet<String> alreadyConstrainedAttributes = new HashSet<>();
         for (CAttribute attribute : attributes) {
             alreadyConstrainedAttributes.add(attribute.getRmAttributeName());
         }
-        RMTypeInfo typeInfo = this.lookup.getTypeInfo(cobject.getRmTypeName());
-        for (RMAttributeInfo defaultAttribute : typeInfo.getAttributes().values()) {
-            if (!defaultAttribute.isComputed()) {
-                if (!alreadyConstrainedAttributes.contains(defaultAttribute.getRmName())) {
-                    CAttribute attribute = constraintImposer.getDefaultAttribute(cobject.getRmTypeName(), defaultAttribute.getRmName());
-                    attribute.setParent(cobject);
-                    result.add(attribute);
+        RMTypeInfo typeInfo = this.lookup.getTypeInfo(rmTypeName);
+        CComplexObject fakeParent = new CComplexObject();
+        fakeParent.setRmTypeName(rmTypeName);
+        if(typeInfo != null) {
+            for (RMAttributeInfo defaultAttribute : typeInfo.getAttributes().values()) {
+                if (!defaultAttribute.isComputed()) {
+                    if (!alreadyConstrainedAttributes.contains(defaultAttribute.getRmName())) {
+                        CAttribute attribute = constraintImposer.getDefaultAttribute(rmTypeName, defaultAttribute.getRmName());
+                        attribute.setParent(fakeParent);
+                        result.add(attribute);
+                    }
                 }
             }
         }
