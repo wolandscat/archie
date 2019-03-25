@@ -2,11 +2,13 @@ package com.nedap.archie.rm.datavalues;
 
 import com.nedap.archie.rm.RMObject;
 import com.nedap.archie.rm.datatypes.CodePhrase;
+import com.nedap.archie.xml.adapters.TermMappingMatchAdapter;
 
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -26,7 +28,8 @@ public class TermMapping extends RMObject {
      * > = broader term
      * ? = the kind of mapping is unknown
      */
-    private char match = '?';
+    @XmlJavaTypeAdapter(TermMappingMatchAdapter.class)
+    private Character match = '?';
     @Nullable
     private DvCodedText purpose;
     private CodePhrase target;
