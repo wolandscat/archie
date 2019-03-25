@@ -9,6 +9,7 @@ import com.nedap.archie.archetypevalidator.ErrorType;
 import com.nedap.archie.archetypevalidator.ValidatingVisitor;
 import com.nedap.archie.flattener.ArchetypeRepository;
 import com.nedap.archie.rules.Assertion;
+import org.openehr.utils.message.I18n;
 
 import java.util.List;
 
@@ -48,7 +49,8 @@ public class VariousStructureValidation extends ValidatingVisitor {
             CArchetypeRoot archetypeRoot = (CArchetypeRoot) cComplexObject;
             if(archetypeRoot.getArchetypeRef() != null) {
                 if (repository.getArchetype(archetypeRoot.getArchetypeRef()) == null) {
-                    addMessageWithPath(ErrorType.VARXRA, cComplexObject.path(), String.format("archetype with id %s not found", archetypeRoot.getArchetypeRef()));
+                    addMessageWithPath(ErrorType.VARXRA, cComplexObject.path(),
+                            I18n.t("Archetype with id {0} used in use_archetype, but it was not found", archetypeRoot.getArchetypeRef()));
                 }
 
                 ArchetypeHRID hrId = new ArchetypeHRID(archetypeRoot.getArchetypeRef());
@@ -58,14 +60,18 @@ public class VariousStructureValidation extends ValidatingVisitor {
                 if (combinedModels.typeNameExists(archetypeRootTypeName)) {
                     //if parent type info not found will be checked later in phase 2
                     if (!combinedModels.typeNameExists(archetypeReferenceTypeName)) {
-                        addMessageWithPath(ErrorType.VCORM, cComplexObject.getPath(), cComplexObject.getRmTypeName());
+                        addMessageWithPath(ErrorType.VCORM, cComplexObject.getPath(),
+                                I18n.t("Archetype referenced in use_archetype points to class {0}, which does not exist in this reference model", cComplexObject.getRmTypeName()));
                     } else if (!combinedModels.rmTypesConformant(archetypeReferenceTypeName, archetypeRootTypeName)) {
-                        addMessageWithPath(ErrorType.VARXTV, cComplexObject.getPath(), cComplexObject.getRmTypeName());
+                        addMessageWithPath(ErrorType.VARXTV, cComplexObject.getPath(),
+                                I18n.t("use_archetype points to type {0}, which is not conformant for type {1} of the archetype root used",
+                                        cComplexObject.getRmTypeName(), archetypeRootTypeName));
                     }
                 }
             } else {
                 if(!(archetypeRoot.getOccurrences() != null && archetypeRoot.getOccurrences().isProhibited())) {
-                    addMessageWithPath(ErrorType.VARXR, archetypeRoot.getPath(), "archetype root must have an archetype reference or be prohibited (occurrences matches {0})");
+                    addMessageWithPath(ErrorType.VARXR, archetypeRoot.getPath(),
+                            I18n.t("Archetype root must have an archetype reference or be prohibited (occurrences matches 0)"));
                 }
             }
         }

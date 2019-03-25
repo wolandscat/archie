@@ -7,6 +7,7 @@ import com.nedap.archie.aom.utils.AOMUtils;
 import com.nedap.archie.archetypevalidator.ArchetypeValidationBase;
 import com.nedap.archie.archetypevalidator.ErrorType;
 import com.nedap.archie.query.AOMPathQuery;
+import org.openehr.utils.message.I18n;
 
 import java.net.URI;
 import java.util.List;
@@ -35,15 +36,15 @@ public class BasicTerminologyValidation extends ArchetypeValidationBase {
         for(Map<String, ArchetypeTerm> languageSpecificTerminology:archetype.getTerminology().getTermDefinitions().values()) {
             for(ArchetypeTerm term:languageSpecificTerminology.values()) {
                 if(!AOMUtils.isValidCode(term.getCode())) {
-                    addMessage(ErrorType.VATCV, String.format("id code %s in terminology is not valid", term.getCode()));
+                    addMessage(ErrorType.VATCV, I18n.t("Id code {0} in terminology is not a valid term code, should be id, ac or at, followed by digits", term.getCode()));
                 }
                 if(archetype.isDifferential()) {
                     if(terminologySpecialisationDepth != AOMUtils.getSpecializationDepthFromCode(term.getCode())) {
-                        addMessage(ErrorType.VTSD, String.format("id code %s in terminology is of a different specialization depth than the archetype", term.getCode()));
+                        addMessage(ErrorType.VTSD, I18n.t("Id code {0} in terminology is of a different specialization depth than the archetype", term.getCode()));
                     }
                 } else {
                     if(AOMUtils.getSpecializationDepthFromCode(term.getCode()) > terminologySpecialisationDepth) {
-                        addMessage(ErrorType.VTSD, String.format("id code %s in terminology is of a different specialization depth than the archetype", term.getCode()));
+                        addMessage(ErrorType.VTSD, I18n.t("Id code {0} in terminology is of a different specialization depth than the archetype", term.getCode()));
                     }
                 }
             }

@@ -6,8 +6,11 @@ import com.nedap.archie.aom.ResourceAnnotations;
 import com.nedap.archie.aom.utils.AOMUtils;
 import com.nedap.archie.archetypevalidator.ArchetypeValidationBase;
 import com.nedap.archie.archetypevalidator.ErrorType;
+import org.openehr.utils.message.I18n;
 
 import java.util.Map;
+
+
 
 public class AnnotationsValidation extends ArchetypeValidationBase {
 
@@ -27,11 +30,11 @@ public class AnnotationsValidation extends ArchetypeValidationBase {
                         boolean isArchetypePath = AOMUtils.isArchetypePath(path) ; //TODO: NO idea what the eiffel code here suggests it does
                         if(isArchetypePath) {
                             if(!archetype.hasPath(path) || (flatParent != null && !flatParent.hasPath(path))) {
-                                addMessage(ErrorType.VRANP, String.format("annotation with path %s does not exist in flat archetype", path));
+                                addMessage(ErrorType.VRANP, I18n.t("The path {0} referenced in the annotations does not exist in the flat archetype", path));
                             }
                         } else { //TODO: this can also be referencemodel.has_path, but that's not implemented yet
                             if(!combinedModels.hasReferenceModelPath(archetype.getDefinition().getRmTypeName(), path)) {
-                                addMessage(ErrorType.VRANP, String.format("annotation with path %s does not exist in flat archetype", path));
+                                addMessage(ErrorType.VRANP, I18n.t("The path {0} referenced in the annotations does not exist in the flat archetype or reference model", path));
                             }
                         }
 

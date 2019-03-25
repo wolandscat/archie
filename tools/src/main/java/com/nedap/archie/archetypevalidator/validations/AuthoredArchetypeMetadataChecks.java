@@ -5,6 +5,7 @@ import com.nedap.archie.aom.ResourceDescriptionItem;
 import com.nedap.archie.aom.TranslationDetails;
 import com.nedap.archie.archetypevalidator.ArchetypeValidationBase;
 import com.nedap.archie.archetypevalidator.ErrorType;
+import org.openehr.utils.message.I18n;
 
 import java.util.Objects;
 
@@ -33,7 +34,7 @@ public class AuthoredArchetypeMetadataChecks extends ArchetypeValidationBase {
             for(String language:archetype.getDescription().getDetails().keySet()) {
                 ResourceDescriptionItem resourceDescriptionItem = archetype.getDescription().getDetails().get(language);
                 if(resourceDescriptionItem.getLanguage() == null || !Objects.equals(language, resourceDescriptionItem.getLanguage().getCodeString())){
-                    addMessage(ErrorType.VRDLA, String.format("resource description language %s has its key set wrong: %s", language, resourceDescriptionItem.getLanguage() == null ? null : resourceDescriptionItem.getLanguage().getCodeString()));
+                    addMessage(ErrorType.VRDLA, I18n.t("Resource description language {0} has an incorrect key: {1}", language, resourceDescriptionItem.getLanguage() == null ? null : resourceDescriptionItem.getLanguage().getCodeString()));
                 }
 
             }
@@ -45,11 +46,11 @@ public class AuthoredArchetypeMetadataChecks extends ArchetypeValidationBase {
             for(String language:archetype.getTranslations().keySet()) {
                 TranslationDetails translationDetails = archetype.getTranslations().get(language);
                 if(translationDetails.getLanguage() == null || !language.equals(translationDetails.getLanguage().getCodeString())) {
-                    addMessage(ErrorType.VTRLA, String.format("key for language % is wrong: %s", language, translationDetails.getLanguage().getCodeString()));
+                    addMessage(ErrorType.VTRLA, I18n.t("Translation details language {0} has an incorrect key: {1}", language, translationDetails.getLanguage().getCodeString()));
                 }
                 //check if also defined in terminology
                 if(archetype.getTerminology().getTermDefinitions().get(language) == null) {
-                    addMessage(ErrorType.VOTM, String.format("language %s defined in translations, but not defined in terminology", language));
+                    addMessage(ErrorType.VOTM, I18n.t("language {0} is defined in the translations, but is not present in the terminology", language));
                 }
             }
         }
@@ -57,10 +58,10 @@ public class AuthoredArchetypeMetadataChecks extends ArchetypeValidationBase {
 
     private void checkAdlRmVersionIdFormats() {
         if(!isValidVersion(archetype.getAdlVersion())) {
-            addMessage(ErrorType.VARAV, String.format("adl version %s is not valid", archetype.getAdlVersion()));
+            addMessage(ErrorType.VARAV, I18n.t("ADL version {0} is an invalid format for a version, should be x.x.x-(rc|alpha(x)?)?", archetype.getAdlVersion()));
         }
         if(!isValidVersion(archetype.getRmRelease())) {
-            addMessage(ErrorType.VARRV, String.format("rm release version %s is not valid", archetype.getRmRelease()));
+            addMessage(ErrorType.VARRV, I18n.t("RM Release version {0} is an invalid format for a version, should be x.x.x-(rc|alpha(x)?)?", archetype.getRmRelease()));
         }
     }
 
@@ -69,7 +70,7 @@ public class AuthoredArchetypeMetadataChecks extends ArchetypeValidationBase {
             String languageCode = archetype.getOriginalLanguage().getCodeString();;
             if(languageCode != null) {
                 if(archetype.getTerminology().getTermDefinitions().get(languageCode) == null) {
-                    addMessage(ErrorType.VOLT, String.format("original language %s not defined in terminology", languageCode));
+                    addMessage(ErrorType.VOLT, I18n.t("original language {0} is not defined in the terminology", languageCode));
                 }
             }
         } else {

@@ -11,6 +11,7 @@ import com.nedap.archie.archetypevalidator.ErrorType;
 import com.nedap.archie.archetypevalidator.ValidatingVisitor;
 import com.nedap.archie.rminfo.RMAttributeInfo;
 import com.nedap.archie.rminfo.RMTypeInfo;
+import org.openehr.utils.message.I18n;
 
 /**
  * TODO: check that enumeration type constraints use valid literal values (VCORMENV, VCORMENU, VCORMEN);
@@ -27,7 +28,7 @@ public class ValidateAgainstReferenceModel extends ValidatingVisitor {
     protected void validate(CComplexObject cObject) {
 
         if (!combinedModels.typeNameExists(cObject.getRmTypeName())) {
-            addMessageWithPath(ErrorType.VCORM, cObject.getPath(), cObject.getRmTypeName());
+            addMessageWithPath(ErrorType.VCORM, cObject.getPath(), I18n.t("Type name {0} does not exist", cObject.getRmTypeName()));
         } else {
             CAttribute owningAttribute = cObject.getParent();
 
@@ -40,7 +41,8 @@ public class ValidateAgainstReferenceModel extends ValidatingVisitor {
                 if (owningObject != null) {
                     if(!combinedModels.typeConformant(owningObject.getRmTypeName(), owningAttribute.getRmAttributeName(), cObject.getRmTypeName())) {
                         addMessageWithPath(ErrorType.VCORMT, cObject.getPath(),
-                                owningObject.getRmTypeName()  + "." + owningAttribute.getRmAttributeName()+ " cannot contain type " + cObject.getRmTypeName());
+                                I18n.t("Attribute {0}.{1} cannot contain type {2}",
+                                owningObject.getRmTypeName(), owningAttribute.getRmAttributeName(), cObject.getRmTypeName()));
                     }
 
                 }
@@ -55,7 +57,9 @@ public class ValidateAgainstReferenceModel extends ValidatingVisitor {
         if(attribute.getDifferentialPath() == null) {
             CObject parentConstraint = attribute.getParent();
             if(!combinedModels.validatePrimitiveType(parentConstraint.getRmTypeName(), attribute.getRmAttributeName(), cObject)) {
-                addMessage(ErrorType.VCORMT, cObject.path());
+                addMessageWithPath(ErrorType.VCORMT, cObject.path(),
+                        I18n.t("Attribute {0}.{1} cannot be constrained by a {2}",
+                                parentConstraint.getRmTypeName(), attribute.getRmAttributeName(), cObject == null ? null : cObject.getClass().getSimpleName()));
             }
 
             //TODO: we need AOM_PROFILE here instead
@@ -66,7 +70,8 @@ public class ValidateAgainstReferenceModel extends ValidatingVisitor {
                     CAttribute parentAttribute = (CAttribute) differentialPathFromParent;
                     CObject parentConstraint = parentAttribute.getParent();
                     if(!combinedModels.validatePrimitiveType(parentConstraint.getRmTypeName(), parentAttribute.getRmAttributeName(), cObject)) {
-                        addMessage(ErrorType.VCORMT, cObject.path());
+                        I18n.t("Attribute {0}.{1} cannot be constrained by a {2}",
+                                parentConstraint.getRmTypeName(), parentAttribute.getRmAttributeName(), cObject == null ? null : cObject.getClass().getSimpleName());
                     }
                 }
             }
@@ -88,7 +93,8 @@ public class ValidateAgainstReferenceModel extends ValidatingVisitor {
         }
         if(owningObject != null) {
             if (!combinedModels.attributeExists(owningObject.getRmTypeName(), cAttribute.getRmAttributeName())) {
-                addMessageWithPath(ErrorType.VCARM, cAttribute.getPath(), cAttribute.getRmAttributeName() + " is not a known attribute of " + owningObject.getRmTypeName() + " or it is has not been implemented in Archie");
+                addMessageWithPath(ErrorType.VCARM, cAttribute.getPath(),
+                        I18n.t("{0} is not a known attribute of {1}", cAttribute.getRmAttributeName(), owningObject.getRmTypeName()));
             } else {
                 CAttribute defaultAttribute = new ReflectionConstraintImposer(combinedModels).getDefaultAttribute(owningObject.getRmTypeName(), cAttribute.getRmAttributeName());
                 if(defaultAttribute != null) {
@@ -96,13 +102,19 @@ public class ValidateAgainstReferenceModel extends ValidatingVisitor {
                         if(!defaultAttribute.getExistence().contains(cAttribute.getExistence())) {
                             if(!archetype.isSpecialized() && defaultAttribute.getExistence().equals(cAttribute.getExistence())) {
                                 if(settings.isStrictMultiplicitiesSpecializationValidation()) {
-                                    addMessageWithPath(ErrorType.VCAEX, cAttribute.path());
+                                    //TODO: this adds an error if the RM existence is the same as the child existence. WHY!?
+                                    addMessageWithPath(ErrorType.VCAEX, cAttribute.path(),
+                                            I18n.t("The existence of attribute {0}.{1} is the same as in the reference model - this is not allowed due to strict existence validation being enabled",
+                                                    owningObject.getRmTypeName(), cAttribute.getRmAttributeName()));
                                 } else {
                                     //TODO: warn
                                     cAttribute.setExistence(null);
                                 }
                             } else {
-                                addMessageWithPath(ErrorType.VCAEX, cAttribute.path());
+                                addMessageWithPath(ErrorType.VCAEX, cAttribute.path(),
+                                        I18n.t("existence {0} of attribute {2}.{3} does not match existence {1} of the reference model",
+                                                cAttribute.getExistence(), defaultAttribute.getExistence(),
+                                                owningObject.getRmTypeName(), cAttribute.getRmAttributeName()));
                             }
                         }
                     }
@@ -110,18 +122,24 @@ public class ValidateAgainstReferenceModel extends ValidatingVisitor {
                         if(defaultAttribute.getCardinality() != null && cAttribute.getCardinality() != null && !defaultAttribute.getCardinality().contains(cAttribute.getCardinality())){
                             if(defaultAttribute.getCardinality().equals(cAttribute.getCardinality())) {
                                 if(settings.isStrictMultiplicitiesSpecializationValidation()) {
-                                    addMessageWithPath(ErrorType.VCACA, cAttribute.path());
+                                    addMessageWithPath(ErrorType.VCACA, cAttribute.path(),
+                                            I18n.t("The cardinality of Attribute {0}.{1} is the same as in the reference model - this is not allowed due to strict multiplicities validation being enabled",
+                                                    owningObject.getRmTypeName(), cAttribute.getRmAttributeName()));
                                 } else {
-                                    //TODO: warning
+                                    //TODO: warning. Or just don't serialize?
                                     cAttribute.setCardinality(null);
                                 }
                             } else {
-                                addMessageWithPath(ErrorType.VCACA, cAttribute.path());
+                                addMessageWithPath(ErrorType.VCACA, cAttribute.path(),
+                                        I18n.t("cardinality {0} of attribute {2}.{3} does not match cardinality {1} of the reference model",
+                                                cAttribute.getCardinality(), defaultAttribute.getCardinality(),
+                                                owningObject.getRmTypeName(), cAttribute.getRmAttributeName()));
                             }
                         }
                     } else {
                         if(cAttribute.getCardinality() != null) {
-                            addMessageWithPath(ErrorType.VCAM, defaultAttribute.path(), "single valued attributes can not have a cardinality");
+                            addMessageWithPath(ErrorType.VCAM, defaultAttribute.path(),
+                                    I18n.t("single valued attributes can not have a cardinality"));
                         }
                         //TODO: single/multiple validation. but this is not set in parsing and not in archetype, so only useful during editing
                         //this is VCAMm and VCAMs in eiffel code

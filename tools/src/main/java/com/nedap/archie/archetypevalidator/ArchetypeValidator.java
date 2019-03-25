@@ -13,6 +13,7 @@ import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 import com.nedap.archie.flattener.OverridingInMemFullArchetypeRepository;
 import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.rminfo.ReferenceModels;
+import org.openehr.utils.message.I18n;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -184,7 +185,7 @@ public class ArchetypeValidator {
             result.addOverlayValidations(extraArchetypeRepository.getAllValidationResults());
             for(ValidationResult subResult:extraArchetypeRepository.getAllValidationResults()) {
                 if(!subResult.passes()) {
-                    result.getErrors().add(new ValidationMessage(ErrorType.OTHER, MessageFormat.format("template overlay {0} had validation errors", subResult.getArchetypeId())));
+                    result.getErrors().add(new ValidationMessage(ErrorType.OTHER, I18n.t("template overlay {0} had validation errors", subResult.getArchetypeId())));
                 }
             }
         }
