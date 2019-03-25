@@ -46,7 +46,7 @@ public class FlatFormValidation extends ValidatingVisitor {
 
     @Override
     protected void beginValidation() {
-        validateTerminologyBindings();
+        //validateTerminologyBindings();
     }
 
     private void validateTerminologyBindings() {

@@ -107,7 +107,7 @@ public class ArchetypeValidatorTest {
         System.out.println(messages);
         assertEquals(2, messages.size());
         assertEquals(ErrorType.OTHER, messages.get(0).getType());
-        assertTrue("message should complain about tuple members being incorrect", messages.get(0).getMessage().contains("There should be 3 tuple members"));
+        assertTrue("message should complain about tuple members being incorrect", messages.get(0).getMessage().contains("In the attribute tuple 3 members were specified, but the primitive tuple has 2 members instead"));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.nedap.archie.archetypevalidator;
 
 import com.google.common.base.Strings;
+import org.openehr.utils.message.I18n;
 
 /**
  * Created by pieter.bos on 31/03/2017.
@@ -51,11 +52,37 @@ public class ValidationMessage {
     }
 
     public String toString() {
-        String result = type.toString() + " at " + pathInArchetype;
-        if(!Strings.isNullOrEmpty(message)) {
-            result += ": " + message;
+        StringBuilder result = new StringBuilder();
+        if(warning) {
+            result.append(I18n.t("Warning"));
+        } else {
+            result.append(I18n.t("Error"));
         }
-        return result;
+        boolean outputNewLine = false;
+        if(!Strings.isNullOrEmpty(message)) {
+            result.append(": ");
+            result.append(message);
+            result.append("\n");
+            outputNewLine = true;
+        }
+        if(!Strings.isNullOrEmpty(pathInArchetype)) {
+
+            if(!outputNewLine) {
+                result.append(" ");
+            }
+            result.append(I18n.t("at path: "));
+            result.append(pathInArchetype);
+            result.append("\n");
+            outputNewLine = true;
+        }
+        if(!outputNewLine) {
+            result.append(" ");
+        }
+        result.append(type.getCode());
+        result.append(": ");
+        result.append(type.getMessage());
+
+        return result.toString();
     }
 
     public boolean isWarning() {

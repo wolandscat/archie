@@ -207,7 +207,7 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
                     I18n.t("use_archetype {0} does not match the expression of the archetype slot it specialized in the parent", root.getArchetypeRef()));
             return false;
         }
-        
+
         return true;
 
     }
