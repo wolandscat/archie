@@ -63,13 +63,6 @@ public class TemporalConstraintParser extends BaseTreeWalker {
             }
         }
 
-        if(result.getConstraint().size() == 1) {
-            Interval<TemporalAmount> interval = result.getConstraint().get(0);
-            if(interval.getLower() != null && interval.getUpper() != null && interval.getLower().equals(interval.getUpper())) {
-                result.setAssumedValue(interval.getLower());
-            }
-        }
-
         return result;
     }
 
@@ -156,13 +149,6 @@ public class TemporalConstraintParser extends BaseTreeWalker {
         if(context.date_time_interval_list_value() != null) {
             for(Date_time_interval_valueContext intervalListContext:context.date_time_interval_list_value().date_time_interval_value()) {
                 result.addConstraint(parseDateTimeInterval(intervalListContext));
-            }
-        }
-
-        if(result.getConstraint().size() == 1) {
-            Interval<TemporalAccessor> interval = result.getConstraint().get(0);
-            if(interval.getLower() != null && interval.getUpper() != null && interval.getLower().equals(interval.getUpper())) {
-                result.setAssumedValue(interval.getLower());
             }
         }
 
@@ -253,13 +239,6 @@ public class TemporalConstraintParser extends BaseTreeWalker {
             }
         }
 
-        if(result.getConstraint().size() == 1) {
-            Interval<TemporalAccessor> interval = result.getConstraint().get(0);
-            if(interval.getLower() != null && interval.getUpper() != null && interval.getLower().equals(interval.getUpper())) {
-                result.setAssumedValue(interval.getLower());
-            }
-        }
-
         return result;
     }
 
@@ -345,13 +324,6 @@ public class TemporalConstraintParser extends BaseTreeWalker {
         if(context.date_interval_list_value() != null) {
             for(Date_interval_valueContext intervalListContext:context.date_interval_list_value().date_interval_value()) {
                 result.addConstraint(parseDateInterval(intervalListContext));
-            }
-        }
-
-        if(result.getConstraint().size() == 1) {
-            Interval<Temporal> interval = result.getConstraint().get(0);
-            if(interval.getLower() != null && interval.getUpper() != null && interval.getLower().equals(interval.getUpper())) {
-                result.setAssumedValue(interval.getLower());
             }
         }
 
