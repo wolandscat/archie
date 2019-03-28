@@ -163,13 +163,13 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
             if (usedArchetype != null) {
                 if (!repository.isChildOf(repository.getArchetype(parentCObject.getArchetypeRef()), usedArchetype)) {
                     addMessageWithPath(ErrorType.VARXAV, cObject.path(),
-                            I18n.t("use_archetype specializes an archetype root pointing to {0}, but the archetype {1} is not a descendant",
+                            I18n.t("Use_archetype specializes an archetype root pointing to {0}, but the archetype {1} is not a descendant",
                                     parentCObject.getArchetypeRef(), usedArchetype.getArchetypeId()));
                     return false;
                 }
             } else {
                 addMessageWithPath(ErrorType.VARXRA, cObject.path(),
-                        I18n.t("use_archetype references archetype id {0}, but no archetype was found", cObject.getArchetypeRef()));
+                        I18n.t("Use_archetype references archetype id {0}, but no archetype was found", cObject.getArchetypeRef()));
                 return false;
             }
             return true;
@@ -196,7 +196,7 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
 
         if(repository.getArchetype(root.getArchetypeRef()) == null) {
             addMessageWithPath(ErrorType.VARXR, root.path(),
-                    I18n.t("use_archetype references archetype id {0}, but no archetype was found", root.getArchetypeRef()));
+                    I18n.t("Use_archetype references archetype id {0}, but no archetype was found", root.getArchetypeRef()));
             return false;
         } else if (AOMUtils.getSpecializationDepthFromCode(root.getNodeId()) != archetype.specializationDepth()) {
             addMessageWithPath(ErrorType.VARXID, root.getPath(),
@@ -204,7 +204,7 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
             return false;
         } else if (!AOMUtils.archetypeIdMatchesSlotExpression(root.getArchetypeRef(), slot)) {
             addMessageWithPath(ErrorType.VARXS, root.path(),
-                    I18n.t("use_archetype {0} does not match the expression of the archetype slot it specialized in the parent", root.getArchetypeRef()));
+                    I18n.t("Use_archetype {0} does not match the expression of the archetype slot it specialized in the parent", root.getArchetypeRef()));
             return false;
         }
 

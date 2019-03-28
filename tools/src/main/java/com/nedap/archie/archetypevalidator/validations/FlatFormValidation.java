@@ -21,11 +21,11 @@ public class FlatFormValidation extends ValidatingVisitor {
         //validate that CComplexObjectProxy nodes have a valid path
         ComplexObjectProxyReplacement complexObjectProxyReplacement = ComplexObjectProxyReplacement.getComplexObjectProxyReplacement(cObject);
         if(complexObjectProxyReplacement == null) {
-            addMessageWithPath(ErrorType.VUNP, cObject.path(), I18n.t("Use node (C_COMPLEX_OBJECT_PROXY) points to a path that cannot be found: {0}", cObject.getTargetPath()));
+            addMessageWithPath(ErrorType.VUNP, cObject.path(), I18n.t("Use_node (C_COMPLEX_OBJECT_PROXY) points to a path that cannot be found: {0}", cObject.getTargetPath()));
         } else {
             CComplexObject replacement = complexObjectProxyReplacement.getReplacement();
             if(!combinedModels.rmTypesConformant(replacement.getRmTypeName(), cObject.getRmTypeName())) {
-                addMessageWithPath(ErrorType.VUNT, cObject.path(), I18n.t("Use node (C_COMPLEX_OBJECT_PROXY) points to type {0}, which does not conform to type {1}", replacement.getRmTypeName(), cObject.getRmTypeName()));
+                addMessageWithPath(ErrorType.VUNT, cObject.path(), I18n.t("Use_node (C_COMPLEX_OBJECT_PROXY) points to type {0}, which does not conform to type {1}", replacement.getRmTypeName(), cObject.getRmTypeName()));
             }
         }
     }

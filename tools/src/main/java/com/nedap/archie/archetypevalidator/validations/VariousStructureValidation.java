@@ -64,7 +64,7 @@ public class VariousStructureValidation extends ValidatingVisitor {
                                 I18n.t("Archetype referenced in use_archetype points to class {0}, which does not exist in this reference model", cComplexObject.getRmTypeName()));
                     } else if (!combinedModels.rmTypesConformant(archetypeReferenceTypeName, archetypeRootTypeName)) {
                         addMessageWithPath(ErrorType.VARXTV, cComplexObject.getPath(),
-                                I18n.t("use_archetype points to type {0}, which is not conformant for type {1} of the archetype root used",
+                                I18n.t("Use_archetype points to type {0}, which is not conformant for type {1} of the archetype root used",
                                         cComplexObject.getRmTypeName(), archetypeRootTypeName));
                     }
                 }
