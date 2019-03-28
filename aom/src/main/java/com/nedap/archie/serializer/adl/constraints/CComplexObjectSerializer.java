@@ -152,9 +152,13 @@ public class CComplexObjectSerializer<T extends CComplexObject> extends Constrai
     private void appendCardinality(Cardinality card) {
         buildOccurrences(builder, card.getInterval());
         List<String> tags = new ArrayList<>();
+        //TODO: this should compare against the RM and only serialize if different, OR we should make ordered nullable
+        //and add a preprocessor that removes all default values
         if (!card.isOrdered()) {
             tags.add("unordered");
         }
+        //TODO: this should compare against the RM and only serialize if different, OR we should make unique nullable
+        //and add a preprocessor that removes all default values
         if (card.isUnique()) {
             tags.add("unique");
         }
