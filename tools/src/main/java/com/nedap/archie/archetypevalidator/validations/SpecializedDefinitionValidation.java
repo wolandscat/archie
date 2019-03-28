@@ -1,5 +1,6 @@
 package com.nedap.archie.archetypevalidator.validations;
 
+import com.google.common.base.Joiner;
 import com.nedap.archie.aom.*;
 import com.nedap.archie.aom.utils.AOMUtils;
 import com.nedap.archie.aom.utils.NodeIdUtil;
@@ -7,6 +8,7 @@ import com.nedap.archie.aom.utils.CodeRedefinitionStatus;
 import com.nedap.archie.archetypevalidator.ErrorType;
 import com.nedap.archie.archetypevalidator.ValidatingVisitor;
 import com.nedap.archie.rules.Assertion;
+import org.openehr.utils.message.I18n;
 
 import java.util.List;
 
@@ -21,7 +23,8 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
         if(archetype.isSpecialized() && flatParent != null) {
             super.validate();
         } else if (archetype.isSpecialized() && flatParent == null) {
-            addMessage(ErrorType.VASID, "parent archetype not found or can not be flattened");
+            addMessage(ErrorType.VASID,
+                    I18n.t("Parent archetype {0} not found or can not be flattened", archetype.getParentArchetypeId()));
         }
     }
 
@@ -40,7 +43,8 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
         boolean passed = true;
         if(parentCObject == null) {
             //shouldn't happen
-            addMessageWithPath(ErrorType.OTHER, cObject.path(), String.format("Could not find parent object for %s but it should have been prechecked. Could you report this as a bug?", flatPath));
+            addMessageWithPath(ErrorType.OTHER, cObject.path(),
+                    I18n.t("Could not find parent object for {0} but it should have been prechecked. Could you report this as a bug?", flatPath));
             //stop validating if we don't have a parent
             return;
         }
@@ -49,7 +53,9 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
         if(parentCObject instanceof ArchetypeSlot) {
             if(((ArchetypeSlot) parentCObject).isClosed()) {
                 //not in the eiffel code, but is in the spec and makes sense: cannot redefined a closed parent slot
-                addMessageWithPath(ErrorType.VDSSP, cObject.path());
+                addMessageWithPath(ErrorType.VDSSP, cObject.path(),
+                        I18n.t("Cannot redefine a closed archetype slot")
+                        );
                 passed = false;
             }
         }
@@ -58,7 +64,8 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
             if(slot.isClosed() && (hasAssertions(slot.getExcludes()) || hasAssertions(slot.getIncludes()))) {
                 //not in eiffel code, but slot cannot be both closed and narrowed at the same time.
                 //we could make this phase 1, but makes sense here
-                addMessageWithPath(ErrorType.VDSSC, cObject.path());
+                addMessageWithPath(ErrorType.VDSSC, cObject.path(),
+                        I18n.t("A closed archetype slot cannot have its includes or excludes assertions modified"));
                 passed = false;
             }
         }
@@ -75,6 +82,7 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
             if(usedNodeInParent != null) {
                 parentCObject = usedNodeInParent;
             } else {
+                //TODO: what does this mean?
                 addMessageWithPath(ErrorType.VSUNT, cObject.path());//TODO: check that our flattener actually supports this
                 passed = false;
             }
@@ -82,7 +90,9 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
             //any allowed in parent, so fine here!
             passed = true;
         } else if (!cObject.getClass().equals(parentCObject.getClass())) {
-            addMessageWithPath(ErrorType.VSONT, cObject.path());
+            addMessageWithPath(ErrorType.VSONT, cObject.path(),
+                    I18n.t("A {0} cannot specialize a {1}", cObject.getClass().getSimpleName(),
+                            parentCObject.getClass().getSimpleName()));
             passed = false;
         }
 
@@ -99,15 +109,22 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
 
         if(!cObject.cConformsTo(parentCObject, combinedModels::rmTypesConformant)) {
             if(!cObject.typeNameConformsTo(parentCObject, combinedModels::rmTypesConformant)) {
-                addMessageWithPath(ErrorType.VSONCT, cObject.path());
+                addMessageWithPath(ErrorType.VSONCT, cObject.path(),
+                        I18n.t("Type {0} does not conform to type {1} in parent", cObject.getRmTypeName(), parentCObject.getRmTypeName()));
             } else if (!cObject.occurrencesConformsTo(parentCObject)) {
-                addMessageWithPath(ErrorType.VSONCO, cObject.path());
+                addMessageWithPath(ErrorType.VSONCO, cObject.path(),
+                        I18n.t("Occurrences {0} does not conform to occurrences {1} in parent", cObject.getOccurrences(), parentCObject.getOccurrences()));
             } else if (!cObject.nodeIdConformsTo(parentCObject)) {
-                addMessageWithPath(ErrorType.VSONI, cObject.path());
+                addMessageWithPath(ErrorType.VSONI, cObject.path(),
+                        I18n.t("Node ID {0} does not conform to node id {1} in parent", cObject.getNodeId(), parentCObject.getNodeId()));
             } else if (cObject instanceof CPrimitiveObject && parentCObject instanceof CPrimitiveObject) {
-                addMessageWithPath(ErrorType.VPOV, cObject.path());
+                addMessageWithPath(ErrorType.VPOV, cObject.path(),
+                        I18n.t("Primitive object with RM type {0} does not conform to primitive object with RM type {1} in parent",
+                                cObject.getRmTypeName(),
+                                parentCObject.getRmTypeName()));
             } else {
-                addMessageWithPath(ErrorType.VUNK, cObject.path());
+                addMessageWithPath(ErrorType.VUNK, cObject.path(),
+                        I18n.t("Unknown error in conformance of specialized C_OBJECT"));
             }
         } else {
             if (cObject instanceof CComplexObject && parentCObject instanceof  CComplexObject) {
@@ -117,12 +134,16 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
                     for(CAttributeTuple tuple:cComplexObject.getAttributeTuples()) {
                         CAttributeTuple matchingTuple = AOMUtils.findMatchingTuple(parentCComplexObject.getAttributeTuples(), tuple);
                         if(matchingTuple != null && ! tuple.cConformsTo(matchingTuple, combinedModels::rmTypesConformant)) {
-                            addMessageWithPath(ErrorType.VTPNC, cObject.path());
+
+                            //tuple does not conform
+                            addMessageWithPath(ErrorType.VTPNC, cObject.path(),
+                                    I18n.t("Attribute tuple with members {0} does not conform to parent attribute tuple", Joiner.on(", ").join(tuple.getMemberNames())));
                         } else {
                             for(CAttribute attribute:tuple.getMembers()) {
                                 CAttribute parentAttribute = parentCComplexObject.getAttribute(attribute.getRmAttributeName());
                                 if(parentAttribute != null  && parentAttribute.getSocParent() == null) {
-                                    addMessageWithPath(ErrorType.VTPIN, attribute.getPath());
+                                    addMessageWithPath(ErrorType.VTPIN, attribute.getPath(),
+                                            I18n.t("Attribute {0} is a non-tuple attribute in the parent archetype, but a tuple attribute in the current archetype. That is not allowed", attribute.getRmAttributeName()));
                                 }
                             }
                         }
@@ -141,11 +162,14 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
             Archetype usedArchetype = repository.getArchetype(cObject.getArchetypeRef());
             if (usedArchetype != null) {
                 if (!repository.isChildOf(repository.getArchetype(parentCObject.getArchetypeRef()), usedArchetype)) {
-                    addMessage(ErrorType.VARXAV, cObject.path());
+                    addMessageWithPath(ErrorType.VARXAV, cObject.path(),
+                            I18n.t("Use_archetype specializes an archetype root pointing to {0}, but the archetype {1} is not a descendant",
+                                    parentCObject.getArchetypeRef(), usedArchetype.getArchetypeId()));
                     return false;
                 }
             } else {
-                addMessageWithPath(ErrorType.VARXRA, cObject.path());
+                addMessageWithPath(ErrorType.VARXRA, cObject.path(),
+                        I18n.t("Use_archetype references archetype id {0}, but no archetype was found", cObject.getArchetypeRef()));
                 return false;
             }
             return true;
@@ -154,7 +178,9 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
 
     private boolean validateSlotSpecializedWithSlot(ArchetypeSlot parentCObject, ArchetypeSlot cObject) {
         if(!parentCObject.getNodeId().equals(cObject.getNodeId())) {
-            addMessageWithPath(ErrorType.VDSSID, cObject.path());
+            addMessageWithPath(ErrorType.VDSSID, cObject.path(),
+                    I18n.t("A specialized archetype slot must have the same id as the parent id {0}, but it was {1}",
+                            parentCObject.getNodeId(), cObject.getNodeId()));
             return false;
         }
         return true;
@@ -162,19 +188,26 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
 
     private boolean validateSlotSpecializedWithRoot(ArchetypeSlot slot, CArchetypeRoot root) {
         if(!rootMatchesSlotType(slot, root)) {
-            addMessageWithPath(ErrorType.VARXS, root.path());
+            addMessageWithPath(ErrorType.VARXS, root.path(),
+                    I18n.t("The use_archetype with type {0} does not match the archetype slow (allow_archetype) with type {1}",
+                            slot.getRmTypeName(), root.getRmTypeName()));
             return false;
         }
+
         if(repository.getArchetype(root.getArchetypeRef()) == null) {
-            addMessageWithPath(ErrorType.VARXR, root.path());
+            addMessageWithPath(ErrorType.VARXR, root.path(),
+                    I18n.t("Use_archetype references archetype id {0}, but no archetype was found", root.getArchetypeRef()));
             return false;
         } else if (AOMUtils.getSpecializationDepthFromCode(root.getNodeId()) != archetype.specializationDepth()) {
-            addMessageWithPath(ErrorType.VARXID, root.getPath());
+            addMessageWithPath(ErrorType.VARXID, root.getPath(),
+                    I18n.t("Node ID {0} specialization depth does not conform to the archetype specialization depth {1}", root.getNodeId(), archetype.specializationDepth()));
             return false;
         } else if (!AOMUtils.archetypeIdMatchesSlotExpression(root.getArchetypeRef(), slot)) {
-            addMessageWithPath(ErrorType.VARXS, root.path());
+            addMessageWithPath(ErrorType.VARXS, root.path(),
+                    I18n.t("Use_archetype {0} does not match the expression of the archetype slot it specialized in the parent", root.getArchetypeRef()));
             return false;
         }
+
         return true;
 
     }
@@ -212,16 +245,23 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
                     if(parentCObject != null) {
                         if(cObject.isProhibited()) {
                             if(!cObject.getClass().equals(parentCObject.getClass())) {
-                                addMessage(ErrorType.VSONPT, cObject.path());
+                                addMessageWithPath(ErrorType.VSONPT, cObject.path(),
+                                        I18n.t("C_OBJECT in this archetype with class {0} is prohibited, which means its class must be the same as parent type {1}",
+                                                cObject.getClass().getSimpleName(), parentCObject.getClass().getSimpleName()));
                             } else if(!parentCObject.getNodeId().equals(cObject.getNodeId())) {
-                                addMessage(ErrorType.VSONPI, cObject.path());
+                                addMessageWithPath(ErrorType.VSONPI, cObject.path(),
+                                        I18n.t("C_OBJECT in this archetype with node id {0} is prohibited, which means its node id must be the same as parent {1}",
+                                                cObject.getNodeId(), parentCObject.getNodeId()));
                             }
                         }
                     } else if(!(cObject instanceof CPrimitiveObject)) {
-                        addMessage(ErrorType.VSONIN, cObject.path());
+                        addMessageWithPath(ErrorType.VSONIN, cObject.path(),
+                                I18n.t("Node id {0} is not valid here", cObject.getNodeId())
+                                );
                     }
                 } else if(AOMUtils.getSpecialisationStatusFromCode(cObject.getNodeId(), cObject.specialisationDepth()) == CodeRedefinitionStatus.REDEFINED) {
-                    addMessage(ErrorType.VSONIN, cObject.path());
+                    addMessageWithPath(ErrorType.VSONIN, cObject.path(),
+                            I18n.t("Node id {0} is not valid here because it redefines an object illegally", cObject.getNodeId()));
                 }
             } else {
                 //special checks if it is a non-overlay node...
@@ -233,15 +273,16 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
                         CObject child = parentAttribute.getChild(cObject.getSiblingOrder().getSiblingNodeId());
                         CObject child2 = parentAttribute.getChild(AOMUtils.codeAtLevel(cObject.getSiblingOrder().getSiblingNodeId(), flatParent.specializationDepth()));
                         if (child == null && child2 == null) {
-                            addMessage(ErrorType.VSSM, cObject.path());
+                            addMessageWithPath(ErrorType.VSSM, cObject.path(),
+                                I18n.t("Sibling order {0} refers to missing node id", cObject.getSiblingOrder()));
                         }
                     }
                 }
 
                 if(cObject.isProhibited()) {
                     //should be 'attribute_at_path'
-
-                    addMessage(ErrorType.VSONPO, cObject.path());
+                    addMessageWithPath(ErrorType.VSONPO, cObject.path(),
+                            I18n.t("An object with the new node id {0} cannot be prohibited", cObject.getNodeId()));
                 }
             }
         }//else in eiffel code is separate cattribute method here
@@ -260,16 +301,12 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
         return null;
     }
 
-
     @Override
     public void validate(CAttribute attribute) {
         SpecializedAttributeValidation specializedAttributeValidation = new SpecializedAttributeValidation();
         if(specializedAttributeValidation.validateTest(attribute, this)) {
             specializedAttributeValidation.validate(attribute, this);
         }
-
-
     }
-
 
 }

@@ -3,6 +3,7 @@ package com.nedap.archie.archetypevalidator.validations;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.archetypevalidator.ArchetypeValidationBase;
 import com.nedap.archie.archetypevalidator.ErrorType;
+import org.openehr.utils.message.I18n;
 
 import java.util.Objects;
 
@@ -28,7 +29,7 @@ public class BasicChecks extends ArchetypeValidationBase {
                 int parentNodeIdSpecialisationDepth = parent.getDefinition().specialisationDepth();
                 int nodeIdSpecialisationDepth = archetype.getDefinition().specialisationDepth();
                 if(parentNodeIdSpecialisationDepth != nodeIdSpecialisationDepth -1) {
-                    addMessage(ErrorType.VACSD,"The specialisation depth of the archetypes must be one greater than the specialisation depth of the parent archetype");
+                    addMessage(ErrorType.VACSD, I18n.t("The specialisation depth of the archetype, {0}, must be one greater than the specialisation depth of the parent archetype, {1}", nodeIdSpecialisationDepth, parentNodeIdSpecialisationDepth));
                 }
             }
         }
@@ -37,19 +38,19 @@ public class BasicChecks extends ArchetypeValidationBase {
     private void checkMissingTerminology() {
         //missing mandatory parts are checked in grammar, but check here as well
         if(archetype.getTerminology() == null) {
-            addMessage(ErrorType.STCNT, "archetype terminology missing");
+            addMessage(ErrorType.STCNT, I18n.t("Archetype terminology not defined"));
         } else if(archetype.getTerminology().getTermDefinitions().isEmpty()) {
-            addMessage(ErrorType.STCNT,"archetype terminology contains no term definitions");
+            addMessage(ErrorType.STCNT,I18n.t("Archetype terminology contains no term definitions"));
         }
     }
 
     private void checkIdCodeSpecialisationLevel() {
         int depth = ValidationUtils.getSpecializationDepth(archetype, repository);
         if(depth != archetype.getDefinition().specialisationDepth()) {
-            addMessage(ErrorType.VARCN);
+            addMessage(ErrorType.VARCN, I18n.t("Incorrect root node id {0}: it must match the specialization depth of the archetype, which is {1}", archetype.getDefinition().getNodeId(), depth));
         }
         if(!archetype.getDefinition().getNodeId().matches("id1(.1)*")) {
-            addMessage(ErrorType.VARCN, archetype.getDefinition().getNodeId());
+            addMessage(ErrorType.VARCN, I18n.t("The node id is not in the form id1.1....1: {0}", archetype.getDefinition().getNodeId()));
         }
     }
 

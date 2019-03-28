@@ -9,6 +9,7 @@ import com.nedap.archie.archetypevalidator.ErrorType;
 import com.nedap.archie.archetypevalidator.ValidatingVisitor;
 import com.nedap.archie.paths.PathSegment;
 import com.nedap.archie.query.APathQuery;
+import org.openehr.utils.message.I18n;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class DefinitionStructureValidation extends ValidatingVisitor {
         if (cAttribute.getDifferentialPath() != null) {
             if (archetype.getParentArchetypeId() == null) {
                 //differential paths can only occur in specialized archetypes, so not in this one
-                addMessage(ErrorType.VDIFV, cAttribute.path());
+                addMessageWithPath(ErrorType.VDIFV, cAttribute.path(), I18n.t("A differential path was used in an attribute, but this is not allowed in an archetype that has no parent"));
             } else if (repository != null) {
                 if (flatParent != null) {
                     //adl workbench deviates from spec by only allowing differential paths at root, we allow them everywhere, according to spec
@@ -62,7 +63,8 @@ public class DefinitionStructureValidation extends ValidatingVisitor {
                             }
                         }
                     } else if (!(differentialPathInParent instanceof CAttribute)) {
-                        addMessageWithPath(ErrorType.VDIFP, cAttribute.getDifferentialPath(), "differential path must point to an attribute in the flat parent, but it pointed instead to a " + differentialPathInParent.getClass());
+                        addMessageWithPath(ErrorType.VDIFP, cAttribute.getDifferentialPath(),
+                                I18n.t("Differential path must point to a C_ATTRIBUTE in the flat parent, but it pointed instead to a {0}",  differentialPathInParent.getClass()));
                     }
                 }
             }
@@ -70,6 +72,6 @@ public class DefinitionStructureValidation extends ValidatingVisitor {
     }
 
     private void addPathNotFoundInParentError(CAttribute cAttribute) {
-        addMessageWithPath(ErrorType.VDIFP, cAttribute.getDifferentialPath());
+        addMessageWithPath(ErrorType.VDIFP, cAttribute.getPath(), I18n.t("Differential path {0} was not found in the parent archetype", cAttribute.getDifferentialPath()));
     }
 }

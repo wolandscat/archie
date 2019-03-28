@@ -4,6 +4,7 @@ import com.nedap.archie.aom.CAttribute;
 import com.nedap.archie.aom.CComplexObject;
 import com.nedap.archie.archetypevalidator.ErrorType;
 import com.nedap.archie.archetypevalidator.ValidatingVisitor;
+import org.openehr.utils.message.I18n;
 
 import java.util.HashSet;
 
@@ -26,7 +27,7 @@ public class AttributeUniquenessValidation extends ValidatingVisitor {
                 continue;
             }
             if (attributeNames.contains(attribute.getRmAttributeName())) {
-                addMessageWithPath(ErrorType.VCATU, attribute.getPath());
+                addMessageWithPath(ErrorType.VCATU, attribute.getPath(), I18n.t("Duplicate attribute constraint with name {0}", attribute.getRmAttributeName()));
             }
             attributeNames.add(attribute.getRmAttributeName());
         }

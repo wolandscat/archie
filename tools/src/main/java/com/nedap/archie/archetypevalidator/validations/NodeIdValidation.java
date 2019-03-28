@@ -4,6 +4,7 @@ import com.nedap.archie.aom.CObject;
 import com.nedap.archie.aom.CPrimitiveObject;
 import com.nedap.archie.archetypevalidator.ErrorType;
 import com.nedap.archie.archetypevalidator.ValidatingVisitor;
+import org.openehr.utils.message.I18n;
 
 import java.util.HashMap;
 
@@ -30,11 +31,12 @@ public class NodeIdValidation extends ValidatingVisitor {
     public void validate(CObject cObject) {
         if(cObject.getNodeId() == null) {
             //every object must have a node id
-            addMessageWithPath(ErrorType.VCOID, cObject.getPath());
+            addMessageWithPath(ErrorType.VCOID, cObject.getPath(),
+                    I18n.t("C_OBJECT with RM type {0} must have a node id", cObject.getRmTypeName()));
         }
         else if(!CPrimitiveObject.PRIMITIVE_NODE_ID_VALUE.equals(cObject.getNodeId()) && nodeIds.containsKey(cObject.getNodeId())) {
             //every node id in a single archetype must be unique or a primitive object
-            addMessageWithPath(ErrorType.VCOSU, cObject.getPath(), "node ID " + cObject.getNodeId() + " already used in " + nodeIds.get(cObject.getNodeId()));
+            addMessageWithPath(ErrorType.VCOSU, cObject.getPath(), I18n.t("Node id {0} already used in path {1}", cObject.getNodeId(), nodeIds.get(cObject.getNodeId())));
         }
         nodeIds.put(cObject.getNodeId(), cObject.getPath());
     }
