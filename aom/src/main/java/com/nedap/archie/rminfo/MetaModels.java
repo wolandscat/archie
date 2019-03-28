@@ -121,18 +121,24 @@ public class MetaModels implements MetaModelInterface {
             selectedBmmModel = validationResult == null ? null : validationResult.getModel();
         }
 
-        for(AomProfile profile:aomProfiles.getProfiles()) {
-            if(profile.getProfileName().equalsIgnoreCase(rmPublisher)) {
-                this.selectedAomProfile = profile;
-                break;
-            }
-        }
+        selectAomProfile(selectedBmmModel, rmPublisher);
 
         if(selectedModel == null && selectedBmmModel == null) {
             throw new ModelNotFoundException(String.format("model for %s.%s version %s not found", rmPublisher, rmPackage, rmRelease));
         }
         this.selectedModel = new MetaModel(selectedModel, selectedBmmModel, selectedAomProfile);
 
+    }
+
+    private void selectAomProfile(BmmModel selectedBmmModel, String rmPublisher) {
+        for(AomProfile profile:aomProfiles.getProfiles()) {
+            if((selectedBmmModel != null && profile.getRmSchemaPattern().stream().anyMatch(pat -> selectedBmmModel.getSchemaId().matches(pat))
+            ) || profile.getProfileName().equalsIgnoreCase(rmPublisher)
+                ) {
+                this.selectedAomProfile = profile;
+                break;
+            }
+        }
     }
 
     public ModelInfoLookup getSelectedModelInfoLookup() {
