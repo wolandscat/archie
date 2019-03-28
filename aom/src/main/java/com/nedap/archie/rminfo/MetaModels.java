@@ -121,18 +121,37 @@ public class MetaModels implements MetaModelInterface {
             selectedBmmModel = validationResult == null ? null : validationResult.getModel();
         }
 
-        for(AomProfile profile:aomProfiles.getProfiles()) {
-            if(profile.getProfileName().equalsIgnoreCase(rmPublisher)) {
-                this.selectedAomProfile = profile;
-                break;
-            }
+        AomProfile profile = getAomProfileWithSchemaId(selectedBmmModel);
+        if(profile == null) {
+            profile = getAomProfileOnPublisher(rmPublisher);
         }
+        this.selectedAomProfile = profile;
 
         if(selectedModel == null && selectedBmmModel == null) {
             throw new ModelNotFoundException(String.format("model for %s.%s version %s not found", rmPublisher, rmPackage, rmRelease));
         }
         this.selectedModel = new MetaModel(selectedModel, selectedBmmModel, selectedAomProfile);
 
+    }
+
+    private AomProfile getAomProfileWithSchemaId(BmmModel selectedBmmModel) {
+        if(selectedBmmModel != null) {
+            for (AomProfile profile : aomProfiles.getProfiles()) {
+                if (profile.getRmSchemaPattern().stream().anyMatch(pat -> selectedBmmModel.getSchemaId().matches(pat))) {
+                    return this.selectedAomProfile = profile;
+                }
+            }
+        }
+        return null;
+    }
+
+    private AomProfile getAomProfileOnPublisher(String rmPublisher) {
+        for(AomProfile profile:aomProfiles.getProfiles()) {
+           if(profile.getProfileName().equalsIgnoreCase(rmPublisher)) {
+                return this.selectedAomProfile = profile;
+            }
+        }
+        return null;
     }
 
     public ModelInfoLookup getSelectedModelInfoLookup() {
