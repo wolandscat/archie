@@ -32,11 +32,11 @@ public class NodeIdValidation extends ValidatingVisitor {
         if(cObject.getNodeId() == null) {
             //every object must have a node id
             addMessageWithPath(ErrorType.VCOID, cObject.getPath(),
-                    I18n.t("C_Object with RM type {0} must have a node id", cObject.getRmTypeName()));
+                    I18n.t("C_OBJECT with RM type {0} must have a node id", cObject.getRmTypeName()));
         }
         else if(!CPrimitiveObject.PRIMITIVE_NODE_ID_VALUE.equals(cObject.getNodeId()) && nodeIds.containsKey(cObject.getNodeId())) {
             //every node id in a single archetype must be unique or a primitive object
-            addMessageWithPath(ErrorType.VCOSU, cObject.getPath(), I18n.t("node ID {0} already used in path {1}", cObject.getNodeId(), nodeIds.get(cObject.getNodeId())));
+            addMessageWithPath(ErrorType.VCOSU, cObject.getPath(), I18n.t("Node id {0} already used in path {1}", cObject.getNodeId(), nodeIds.get(cObject.getNodeId())));
         }
         nodeIds.put(cObject.getNodeId(), cObject.getPath());
     }

@@ -112,7 +112,7 @@ public class ValidateAgainstReferenceModel extends ValidatingVisitor {
                                 }
                             } else {
                                 addMessageWithPath(ErrorType.VCAEX, cAttribute.path(),
-                                        I18n.t("existence {0} of attribute {2}.{3} does not match existence {1} of the reference model",
+                                        I18n.t("The existence {0} of attribute {2}.{3} does not match existence {1} of the reference model",
                                                 cAttribute.getExistence(), defaultAttribute.getExistence(),
                                                 owningObject.getRmTypeName(), cAttribute.getRmAttributeName()));
                             }
@@ -131,7 +131,7 @@ public class ValidateAgainstReferenceModel extends ValidatingVisitor {
                                 }
                             } else {
                                 addMessageWithPath(ErrorType.VCACA, cAttribute.path(),
-                                        I18n.t("cardinality {0} of attribute {2}.{3} does not match cardinality {1} of the reference model",
+                                        I18n.t("The cardinality {0} of attribute {2}.{3} does not match cardinality {1} of the reference model",
                                                 cAttribute.getCardinality(), defaultAttribute.getCardinality(),
                                                 owningObject.getRmTypeName(), cAttribute.getRmAttributeName()));
                             }
@@ -139,7 +139,7 @@ public class ValidateAgainstReferenceModel extends ValidatingVisitor {
                     } else {
                         if(cAttribute.getCardinality() != null) {
                             addMessageWithPath(ErrorType.VCAM, defaultAttribute.path(),
-                                    I18n.t("single valued attributes can not have a cardinality"));
+                                    I18n.t("Single valued attributes can not have a cardinality"));
                         }
                         //TODO: single/multiple validation. but this is not set in parsing and not in archetype, so only useful during editing
                         //this is VCAMm and VCAMs in eiffel code

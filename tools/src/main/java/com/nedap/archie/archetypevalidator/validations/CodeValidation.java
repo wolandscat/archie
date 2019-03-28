@@ -30,13 +30,13 @@ public class CodeValidation extends ValidatingVisitor {
         int archetypeSpecializationDepth = archetype.specializationDepth();
         if(codeSpecializationDepth > archetypeSpecializationDepth) {
             addMessageWithPath(ErrorType.VTSD, cObject.path(),
-                    I18n.t("code specialization depth of code {0} is {1}, which is greater than archetype specialization depth {2}",
+                    I18n.t("The code specialization depth of code {0} is {1}, which is greater than archetype specialization depth {2}",
                             nodeId, codeSpecializationDepth, archetypeSpecializationDepth));
         } else if (cObject.isRoot() || parentIsMultiple(cObject)) {
             if( (codeSpecializationDepth < archetypeSpecializationDepth && !flatParent.getTerminology().hasIdCode(nodeId)) ||
                     (codeSpecializationDepth == archetypeSpecializationDepth &&  !archetype.getTerminology().hasIdCode(nodeId))) {
                 addMessageWithPath(ErrorType.VATID, cObject.path(),
-                        I18n.t("node id {0} is used in the archetype, but missing in the terminology", nodeId));
+                        I18n.t("Node id {0} is used in the archetype, but missing in the terminology", nodeId));
             }
         }
     }

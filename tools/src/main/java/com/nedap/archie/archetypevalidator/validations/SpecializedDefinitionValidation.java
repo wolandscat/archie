@@ -119,7 +119,7 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
                         I18n.t("Node ID {0} does not conform to node id {1} in parent", cObject.getNodeId(), parentCObject.getNodeId()));
             } else if (cObject instanceof CPrimitiveObject && parentCObject instanceof CPrimitiveObject) {
                 addMessageWithPath(ErrorType.VPOV, cObject.path(),
-                        I18n.t("Primitive object with rm type {0} does not conform to primitive object with rm type {1} in parent",
+                        I18n.t("Primitive object with RM type {0} does not conform to primitive object with RM type {1} in parent",
                                 cObject.getRmTypeName(),
                                 parentCObject.getRmTypeName()));
             } else {

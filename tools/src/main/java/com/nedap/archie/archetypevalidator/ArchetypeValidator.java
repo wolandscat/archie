@@ -185,7 +185,7 @@ public class ArchetypeValidator {
             result.addOverlayValidations(extraArchetypeRepository.getAllValidationResults());
             for(ValidationResult subResult:extraArchetypeRepository.getAllValidationResults()) {
                 if(!subResult.passes()) {
-                    result.getErrors().add(new ValidationMessage(ErrorType.OTHER, I18n.t("template overlay {0} had validation errors", subResult.getArchetypeId())));
+                    result.getErrors().add(new ValidationMessage(ErrorType.OTHER, I18n.t("Template overlay {0} had validation errors", subResult.getArchetypeId())));
                 }
             }
         }

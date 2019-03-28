@@ -50,7 +50,7 @@ public class BasicChecks extends ArchetypeValidationBase {
             addMessage(ErrorType.VARCN, I18n.t("Incorrect root node id {0}: it must match the specialization depth of the archetype, which is {1}", archetype.getDefinition().getNodeId(), depth));
         }
         if(!archetype.getDefinition().getNodeId().matches("id1(.1)*")) {
-            addMessage(ErrorType.VARCN, I18n.t("the node id is not in the form id1.1....1: {0}", archetype.getDefinition().getNodeId()));
+            addMessage(ErrorType.VARCN, I18n.t("The node id is not in the form id1.1....1: {0}", archetype.getDefinition().getNodeId()));
         }
     }
 

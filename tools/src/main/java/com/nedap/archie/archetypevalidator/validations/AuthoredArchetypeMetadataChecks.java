@@ -50,7 +50,7 @@ public class AuthoredArchetypeMetadataChecks extends ArchetypeValidationBase {
                 }
                 //check if also defined in terminology
                 if(archetype.getTerminology().getTermDefinitions().get(language) == null) {
-                    addMessage(ErrorType.VOTM, I18n.t("language {0} is defined in the translations, but is not present in the terminology", language));
+                    addMessage(ErrorType.VOTM, I18n.t("Language {0} is defined in the translations, but is not present in the terminology", language));
                 }
             }
         }
@@ -70,7 +70,7 @@ public class AuthoredArchetypeMetadataChecks extends ArchetypeValidationBase {
             String languageCode = archetype.getOriginalLanguage().getCodeString();;
             if(languageCode != null) {
                 if(archetype.getTerminology().getTermDefinitions().get(languageCode) == null) {
-                    addMessage(ErrorType.VOLT, I18n.t("original language {0} is not defined in the terminology", languageCode));
+                    addMessage(ErrorType.VOLT, I18n.t("Original language {0} is not defined in the terminology", languageCode));
                 }
             }
         } else {

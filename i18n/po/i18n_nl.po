@@ -42,7 +42,7 @@ msgstr "Een {0} kan niet een {1} specialiseren"
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/validations/AuthoredArchetypeMetadataChecks.java:61
 #, java-format
 msgid "ADL version {0} is an invalid format for a version, should be x.x.x-(rc|alpha(x)?)?"
-msgstr "ADL versie {0} is in een incorrect formaat. Dit zou een versie in het formaat x.x.x-(rc|alpha(x)?)? moeten zijn"
+msgstr "ADL-versie {0} is in een incorrect formaat. Dit zou een versie in het formaat x.x.x-(rc|alpha(x)?)? moeten zijn"
 
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/validations/SpecializedDefinitionValidation.java:285
 #, java-format
@@ -138,7 +138,7 @@ msgstr "Fout bij het laden van een BMM schema"
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/validations/SpecializedDefinitionValidation.java:249
 #, java-format
 msgid "C_OBJECT in this archetype with class {0} is prohibited, which means its class must be the same as parent type {1}"
-msgstr "Het C_OBJECT  in dit archetype met klasse {0} heeft 0 als maximum occurrences (prohibited), maar heeft niet dezelfde klasse als het C_OBJECT dat gespecializeerd wordt: {1}"
+msgstr "Het C_OBJECT in dit archetype met klasse {0} heeft 0 als maximum occurrences (prohibited), maar heeft niet dezelfde klasse als het C_OBJECT dat gespecializeerd wordt: {1}"
 
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/validations/SpecializedDefinitionValidation.java:253
 #, java-format
@@ -173,7 +173,7 @@ msgstr "Code {0} van deze C_TERMINOLOGY_CODE bestaat niet in de terminology"
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/validations/SpecializedDefinitionValidation.java:47
 #, java-format
 msgid "Could not find parent object for {0} but it should have been prechecked. Could you report this as a bug?"
-msgstr "Kan parent object voor {0} niet vinden. Deze melding is waarschijnlijk een bug, zou U dat kunnen melden?"
+msgstr "Kan parent object voor {0} niet vinden. Deze melding is waarschijnlijk een bug, zou u dat kunnen melden?"
 
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/validations/DefinitionStructureValidation.java:67
 #, java-format
@@ -260,7 +260,7 @@ msgstr ""
 #: ../bmm/src/main/java/org/openehr/bmm/persistence/validation/BmmMessageIds.java:37
 #, java-format
 msgid "No Reference Model schema found for package ''{0}''"
-msgstr "Geen reference model schema gevonden voor package “{0}”"
+msgstr "Geen referentiemodel-schema gevonden voor package “{0}”"
 
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/validations/SpecializedDefinitionValidation.java:119
 #, java-format
@@ -314,7 +314,7 @@ msgstr "Primitive object met rm type {0} klopt niet bij primitive object met rm 
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/validations/AuthoredArchetypeMetadataChecks.java:64
 #, java-format
 msgid "RM Release version {0} is an invalid format for a version, should be x.x.x-(rc|alpha(x)?)?"
-msgstr "Het formaat van de rm release version {0} klopt niet. dit moet in het formaat  x.x.x-(rc|alpha(x)?)? zijn"
+msgstr "Het formaat van de RM release version {0} klopt niet. dit moet in het formaat  x.x.x-(rc|alpha(x)?)? zijn"
 
 #: ../bmm/src/main/java/org/openehr/bmm/persistence/validation/BmmMessageIds.java:46
 #, java-format
@@ -639,7 +639,7 @@ msgstr "Het attribuut {0} van type {1} kan maar één waarde hebben, maar de occ
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/validations/ValidateAgainstReferenceModel.java:126
 #, java-format
 msgid "The cardinality of Attribute {0}.{1} is the same as in the reference model - this is not allowed due to strict multiplicities validation being enabled"
-msgstr "De cardinaliteit van attirbuut {0}.{1} is hetzelfde als in het referentie model. Dit is niet toegestaan als strikte validatie is ingeschakeld"
+msgstr "De cardinaliteit van attribuut {0}.{1} is hetzelfde als in het referentiemodel. Dit is niet toegestaan als strikte validatie is ingeschakeld"
 
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/validations/ValidateAgainstReferenceModel.java:107
 #, java-format
@@ -677,11 +677,11 @@ msgstr ""
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/validations/BasicChecks.java:32
 #, java-format
 msgid "The specialisation depth of the archetype, {0}, must be one greater than the specialisation depth of the parent archetype, {1}"
-msgstr "De specialisatie depth van het archetype, {0}, moet één groter zijn dan die van het gespecialiseerde archetype, {1}"
+msgstr "De specialisation depth van het archetype, {0}, moet één groter zijn dan die van het gespecialiseerde archetype, {1}"
 
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/ErrorType.java:28
 msgid "The specialisation depth of the archetypes must be one greater than the specialisation depth of the parent archetype"
-msgstr "De specialisatie depth van het archetype moet één groter zijn dan die van het gespecialiseerde archetype"
+msgstr "De specialisation depth van het archetype moet één groter zijn dan die van het gespecialiseerde archetype"
 
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/validations/SpecializedDefinitionValidation.java:192
 #, java-format
@@ -810,7 +810,7 @@ msgstr "maximaal {0}"
 
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/ValidationMessage.java:73
 msgid "at path: "
-msgstr "o\\p het pad: "
+msgstr "op het pad: "
 
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/ErrorType.java:14
 msgid "attribute name reference model validity: an attribute name introducing an attribute constraint block must be defined in the underlying information model as an attribute (stored or computed) of the type which introduces the enclosing object block"
@@ -1063,7 +1063,7 @@ msgstr "use_archetype {1} specialiseert een andere use_archetype die verwijst na
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/validations/SpecializedDefinitionValidation.java:207
 #, java-format
 msgid "use_archetype {0} does not match the expression of the archetype slot it specialized in the parent"
-msgstr "use_archetype {0} komt niet overeen met de restricties van het archetype slot dat het specialiseert"
+msgstr "Use_archetype {0} komt niet overeen met de restricties van het archetype slot dat het specialiseert"
 
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/ErrorType.java:77
 msgid "use_node path validity: the path mentioned in a use_node statement must refer to an object node defined elsewhere in the same archetype or any of its specialisation parent archetypes, that is not itself an internal reference node, and which carries a node identifier if one is needed at the reference point."
