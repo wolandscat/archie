@@ -26,9 +26,9 @@ public class BuiltInReferenceModelsTest {
             System.out.println(validation.getLogger().toString());
 
         }
-        assertEquals(34, bmmRepository.getPersistentSchemas().size());
-        assertEquals(34, bmmRepository.getModels().size());
-        assertEquals(29, bmmRepository.getValidModels().size());
+        assertEquals(35, bmmRepository.getPersistentSchemas().size());
+        assertEquals(35, bmmRepository.getModels().size());
+        assertEquals(30, bmmRepository.getValidModels().size());
         assertEquals(5, bmmRepository.getInvalidModels().size());
     }
 
