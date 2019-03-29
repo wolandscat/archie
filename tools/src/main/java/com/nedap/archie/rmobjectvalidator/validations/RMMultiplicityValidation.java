@@ -28,7 +28,9 @@ public class RMMultiplicityValidation {
             MultiplicityInterval existence = attribute.getExistence();
             if (existence != null) {
                 if (!existence.has(attributeValue == null ? 0 : 1)) {
-                    String message = RMObjectValidationMessageIds.rm_EXISTENCE_MISMATCH.getMessage(attribute.getRmAttributeName(), attribute.getParent() == null ? "TODO:typename" : attribute.getParent().getRmTypeName(), existence.toString());
+                    String message = RMObjectValidationMessageIds.rm_EXISTENCE_MISMATCH.getMessage(attribute.getRmAttributeName(),
+                            attribute.getParent() == null ? "Unknown type" : attribute.getParent().getRmTypeName(), existence.toString());
+
                     return Lists.newArrayList((new RMObjectValidationMessage(attribute, pathSoFar, message, RMObjectValidationMessageType.REQUIRED)));
                 }
             }

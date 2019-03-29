@@ -74,6 +74,21 @@ public class RmObjectValidatorTest {
         }
     }
 
+    @Test
+    public void testValidClusterWithoutArchetype() {
+        Cluster cluster = new Cluster();
+        cluster.setName(new DvText("test cluster"));
+        cluster.setArchetypeNodeId("id12");
+        Element element = new Element();
+        element.setName(new DvText("test element"));
+        element.setArchetypeNodeId("id15");
+        cluster.setItems(Lists.newArrayList(element));
+        RMObjectValidator rmObjectValidator = new RMObjectValidator(ArchieRMInfoLookup.getInstance());
+        List<RMObjectValidationMessage> messages = rmObjectValidator.validate(cluster);
+        assertEquals(0, messages.size());
+
+    }
+
 
     @Test
     public void testNestedEmptyElementWithoutArchetype() {
