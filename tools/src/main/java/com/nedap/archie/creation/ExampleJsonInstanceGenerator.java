@@ -53,6 +53,7 @@ import java.util.Map;
  */
 public  class ExampleJsonInstanceGenerator {
 
+    public static final String MISSING_TERM_IN_ARCHETYPE_FOR_LANGUAGE = "missing term in archetype for language ";
     private final String language;
     private final MetaModels models;
     private OperationalTemplate archetype;
@@ -396,7 +397,7 @@ public  class ExampleJsonInstanceGenerator {
                     Map<String, Object> definingCode = (Map<String, Object>) codePhrase;
                     String codeString = (String) definingCode.get("code_string");//TODO: check terminology code to be local?
                     ArchetypeTerm term = archetype.getTerm(child, codeString, language);
-                    dvCodedText.put("value", term.getText());
+                    dvCodedText.put("value", term == null ? MISSING_TERM_IN_ARCHETYPE_FOR_LANGUAGE + language: term.getText());
                 }
 
                 return dvCodedText;
@@ -418,7 +419,7 @@ public  class ExampleJsonInstanceGenerator {
             name.put("@type", "DV_TEXT");
             ArchetypeTerm term = archetype.getTerm(cObject, language);
             if (term == null) {
-                name.put("value", "missing term in archetype for language " + language);
+                name.put("value", MISSING_TERM_IN_ARCHETYPE_FOR_LANGUAGE + language);
             } else {
                 name.put("value", term.getText());
             }
