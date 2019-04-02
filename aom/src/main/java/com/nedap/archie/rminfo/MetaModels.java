@@ -138,7 +138,7 @@ public class MetaModels implements MetaModelInterface {
         if(selectedBmmModel != null) {
             for (AomProfile profile : aomProfiles.getProfiles()) {
                 if (profile.getRmSchemaPattern().stream().anyMatch(pat -> selectedBmmModel.getSchemaId().matches(pat))) {
-                    return this.selectedAomProfile = profile;
+                    return profile;
                 }
             }
         }
@@ -148,7 +148,7 @@ public class MetaModels implements MetaModelInterface {
     private AomProfile getAomProfileOnPublisher(String rmPublisher) {
         for(AomProfile profile:aomProfiles.getProfiles()) {
            if(profile.getProfileName().equalsIgnoreCase(rmPublisher)) {
-                return this.selectedAomProfile = profile;
+                return profile;
             }
         }
         return null;
