@@ -25,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * the entire MetaModels, or for a specific call, with the overrideModelVersion() method, and the two-parameter
  * selectModel() method.
  *
+ * Note that this class is NOT thread-safe and is to be used by a single thread only.
+ *
  */
 public class MetaModels implements MetaModelInterface {
 
@@ -121,11 +123,9 @@ public class MetaModels implements MetaModelInterface {
             selectedBmmModel = validationResult == null ? null : validationResult.getModel();
         }
 
-        for(AomProfile profile:aomProfiles.getProfiles()) {
-            if(profile.getProfileName().equalsIgnoreCase(rmPublisher)) {
-                this.selectedAomProfile = profile;
-                break;
-            }
+        this.selectedAomProfile = getAomProfileWithSchemaId(selectedBmmModel);
+        if(this.selectedAomProfile == null) {
+            this.selectedAomProfile = getAomProfileOnPublisher(rmPublisher);
         }
 
         if(selectedModel == null && selectedBmmModel == null) {
@@ -133,6 +133,26 @@ public class MetaModels implements MetaModelInterface {
         }
         this.selectedModel = new MetaModel(selectedModel, selectedBmmModel, selectedAomProfile);
 
+    }
+
+    private AomProfile getAomProfileWithSchemaId(BmmModel selectedBmmModel) {
+        if(selectedBmmModel != null) {
+            for (AomProfile profile : aomProfiles.getProfiles()) {
+                if (profile.getRmSchemaPattern().stream().anyMatch(pat -> selectedBmmModel.getSchemaId().matches(pat))) {
+                    return profile;
+                }
+            }
+        }
+        return null;
+    }
+
+    private AomProfile getAomProfileOnPublisher(String rmPublisher) {
+        for(AomProfile profile:aomProfiles.getProfiles()) {
+           if(profile.getProfileName().equalsIgnoreCase(rmPublisher)) {
+                return profile;
+            }
+        }
+        return null;
     }
 
     public ModelInfoLookup getSelectedModelInfoLookup() {
