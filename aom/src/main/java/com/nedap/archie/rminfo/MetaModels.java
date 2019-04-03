@@ -25,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * the entire MetaModels, or for a specific call, with the overrideModelVersion() method, and the two-parameter
  * selectModel() method.
  *
+ * Note that this class is NOT thread-safe and is to be used by a single thread only.
+ *
  */
 public class MetaModels implements MetaModelInterface {
 
@@ -121,11 +123,10 @@ public class MetaModels implements MetaModelInterface {
             selectedBmmModel = validationResult == null ? null : validationResult.getModel();
         }
 
-        AomProfile profile = getAomProfileWithSchemaId(selectedBmmModel);
-        if(profile == null) {
-            profile = getAomProfileOnPublisher(rmPublisher);
+        this.selectedAomProfile = getAomProfileWithSchemaId(selectedBmmModel);
+        if(this.selectedAomProfile == null) {
+            this.selectedAomProfile = getAomProfileOnPublisher(rmPublisher);
         }
-        this.selectedAomProfile = profile;
 
         if(selectedModel == null && selectedBmmModel == null) {
             throw new ModelNotFoundException(String.format("model for %s.%s version %s not found", rmPublisher, rmPackage, rmRelease));
