@@ -68,6 +68,8 @@ public class ADL14Parser {
         walker.walk(listener, tree);
         Archetype result = listener.getArchetype();
 
+        new ADL14DescriptionConverter().convert(result);
+
         ADL14NodeIDConverter adl14NodeIDConverter = new ADL14NodeIDConverter(result);
         adl14NodeIDConverter.convert(); //fixes archetype in place
 

@@ -56,7 +56,9 @@ public class ADL14NodeIDConverter {
         } else if (cObject instanceof ArchetypeSlot) {
             calculateNewNodeId(cObject);
         } else if (cObject instanceof CComplexObjectProxy) {
+            CComplexObjectProxy proxy = (CComplexObjectProxy) cObject;
             calculateNewNodeId(cObject);
+            proxy.setTargetPath(convertPath(proxy.getTargetPath()));
         }
         for(CAttribute attribute:cObject.getAttributes()) {
             convert(attribute);
@@ -108,8 +110,9 @@ public class ADL14NodeIDConverter {
     public static String convertPath(String key) {
         APathQuery aPathQuery = new APathQuery(key);
         for(PathSegment segment:aPathQuery.getPathSegments()) {
-            segment.setNodeId(convertNodeId(segment.getNodeId()));
-
+            if(segment.getNodeId() != null) {
+                segment.setNodeId(convertNodeId(segment.getNodeId()));
+            }
         }
         return aPathQuery.toString();
     }

@@ -165,37 +165,51 @@ public class Adl14CComplexObjectParser extends BaseTreeWalker {
                 if(objectContext.domainSpecificExtension().odin_text() != null) {
                     CDVQuantity cdvQuantity = OdinObjectParser.convert(objectContext.domainSpecificExtension().odin_text().getText(), CDVQuantity.class);
                     if (cdvQuantity.getList() != null && !cdvQuantity.getList().isEmpty()) {
-                        CAttributeTuple tuple = new CAttributeTuple();
-                        CDVQuantityItem firstItem = cdvQuantity.getList().values().iterator().next();
-                        if (firstItem.getMagnitude() != null) {
-                            tuple.addMember(new CAttribute("magnitude"));
-                        }
-                        if (firstItem.getUnits() != null) {
-                            tuple.addMember(new CAttribute("units"));
-                        }
-                        if (firstItem.getPrecision() != null) {
-                            tuple.addMember(new CAttribute("precision"));
-                        }
-                        for (CDVQuantityItem item : cdvQuantity.getList().values()) {
-                            CPrimitiveTuple primitiveTuple = new CPrimitiveTuple();
+                        if(cdvQuantity.getList().size() == 1) {
+                            CDVQuantityItem item = cdvQuantity.getList().values().iterator().next();
                             if (item.getMagnitude() != null) {
-                                CReal magnitude = new CReal();
-                                magnitude.addConstraint(item.getMagnitude());
-                                primitiveTuple.addMember(magnitude);
+                                CAttribute magnitude = new CAttribute("magnitude");
+                                magnitude.addChild(item.getMagnitudeAdl2());
+                                result.addAttribute(magnitude);
                             }
                             if (item.getUnits() != null) {
-                                CString units = new CString();
-                                units.addConstraint(item.getUnits());
-                                primitiveTuple.addMember(units);
+                                CAttribute units = new CAttribute("units");
+                                units.addChild(item.getUnitsAdl2());
+                                result.addAttribute(units);
+
                             }
                             if (item.getPrecision() != null) {
-                                CInteger precision = new CInteger();
-                                precision.addConstraint(item.getPrecision());
-                                primitiveTuple.addMember(precision);
+                                CAttribute precision = new CAttribute("precision");
+                                precision.addChild(item.getPrecisionAdl2());
+                                result.addAttribute(precision);
                             }
-                            tuple.addTuple(primitiveTuple);
+                        } else {
+                            CAttributeTuple tuple = new CAttributeTuple();
+                            CDVQuantityItem firstItem = cdvQuantity.getList().values().iterator().next();
+                            if (firstItem.getMagnitude() != null) {
+                                tuple.addMember(new CAttribute("magnitude"));
+                            }
+                            if (firstItem.getUnits() != null) {
+                                tuple.addMember(new CAttribute("units"));
+                            }
+                            if (firstItem.getPrecision() != null) {
+                                tuple.addMember(new CAttribute("precision"));
+                            }
+                            for (CDVQuantityItem item : cdvQuantity.getList().values()) {
+                                CPrimitiveTuple primitiveTuple = new CPrimitiveTuple();
+                                if (item.getMagnitude() != null) {
+                                    primitiveTuple.addMember(item.getMagnitudeAdl2());
+                                }
+                                if (item.getUnits() != null) {
+                                    primitiveTuple.addMember(item.getUnitsAdl2());
+                                }
+                                if (item.getPrecision() != null) {
+                                    primitiveTuple.addMember(item.getPrecisionAdl2());
+                                }
+                                tuple.addTuple(primitiveTuple);
+                            }
+                            result.addAttributeTuple(tuple);
                         }
-                        result.addAttributeTuple(tuple);
                         //TODO: assumed value!?
                         //TODO: property?
                     }
