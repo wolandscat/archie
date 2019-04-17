@@ -71,12 +71,17 @@ public class ADL14Parser {
         ADL14NodeIDConverter adl14NodeIDConverter = new ADL14NodeIDConverter(result);
         adl14NodeIDConverter.convert(); //fixes archetype in place
 
-
+        setCorrectVersions(result);
         //set some values that are not directly in ODIN or ADL
         ArchetypeParsePostProcesser.fixArchetype(result);
 
         return result;
 
+    }
+
+    private void setCorrectVersions(Archetype result) {
+        result.setAdlVersion("2.0.6");
+        result.setRmRelease("1.0.4");
     }
 
     public ANTLRParserErrors getErrors() {

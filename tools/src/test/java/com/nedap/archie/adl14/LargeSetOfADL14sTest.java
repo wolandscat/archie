@@ -1,6 +1,5 @@
 package com.nedap.archie.adl14;
 
-import com.nedap.archie.adl14.ADL14Parser;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.serializer.adl.ADLArchetypeSerializer;
@@ -22,9 +21,9 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by pieter.bos on 16/10/15.
  */
-public class LargeSetOfADLsTest {
+public class LargeSetOfADL14sTest {
 
-    private static Logger logger = LoggerFactory.getLogger(LargeSetOfADLsTest.class);
+    private static Logger logger = LoggerFactory.getLogger(LargeSetOfADL14sTest.class);
 
     @Test
     public void parseLots() throws Exception {
@@ -35,7 +34,7 @@ public class LargeSetOfADLsTest {
         Map<String, ANTLRParserErrors> parseErrors = new LinkedHashMap<>();
 
         for(String file:adlFiles) {
-            if(!file.contains("review")) {
+            if(!file.contains("blood_pressure")) {
                 continue;
             }
             try (InputStream stream = getClass().getResourceAsStream("/" + file)) {

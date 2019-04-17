@@ -346,8 +346,12 @@ public class AOMUtils {
             if (code.length() > 2) {
                 int numberOfDots = getSpecializationDepthFromCode(code);
                 if(specializationDepth == numberOfDots) {
-                    int numericCode = numberOfDots == 0 ? Integer.parseInt(code.substring(2)) : Integer.parseInt(code.substring(code.lastIndexOf('.')+1));
-                    maximumIdCode = Math.max(numericCode, maximumIdCode);
+                    try {
+                        int numericCode = numberOfDots == 0 ? Integer.parseInt(code.substring(2)) : Integer.parseInt(code.substring(code.lastIndexOf('.') + 1));
+                        maximumIdCode = Math.max(numericCode, maximumIdCode);
+                    } catch (NumberFormatException ex) {
+                        //TODO: get rid of this, temporary for term codes that still need conversion!
+                    }
                 }
             }
         }

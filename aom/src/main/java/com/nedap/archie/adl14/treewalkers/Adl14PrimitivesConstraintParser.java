@@ -110,6 +110,35 @@ public class Adl14PrimitivesConstraintParser extends BaseTreeWalker {
         CTerminologyCode result = new CTerminologyCode();
         boolean containsAssumedValue = !terminologyCodeContext.getTokens(Adl14Lexer.SYM_SEMICOLON).isEmpty();
 
+        Adl14Parser.QualifiedTermCodeContext qualifiedTermCodeContext = terminologyCodeContext.qualifiedTermCode();
+        if(qualifiedTermCodeContext != null) {
+            if (qualifiedTermCodeContext.TERM_CODE_REF() != null) {
+                //need to do parsing here because the lexer matched the entire term code ref
+                TerminologyCode terminologyCode = TerminologyCode.createFromString(qualifiedTermCodeContext.TERM_CODE_REF().getText());
+                if (terminologyCode.getTerminologyId() != null && terminologyCode.getTerminologyId().equalsIgnoreCase("local")) {
+                    result.addConstraint(terminologyCode.getCodeString());
+                } else {
+                    //TODO: non-local term constraints. For now just add the text
+                    result.addConstraint(qualifiedTermCodeContext.TERM_CODE_REF().getText());
+                }
+            } else {
+                String terminologyId = qualifiedTermCodeContext.identifier(0).getText();
+                if (terminologyId.equalsIgnoreCase("local")) {
+                    //we need to create a value set. For now just add the constraint, the value set will come after
+                    //the parser
+                    for (int i = 1; i < qualifiedTermCodeContext.identifier().size(); i++) {
+                        result.addConstraint(qualifiedTermCodeContext.identifier(i).getText());
+                    }
+                } else {
+                    //TODO: non-local term constraints
+                    result.addConstraint(qualifiedTermCodeContext.getText());
+                }
+            }
+        } else {
+            throw new RuntimeException("unknown terminology code format - this looks adl2 inside the adl 1.4 format?");
+        }
+        //TODO: assumed value!
+
       /*TODO: 14  if(containsAssumedValue) {
             String terminologyId = terminologyCodeContext.AT_CODE().getText();
             TerminologyCode assumedValue = new TerminologyCode();
