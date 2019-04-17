@@ -10,7 +10,11 @@ import com.nedap.archie.aom.CObject;
 import com.nedap.archie.aom.CPrimitiveObject;
 import com.nedap.archie.aom.terminology.ArchetypeTerm;
 import com.nedap.archie.aom.utils.NodeIdUtil;
+import com.nedap.archie.base.terminology.TerminologyCode;
+import com.nedap.archie.paths.PathSegment;
+import com.nedap.archie.query.APathQuery;
 
+import java.net.URI;
 import java.util.Map;
 
 public class ADL14NodeIDConverter {
@@ -99,5 +103,14 @@ public class ADL14NodeIDConverter {
         for(CObject object:attribute.getChildren()) {
             convert(object);
         }
+    }
+
+    public static String convertPath(String key) {
+        APathQuery aPathQuery = new APathQuery(key);
+        for(PathSegment segment:aPathQuery.getPathSegments()) {
+            segment.setNodeId(convertNodeId(segment.getNodeId()));
+
+        }
+        return aPathQuery.toString();
     }
 }

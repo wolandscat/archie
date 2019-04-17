@@ -1,6 +1,7 @@
 package com.nedap.archie.query;
 
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.nedap.archie.paths.PathSegment;
 
@@ -81,6 +82,13 @@ public class APathQuery {
 
     public List<PathSegment> getPathSegments() {
         return pathSegments;
+    }
+
+    public String toString(){
+        if(pathSegments.size() == 0) {
+            return "/";
+        }
+        return Joiner.on("").join(pathSegments);
     }
 
 }
