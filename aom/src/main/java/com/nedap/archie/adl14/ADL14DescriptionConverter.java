@@ -49,5 +49,7 @@ public class ADL14DescriptionConverter {
         if(revision != null) {
             archetype.getArchetypeId().setReleaseVersion(revision);
         }
+
+        archetype.setGenerated(true);
     }
 }
