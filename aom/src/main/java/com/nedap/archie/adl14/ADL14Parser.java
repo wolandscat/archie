@@ -1,5 +1,6 @@
 package com.nedap.archie.adl14;
 
+import com.nedap.archie.adl14.log.ADL2ConversionLog;
 import com.nedap.archie.adl14.treewalkers.ADL14Listener;
 import com.nedap.archie.adlparser.antlr.Adl14Lexer;
 import com.nedap.archie.adlparser.antlr.Adl14Parser;
@@ -43,15 +44,15 @@ public class ADL14Parser {
 
     }
 
-    public Archetype parse(String adl) throws IOException {
+    public ADL2ConversionResult parse(String adl) throws IOException {
         return parse(CharStreams.fromString(adl));
     }
 
-    public Archetype parse(InputStream stream) throws IOException {
+    public ADL2ConversionResult parse(InputStream stream) throws IOException {
         return parse(CharStreams.fromStream(new BOMInputStream(stream), Charset.availableCharsets().get("UTF-8")));
     }
 
-    public Archetype parse(CharStream stream) {
+    public ADL2ConversionResult parse(CharStream stream) {
 
         errors = new ANTLRParserErrors();
         errorListener = new ArchieErrorListener(errors);
@@ -71,13 +72,13 @@ public class ADL14Parser {
         new ADL14DescriptionConverter().convert(result);
 
         ADL14NodeIDConverter adl14NodeIDConverter = new ADL14NodeIDConverter(result);
-        adl14NodeIDConverter.convert(); //fixes archetype in place
+        ADL2ConversionLog convert = adl14NodeIDConverter.convert();//fixes archetype in place
 
         setCorrectVersions(result);
         //set some values that are not directly in ODIN or ADL
         ArchetypeParsePostProcesser.fixArchetype(result);
 
-        return result;
+        return new ADL2ConversionResult(result, convert);
 
     }
 

@@ -1,5 +1,6 @@
 package com.nedap.archie.adl14.treewalkers;
 
+import com.nedap.archie.adl14.ADL14ConversionUtil;
 import com.nedap.archie.adl14.aom14.ArchetypeOntology;
 import com.nedap.archie.adl14.aom14.ConstraintBindingsList;
 import com.nedap.archie.adl14.aom14.TermBindingsList;
@@ -30,6 +31,8 @@ import java.util.Map;
 public class Adl14TerminologyParser extends BaseTreeWalker {
 
     private static final Logger logger = LoggerFactory.getLogger(Adl14TerminologyParser.class);
+
+    private ADL14ConversionUtil conversionUtil = new ADL14ConversionUtil();
 
     public Adl14TerminologyParser(ANTLRParserErrors errors) {
         super(errors);
@@ -78,7 +81,7 @@ public class Adl14TerminologyParser extends BaseTreeWalker {
 
                 for(Map.Entry<String, TerminologyCode> oldBinding:termBinding.getValue().getItems().entrySet()) {
                     try {
-                        URI newBindingValue = convertToUri(oldBinding.getValue());
+                        URI newBindingValue = conversionUtil.convertToUri(oldBinding.getValue());
                         newBindings.put(oldBinding.getKey(), newBindingValue);
                         //So this is an old path, will be converted later
                         //not inside te parser, obviously
@@ -98,15 +101,7 @@ public class Adl14TerminologyParser extends BaseTreeWalker {
         }
     }
 
-    private URI convertToUri(TerminologyCode value) throws URISyntaxException {
-        //TODO: this should convert known terminology schemes into their corresponding standard URIs
-        if(value.getUri() != null) {
-            return value.getUri();
-        } else if(value.getTerminologyVersion() != null) {
-            return new URI(MessageFormat.format("http://{0}.org/ver/{1}/id/{2}", value.getTerminologyId(), value.getTerminologyVersion(), value.getCodeString()));
-        }
-        return new URI(MessageFormat.format("http://{0}.org/id/{1}", value.getTerminologyId(), value.getCodeString()));
-    }
+
 
 
 }
