@@ -54,4 +54,8 @@ public class CreatedCode {
     public void setOriginalTerm(TerminologyCode termCode) {
         this.originalTerm = termCode;
     }
+
+    public TerminologyCode getOriginalTerm() {
+        return originalTerm;
+    }
 }

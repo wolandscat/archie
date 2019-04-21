@@ -44,15 +44,15 @@ public class ADL14Parser {
 
     }
 
-    public ADL2ConversionResult parse(String adl) throws IOException {
-        return parse(CharStreams.fromString(adl));
+    public ADL2ConversionResult parse(String adl, ADL2ConversionLog previousConversion) throws IOException {
+        return parse(CharStreams.fromString(adl), previousConversion);
     }
 
-    public ADL2ConversionResult parse(InputStream stream) throws IOException {
-        return parse(CharStreams.fromStream(new BOMInputStream(stream), Charset.availableCharsets().get("UTF-8")));
+    public ADL2ConversionResult parse(InputStream stream, ADL2ConversionLog previousConversion) throws IOException {
+        return parse(CharStreams.fromStream(new BOMInputStream(stream), Charset.availableCharsets().get("UTF-8")), previousConversion);
     }
 
-    public ADL2ConversionResult parse(CharStream stream) {
+    public ADL2ConversionResult parse(CharStream stream, ADL2ConversionLog previousConversion) {
 
         errors = new ANTLRParserErrors();
         errorListener = new ArchieErrorListener(errors);
@@ -71,7 +71,7 @@ public class ADL14Parser {
 
         new ADL14DescriptionConverter().convert(result);
 
-        ADL14NodeIDConverter adl14NodeIDConverter = new ADL14NodeIDConverter(result);
+        ADL14NodeIDConverter adl14NodeIDConverter = new ADL14NodeIDConverter(result, previousConversion);
         ADL2ConversionLog convert = adl14NodeIDConverter.convert();//fixes archetype in place
 
         setCorrectVersions(result);

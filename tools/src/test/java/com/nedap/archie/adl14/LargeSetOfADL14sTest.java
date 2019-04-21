@@ -1,7 +1,9 @@
 package com.nedap.archie.adl14;
 
+import com.nedap.archie.adl14.log.ADL2ConversionLog;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
 import com.nedap.archie.aom.Archetype;
+import com.nedap.archie.aom.CAttribute;
 import com.nedap.archie.json.JacksonUtil;
 import com.nedap.archie.serializer.adl.ADLArchetypeSerializer;
 import org.junit.Test;
@@ -35,24 +37,12 @@ public class LargeSetOfADL14sTest {
         Map<String, ANTLRParserErrors> parseErrors = new LinkedHashMap<>();
 
         for(String file:adlFiles) {
-            if(!file.contains("blood_pressure")) {
+            if(!file.contains("review")) {
                 continue;
             }
-            try (InputStream stream = getClass().getResourceAsStream("/" + file)) {
-                logger.info("trying to parse " + file);
-                ADL14Parser parser = new ADL14Parser();
-                ADL2ConversionResult conversionResult = parser.parse(stream);
-                logger.info(JacksonUtil.getObjectMapper().writeValueAsString(conversionResult.getConversionLog()));
-                Archetype archetype = conversionResult.getArchetype();
-                System.out.println(ADLArchetypeSerializer.serialize(archetype));
-                if(parser.errorListener.getErrors().getErrors().size() > 0) {
-                    parseErrors.put(file, parser.errorListener.getErrors());
-                }
-                if(parser.getTree().exception != null) {
-                    exceptions.put(file, parser.getTree().exception);
-                }
-            } catch (Exception e) {
-                exceptions.put(file, e);
+            ADL2ConversionLog log = parse(exceptions, parseErrors, file, null);
+            if(log != null) {
+                parse(exceptions, parseErrors, file, log);
             }
         }
 
@@ -81,6 +71,27 @@ public class LargeSetOfADL14sTest {
         assertTrue(exceptions.size() <= 21);
 
 
+    }
+
+    private ADL2ConversionLog parse(Map<String, Exception> exceptions, Map<String, ANTLRParserErrors> parseErrors, String file, ADL2ConversionLog log) {
+        try (InputStream stream = getClass().getResourceAsStream("/" + file)) {
+            logger.info("trying to parse " + file);
+            ADL14Parser parser = new ADL14Parser();
+            ADL2ConversionResult conversionResult = parser.parse(stream, log);
+            logger.info(JacksonUtil.getObjectMapper().writeValueAsString(conversionResult.getConversionLog()));
+            Archetype archetype = conversionResult.getArchetype();
+            System.out.println(ADLArchetypeSerializer.serialize(archetype));
+            if(parser.errorListener.getErrors().getErrors().size() > 0) {
+                parseErrors.put(file, parser.errorListener.getErrors());
+            }
+            if(parser.getTree().exception != null) {
+                exceptions.put(file, parser.getTree().exception);
+            }
+            return conversionResult.getConversionLog();
+        } catch (Exception e) {
+            exceptions.put(file, e);
+        }
+        return null;
     }
 
 
