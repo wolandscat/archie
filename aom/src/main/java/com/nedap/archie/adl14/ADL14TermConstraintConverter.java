@@ -85,7 +85,7 @@ public class ADL14TermConstraintConverter {
                     try {
                         //do not create a value set, create a code plus binding to the old non-local code
                         TerminologyCode termCode = TerminologyCode.createFromString(firstConstraint);
-                        URI uri = new ADL14ConversionUtil().convertToUri(termCode);
+                        URI uri = new ADL14ConversionUtil(converter.getConversionConfiguration()).convertToUri(termCode);
                         Map<String, URI> termBindingsMap = archetype.getTerminology().getTermBindings().get(termCode.getTerminologyId());
                         if(termBindingsMap == null) {
                             termBindingsMap = new LinkedHashMap<>();

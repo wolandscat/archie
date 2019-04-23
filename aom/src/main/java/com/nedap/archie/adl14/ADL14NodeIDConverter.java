@@ -27,6 +27,8 @@ import java.util.Map;
 public class ADL14NodeIDConverter {
 
     private final Archetype archetype;
+    private final ADL14ConversionConfiguration conversionConfiguration;
+
     private final ADL14TermConstraintConverter termConstraintConverter;
     private final PreviousConversionApplier previousConversionApplier;
 
@@ -43,13 +45,19 @@ public class ADL14NodeIDConverter {
 
 
     public ADL14NodeIDConverter(Archetype archetype) {
-        this(archetype, null);
+        this(archetype, new ADL14ConversionConfiguration(), null);
     }
 
-    public ADL14NodeIDConverter(Archetype archetype, ADL2ConversionLog oldLog) {
+    public ADL14NodeIDConverter(Archetype archetype, ADL14ConversionConfiguration configuration, ADL2ConversionLog oldLog) {
+        this.conversionConfiguration = configuration;
         this.archetype = archetype;
         this.termConstraintConverter = new ADL14TermConstraintConverter(this, archetype);
         this.previousConversionApplier = new PreviousConversionApplier(this, archetype, oldLog);
+    }
+
+
+    public ADL14ConversionConfiguration getConversionConfiguration() {
+        return conversionConfiguration;
     }
 
     public ADL2ConversionLog convert() {

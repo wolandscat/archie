@@ -1,16 +1,12 @@
 package com.nedap.archie.adl14.treewalkers;
 
-import com.fasterxml.jackson.databind.type.MapType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.nedap.archie.adl14.ADL14ConversionConfiguration;
 import com.nedap.archie.adlparser.antlr.Adl14BaseListener;
 import com.nedap.archie.adlparser.antlr.Adl14Parser.*;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
 import com.nedap.archie.aom.*;
-import com.nedap.archie.aom.terminology.ArchetypeTerminology;
 import com.nedap.archie.serializer.odin.OdinObjectParser;
 import org.antlr.v4.runtime.tree.TerminalNode;
-
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * ANTLR listener for an ADLS file. Uses the listener construction for the topmost elements, switches to custom treewalker
@@ -28,10 +24,10 @@ public class ADL14Listener extends Adl14BaseListener {
     private Adl14CComplexObjectParser subTreeWalker;
     private Adl14TerminologyParser terminologyParser;
 
-    public ADL14Listener(ANTLRParserErrors errors) {
+    public ADL14Listener(ANTLRParserErrors errors, ADL14ConversionConfiguration configuration) {
         this.errors = errors;
         subTreeWalker = new Adl14CComplexObjectParser(errors);
-        terminologyParser = new Adl14TerminologyParser(errors);
+        terminologyParser = new Adl14TerminologyParser(errors, configuration);
     }
 
     /** top-level constructs */

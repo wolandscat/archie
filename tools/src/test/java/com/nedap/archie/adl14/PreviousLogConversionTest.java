@@ -15,12 +15,12 @@ public class PreviousLogConversionTest {
     public void applyConsistentConversion() throws Exception {
         ADL2ConversionLog log = null;
         try(InputStream stream = getClass().getResourceAsStream("openEHR-EHR-COMPOSITION.review.v1.adl")) {
-            ADL2ConversionResult result = new ADL14Parser().parse(stream, null);
+            ADL2ConversionResult result = new ADL14Parser().parse(stream, ConversionConfigForTest.getConfig(), null);
             log = result.getConversionLog();
         }
 
         try(InputStream stream = getClass().getResourceAsStream("openEHR-EHR-COMPOSITION.review.v1.modified.adl")) {
-            ADL2ConversionResult result = new ADL14Parser().parse(stream, log);
+            ADL2ConversionResult result = new ADL14Parser().parse(stream, ConversionConfigForTest.getConfig(), log);
             CAttribute attribute = result.getArchetype().itemAtPath("/category");
             assertEquals(2, attribute.getChildren().size());
             CObject dvText = attribute.getChildren().get(0);

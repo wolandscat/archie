@@ -77,7 +77,7 @@ public class LargeSetOfADL14sTest {
         try (InputStream stream = getClass().getResourceAsStream("/" + file)) {
             logger.info("trying to parse " + file);
             ADL14Parser parser = new ADL14Parser();
-            ADL2ConversionResult conversionResult = parser.parse(stream, log);
+            ADL2ConversionResult conversionResult = parser.parse(stream, ConversionConfigForTest.getConfig(), log);
             logger.info(JacksonUtil.getObjectMapper().writeValueAsString(conversionResult.getConversionLog()));
             Archetype archetype = conversionResult.getArchetype();
             System.out.println(ADLArchetypeSerializer.serialize(archetype));

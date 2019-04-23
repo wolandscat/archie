@@ -44,15 +44,15 @@ public class ADL14Parser {
 
     }
 
-    public ADL2ConversionResult parse(String adl, ADL2ConversionLog previousConversion) throws IOException {
-        return parse(CharStreams.fromString(adl), previousConversion);
+    public ADL2ConversionResult parse(String adl, ADL14ConversionConfiguration conversionConfiguration, ADL2ConversionLog previousConversion) throws IOException {
+        return parse(CharStreams.fromString(adl), conversionConfiguration, previousConversion);
     }
 
-    public ADL2ConversionResult parse(InputStream stream, ADL2ConversionLog previousConversion) throws IOException {
-        return parse(CharStreams.fromStream(new BOMInputStream(stream), Charset.availableCharsets().get("UTF-8")), previousConversion);
+    public ADL2ConversionResult parse(InputStream stream, ADL14ConversionConfiguration conversionConfiguration, ADL2ConversionLog previousConversion) throws IOException {
+        return parse(CharStreams.fromStream(new BOMInputStream(stream), Charset.availableCharsets().get("UTF-8")), conversionConfiguration, previousConversion);
     }
 
-    public ADL2ConversionResult parse(CharStream stream, ADL2ConversionLog previousConversion) {
+    public ADL2ConversionResult parse(CharStream stream, ADL14ConversionConfiguration conversionConfiguration, ADL2ConversionLog previousConversion) {
 
         errors = new ANTLRParserErrors();
         errorListener = new ArchieErrorListener(errors);
@@ -64,14 +64,14 @@ public class ADL14Parser {
         parser.addErrorListener(errorListener);
         tree = parser.adl(); // parse
 
-        ADL14Listener listener = new ADL14Listener(errors);
+        ADL14Listener listener = new ADL14Listener(errors, conversionConfiguration);
         walker= new ParseTreeWalker();
         walker.walk(listener, tree);
         Archetype result = listener.getArchetype();
 
         new ADL14DescriptionConverter().convert(result);
 
-        ADL14NodeIDConverter adl14NodeIDConverter = new ADL14NodeIDConverter(result, previousConversion);
+        ADL14NodeIDConverter adl14NodeIDConverter = new ADL14NodeIDConverter(result, conversionConfiguration, previousConversion);
         ADL2ConversionLog convert = adl14NodeIDConverter.convert();//fixes archetype in place
 
         setCorrectVersions(result);

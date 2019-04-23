@@ -72,7 +72,7 @@ public class PreviousConversionApplier {
     private void applyPreviousTermCodeCreation(CreatedCode createdCode) {
         try {
             Map<String, URI> termBindingsMap = archetype.getTerminology().getTermBindings().get(createdCode.getOriginalTerm().getTerminologyId());
-            URI uri = new ADL14ConversionUtil().convertToUri(createdCode.getOriginalTerm());
+            URI uri = new ADL14ConversionUtil(converter.getConversionConfiguration()).convertToUri(createdCode.getOriginalTerm());
             if (termBindingsMap == null) {
                 termBindingsMap = new LinkedHashMap<>();
                 archetype.getTerminology().getTermBindings().put(createdCode.getOriginalTerm().getTerminologyId(), termBindingsMap);

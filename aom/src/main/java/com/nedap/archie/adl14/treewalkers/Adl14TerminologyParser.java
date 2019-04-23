@@ -5,21 +5,18 @@ import com.nedap.archie.adl14.aom14.ArchetypeOntology;
 import com.nedap.archie.adl14.aom14.ConstraintBindingsList;
 import com.nedap.archie.adl14.aom14.TermBindingsList;
 import com.nedap.archie.adl14.aom14.TermCodeList;
+import com.nedap.archie.adl14.ADL14ConversionConfiguration;
 import com.nedap.archie.adlparser.antlr.Adl14Parser.Terminology_sectionContext;
 import com.nedap.archie.adlparser.treewalkers.BaseTreeWalker;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
-import com.nedap.archie.aom.primitives.CTerminologyCode;
 import com.nedap.archie.aom.terminology.ArchetypeTerminology;
 import com.nedap.archie.base.terminology.TerminologyCode;
-import com.nedap.archie.paths.PathSegment;
-import com.nedap.archie.query.APathQuery;
 import com.nedap.archie.serializer.odin.OdinObjectParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.MessageFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -32,10 +29,11 @@ public class Adl14TerminologyParser extends BaseTreeWalker {
 
     private static final Logger logger = LoggerFactory.getLogger(Adl14TerminologyParser.class);
 
-    private ADL14ConversionUtil conversionUtil = new ADL14ConversionUtil();
+    private ADL14ConversionUtil conversionUtil;
 
-    public Adl14TerminologyParser(ANTLRParserErrors errors) {
+    public Adl14TerminologyParser(ANTLRParserErrors errors, ADL14ConversionConfiguration configuration) {
         super(errors);
+        conversionUtil = new ADL14ConversionUtil(configuration);
     }
 
     public ArchetypeTerminology parseTerminology(Terminology_sectionContext context) {
