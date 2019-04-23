@@ -164,6 +164,14 @@ public class Adl14CComplexObjectParser extends BaseTreeWalker {
                 result.setRmTypeName("DV_QUANTITY");
                 if(objectContext.domainSpecificExtension().odin_text() != null) {
                     CDVQuantity cdvQuantity = OdinObjectParser.convert(objectContext.domainSpecificExtension().odin_text().getText(), CDVQuantity.class);
+                    if(cdvQuantity.getProperty() != null) {
+                        CAttribute property = new CAttribute("property");
+                        CTerminologyCode code = new CTerminologyCode();
+                        //will be converted later
+                        code.addConstraint(cdvQuantity.getProperty().toString());
+                        property.addChild(code);
+                        result.addAttribute(property);
+                    }
                     if (cdvQuantity.getList() != null && !cdvQuantity.getList().isEmpty()) {
                         if(cdvQuantity.getList().size() == 1) {
                             CDVQuantityItem item = cdvQuantity.getList().values().iterator().next();
@@ -211,7 +219,6 @@ public class Adl14CComplexObjectParser extends BaseTreeWalker {
                             result.addAttributeTuple(tuple);
                         }
                         //TODO: assumed value!?
-                        //TODO: property?
                     }
                 }
             } else {

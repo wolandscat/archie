@@ -137,8 +137,8 @@ public class Adl14PrimitivesConstraintParser extends BaseTreeWalker {
             } else {
                 throw new RuntimeException("unknown terminology code format - this looks adl2 inside the adl 1.4 format?");
             }
+            //TODO: can this contain an assumed value?
         }
-        //TODO: assumed value!
 
 
      /*       String terminologyId = terminologyCodeContext.AT_CODE().getText();
