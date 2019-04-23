@@ -37,7 +37,7 @@ public class LargeSetOfADL14sTest {
         Map<String, ANTLRParserErrors> parseErrors = new LinkedHashMap<>();
 
         for(String file:adlFiles) {
-            if(!file.contains("blood_pressure")) {
+            if(!file.contains("226")) {
                 continue;
             }
             ADL2ConversionLog log = parse(exceptions, parseErrors, file, null);
@@ -78,7 +78,7 @@ public class LargeSetOfADL14sTest {
             logger.info("trying to parse " + file);
             ADL14Parser parser = new ADL14Parser();
             ADL2ConversionResult conversionResult = parser.parse(stream, ConversionConfigForTest.getConfig(), log);
-           // logger.info(JacksonUtil.getObjectMapper().writeValueAsString(conversionResult.getConversionLog()));
+            logger.info(JacksonUtil.getObjectMapper().writeValueAsString(conversionResult.getConversionLog()));
             Archetype archetype = conversionResult.getArchetype();
             System.out.println(ADLArchetypeSerializer.serialize(archetype));
             if(parser.errorListener.getErrors().getErrors().size() > 0) {

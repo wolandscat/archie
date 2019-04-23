@@ -64,11 +64,18 @@ public class ADL14NodeIDConverter {
 
         convert(archetype.getDefinition());
         if(previousConversionApplier != null) {
-            //TODO: !!!!!!! Store all added things to the term bindings and/or terminology
-            //so it can be ignored when converting the terminology!!!!!
+            //tricky stuff here:
+            //apply the previous conversion. This does 3 things:
+            //1. add synthesized id codes in the same was as before
+            //2. create previously synthesized term codes plus binding again
+            //3. create previously created value sets again
+            //These processes are not tricky in itself, but in what effect it has on the rest of the conversion process
+            //for example, if you add an at-code to the term bindings here, it must not be converted again
+            //this is done by keeping a log of converted codes in this class, and not converting any term bindings
+            //unless they are in the converted codes.
             previousConversionApplier.addCreatedCodes();
             previousConversionApplier.addValueSets();
-            //TODO: remove all unused value set
+            //TODO: remove all unused value sets and term bindings created here
         }
         termConstraintConverter.convert();
         convertTermBindings(archetype);

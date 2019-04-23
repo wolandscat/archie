@@ -66,6 +66,10 @@ public class PreviousConversionApplier {
             }
             Map<String, ValueSet> valueSets = archetype.getTerminology().getValueSets();
             valueSets.putAll(conversionLog.getCreatedValueSets());
+            for(Map.Entry<String, ValueSet> entry:conversionLog.getCreatedValueSets().entrySet()) {
+                //store in the convert to preserve the conversion log
+                converter.addCreatedValueSet(entry.getKey(), entry.getValue());
+            }
         }
     }
 
@@ -116,10 +120,20 @@ public class PreviousConversionApplier {
             if(index >= 0) {
                 CObject cObject = attribute.getChildren().get(index);
                 cObject.setNodeId(createdCode.getGeneratedCode());
+                //store the created code so it appears in the new conversion log as well
+                converter.addCreatedCode(createdCode.getGeneratedCode(), createdCode);
+
             } else {
                 //TODO: warn. has been deleted, can be fine, can be less than fine :)
             }
-            return;
         }
+    }
+
+    /**
+     * Return true if the node is a previously converted node, to make sure it does not get converted again
+     * @return
+     */
+    public boolean isConvertedNode(String code) {
+        return false;
     }
 }

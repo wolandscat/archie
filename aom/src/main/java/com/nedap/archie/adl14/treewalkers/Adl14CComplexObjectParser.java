@@ -177,19 +177,33 @@ public class Adl14CComplexObjectParser extends BaseTreeWalker {
                             CDVQuantityItem item = cdvQuantity.getList().values().iterator().next();
                             if (item.getMagnitude() != null) {
                                 CAttribute magnitude = new CAttribute("magnitude");
-                                magnitude.addChild(item.getMagnitudeAdl2());
+                                CReal magnitudeAdl2 = item.getMagnitudeAdl2();
+                                magnitude.addChild(magnitudeAdl2);
                                 result.addAttribute(magnitude);
+                                if(cdvQuantity.getAssumedValue() != null && cdvQuantity.getAssumedValue().getMagnitude() != null) {
+                                    Double assumedMagnitude = cdvQuantity.getAssumedValue().getMagnitude();
+                                    magnitudeAdl2.setAssumedValue(assumedMagnitude);
+                                }
                             }
                             if (item.getUnits() != null) {
                                 CAttribute units = new CAttribute("units");
-                                units.addChild(item.getUnitsAdl2());
+                                CString unitsAdl2 = item.getUnitsAdl2();
+                                units.addChild(unitsAdl2);
                                 result.addAttribute(units);
-
+                                if(cdvQuantity.getAssumedValue() != null && cdvQuantity.getAssumedValue().getUnits() != null) {
+                                    String assumedUnits = cdvQuantity.getAssumedValue().getUnits();
+                                    unitsAdl2.setAssumedValue(assumedUnits);
+                                }
                             }
                             if (item.getPrecision() != null) {
                                 CAttribute precision = new CAttribute("precision");
-                                precision.addChild(item.getPrecisionAdl2());
+                                CInteger precisionAdl2 = item.getPrecisionAdl2();
+                                precision.addChild(precisionAdl2);
                                 result.addAttribute(precision);
+                                if(cdvQuantity.getAssumedValue() != null && cdvQuantity.getAssumedValue().getPrecision() != null) {
+                                    Long assumedPrecision = cdvQuantity.getAssumedValue().getPrecision();
+                                    precisionAdl2.setAssumedValue(assumedPrecision);
+                                }
                             }
                         } else {
                             CAttributeTuple tuple = new CAttributeTuple();
