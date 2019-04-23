@@ -9,7 +9,6 @@ import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.Map;
 
-//TODO: add a configuration here that supports converting terminology codes to URIs
 public class ADL14ConversionUtil {
 
     private final ADL14ConversionConfiguration conversionConfiguration;

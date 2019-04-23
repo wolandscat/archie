@@ -75,7 +75,7 @@ public class ADL14NodeIDConverter {
         generateMissingNodeIds(archetype.getDefinition());
 
         convertTermDefinitions();
-        return new ADL2ConversionLog(convertedCodes, createdCodes, createdValueSets);
+        return new ADL2ConversionLog(/*convertedCodes*/ null, createdCodes, createdValueSets);
     }
 
     private void convertTermDefinitions() {
@@ -213,13 +213,18 @@ public class ADL14NodeIDConverter {
         for(String language:archetype.getTerminology().getTermDefinitions().keySet()) {
             Map<String, ArchetypeTerm> terms = archetype.getTerminology().getTermDefinitions().get(language);
             ArchetypeTerm term = terms.remove(oldCode);
-            for(String newCode:newCodes) {
-                ArchetypeTerm newTerm = new ArchetypeTerm();
-                newTerm.setCode(newCode);
-                newTerm.setText(term.getText());
-                newTerm.setDescription(term.getDescription());
-                newTerm.putAll(term.getOtherItems());
-                terms.put(newCode, term);
+            if(term != null) {
+                for (String newCode : newCodes) {
+                    ArchetypeTerm newTerm = new ArchetypeTerm();
+                    newTerm.setCode(newCode);
+                    newTerm.setText(term.getText());
+                    newTerm.setDescription(term.getDescription());
+                    newTerm.putAll(term.getOtherItems());
+                    terms.put(newCode, term);
+                }
+            } else {
+                //TODO
+                System.out.println("hmm, this is weird, cannot find term for code " + oldCode);
             }
         }
     }
@@ -238,6 +243,14 @@ public class ADL14NodeIDConverter {
             return convertedCodeResult.getValueCode();
         }
         return convertCode(oldCode, "at");
+    }
+
+    public String convertValueSetCode(String oldCode) {
+        ConvertedCodeResult convertedCodeResult = convertedCodes.get(oldCode);
+        if(convertedCodeResult != null && convertedCodeResult.hasValueCode()) {
+            return convertedCodeResult.getValueCode();
+        }
+        return convertCode(oldCode, "ac");
     }
 
     private String convertCode(String oldCode, String newCodePrefix) {
@@ -269,4 +282,5 @@ public class ADL14NodeIDConverter {
     public String getOldCodeForNewCode(String nodeId) {
         return this.newCodeToOldCodeMap.get(nodeId);
     }
+
 }

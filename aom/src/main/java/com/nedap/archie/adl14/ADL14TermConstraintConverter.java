@@ -18,8 +18,10 @@ import com.nedap.archie.base.terminology.TerminologyCode;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,7 +58,9 @@ public class ADL14TermConstraintConverter {
     private void convertCTerminologyCode(CTerminologyCode cTerminologyCode) {
         if(cTerminologyCode.getConstraint() != null && !cTerminologyCode.getConstraint().isEmpty()) {
             String firstConstraint = cTerminologyCode.getConstraint().get(0);
-            if(AOMUtils.isValueCode(firstConstraint)) {
+            TerminologyCode termCode = TerminologyCode.createFromString(firstConstraint);
+            boolean isLocalCode = termCode.getTerminologyId() == null || termCode.getTerminologyId().equalsIgnoreCase("local");
+            if(isLocalCode && AOMUtils.isValueCode(firstConstraint)) {
                 //local codes
                 if(cTerminologyCode.getConstraint().size() == 1) {
                     //do not create a value set, just convert the code
@@ -80,20 +84,29 @@ public class ADL14TermConstraintConverter {
                     String newCode = converter.convertValueCode(oldCode);
                     assumedValue.setCodeString(newCode);
                 }
+            } else if (isLocalCode && AOMUtils.isValueSetCode(termCode.getCodeString())) {
+                List<String> newConstraint = new ArrayList<>();
+                for(String constraint:cTerminologyCode.getConstraint()) {
+                    TerminologyCode code = TerminologyCode.createFromString(constraint);
+                    String newCode = converter.convertValueSetCode(termCode.getCodeString());
+                    converter.addConvertedCode(termCode.getCodeString(), newCode);
+                    newConstraint.add(newCode);
+                }
+                cTerminologyCode.setConstraint(newConstraint);
+
             } else {
-                if(cTerminologyCode.getConstraint().size() == 1) {
+                if (cTerminologyCode.getConstraint().size() == 1) {
                     try {
                         //do not create a value set, create a code plus binding to the old non-local code
-                        TerminologyCode termCode = TerminologyCode.createFromString(firstConstraint);
                         URI uri = new ADL14ConversionUtil(converter.getConversionConfiguration()).convertToUri(termCode);
                         Map<String, URI> termBindingsMap = archetype.getTerminology().getTermBindings().get(termCode.getTerminologyId());
-                        if(termBindingsMap == null) {
+                        if (termBindingsMap == null) {
                             termBindingsMap = new LinkedHashMap<>();
                             archetype.getTerminology().getTermBindings().put(termCode.getTerminologyId(), termBindingsMap);
                         }
                         //TODO: check if this is a converted or old term binding - old is unusual, but could be possible!
                         String existingTermBinding = ADL14ConversionUtil.findExistingTermBinding(archetype, uri, termBindingsMap);
-                        if(existingTermBinding != null) {
+                        if (existingTermBinding != null) {
                             cTerminologyCode.setConstraint(Lists.newArrayList(existingTermBinding));
                         } else {
                             String valueCode = archetype.generateNextValueCode();
@@ -102,7 +115,7 @@ public class ADL14TermConstraintConverter {
                             createdCode.setOriginalTerm(termCode);
                             converter.addCreatedCode(termCode.toString(), createdCode);
                             cTerminologyCode.setConstraint(Lists.newArrayList(valueCode));
-                            for(String language:archetype.getTerminology().getTermDefinitions().keySet()) {
+                            for (String language : archetype.getTerminology().getTermDefinitions().keySet()) {
                                 ArchetypeTerm term = new ArchetypeTerm();
                                 term.setCode(valueCode);
                                 term.setText("Term binding for " + termCode.toString() + ", translation not known in ADL 1.4 -> ADL 2 converter");

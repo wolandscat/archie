@@ -27,14 +27,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.List;
 
 /**
- * TODO: Due to how the grammar is built, it's a lot of work to create a treewalker. Much copy/paste code.
- * Instead, we could adapt the grammar to work with:
- *
- * c_primitive_object: (value | list_value | interval_value | interval_list_value) assumed_value?
- *
- * This has the drawback that we need to check for type correctness in the treewalker. But that is quite simple, mostly
- * that all objects have the same type and for a few that you cannot use an interval.
- *
  * Created by pieter.bos on 15/10/15.
  */
 public class Adl14PrimitivesConstraintParser extends BaseTreeWalker {
@@ -108,6 +100,7 @@ public class Adl14PrimitivesConstraintParser extends BaseTreeWalker {
 
     public CTerminologyCode parseCTerminologyCode(Adl14Parser.C_terminology_codeContext terminologyCodeContext) {
         CTerminologyCode result = new CTerminologyCode();
+
         boolean containsAssumedValue = !terminologyCodeContext.getTokens(Adl14Lexer.SYM_SEMICOLON).isEmpty();
 
         Adl14Parser.QualifiedTermCodeContext qualifiedTermCodeContext = terminologyCodeContext.qualifiedTermCode();
@@ -118,7 +111,7 @@ public class Adl14PrimitivesConstraintParser extends BaseTreeWalker {
                 if (terminologyCode.getTerminologyId() != null && terminologyCode.getTerminologyId().equalsIgnoreCase("local")) {
                     result.addConstraint(terminologyCode.getCodeString());
                 } else {
-                    //TODO: non-local term constraints. For now just add the text
+                    //non-local term constraints. Just add the text here, it will be converted later
                     result.addConstraint(qualifiedTermCodeContext.TERM_CODE_REF().getText());
                 }
             } else {
@@ -130,17 +123,25 @@ public class Adl14PrimitivesConstraintParser extends BaseTreeWalker {
                         result.addConstraint(qualifiedTermCodeContext.identifier(i).getText());
                     }
                 } else {
-                    //TODO: non-local term constraints
+                    //non-local term constraints. Add the text here, will be converted later
                     result.addConstraint(qualifiedTermCodeContext.getText());
+                }
+                if(qualifiedTermCodeContext.assumed_value() != null) {
+                    result.setAssumedValue(TerminologyCode.createFromString(qualifiedTermCodeContext.assumed_value().getText()));
                 }
             }
         } else {
-            throw new RuntimeException("unknown terminology code format - this looks adl2 inside the adl 1.4 format?");
+            //this is an AC-code.
+            if(terminologyCodeContext.localTermCode().AC_CODE() != null) {
+                result.addConstraint(terminologyCodeContext.localTermCode().AC_CODE().getText());
+            } else {
+                throw new RuntimeException("unknown terminology code format - this looks adl2 inside the adl 1.4 format?");
+            }
         }
         //TODO: assumed value!
 
-      /*TODO: 14  if(containsAssumedValue) {
-            String terminologyId = terminologyCodeContext.AT_CODE().getText();
+
+     /*       String terminologyId = terminologyCodeContext.AT_CODE().getText();
             TerminologyCode assumedValue = new TerminologyCode();
             assumedValue.setTerminologyId(terminologyId);
             String assumedValueString = terminologyCodeContext.AT_CODE().getText();

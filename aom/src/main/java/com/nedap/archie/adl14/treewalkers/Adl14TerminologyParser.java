@@ -43,8 +43,8 @@ public class Adl14TerminologyParser extends BaseTreeWalker {
             terminology.getTermDefinitions().put(language, ontology.getTermDefinitions().get(language).getItems());
         }
         convertTermBindings(ontology, terminology);
-
         convertConstraintBindings(ontology, terminology);
+        convertConstraintDefinitions(ontology, terminology);
         //terminologies available is deprecated and should not be included - no longer necessary
         return terminology;
     }
