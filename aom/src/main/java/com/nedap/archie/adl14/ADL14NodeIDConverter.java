@@ -82,6 +82,7 @@ public class ADL14NodeIDConverter {
         generateMissingNodeIds(archetype.getDefinition());
 
         convertTermDefinitions();
+        previousConversionApplier.removeCreatedUnusedTermCodesAndValueSets();
         return new ADL2ConversionLog(/*convertedCodes*/ null, createdCodes, createdValueSets);
     }
 
