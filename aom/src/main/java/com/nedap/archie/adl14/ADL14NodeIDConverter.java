@@ -17,6 +17,7 @@ import com.nedap.archie.aom.terminology.ValueSet;
 import com.nedap.archie.aom.utils.AOMUtils;
 import com.nedap.archie.aom.utils.NodeIdUtil;
 import com.nedap.archie.paths.PathSegment;
+import com.nedap.archie.paths.PathUtil;
 import com.nedap.archie.query.APathQuery;
 
 import java.net.URI;
@@ -27,6 +28,8 @@ import java.util.Map;
 public class ADL14NodeIDConverter {
 
     private final Archetype archetype;
+    private final Archetype flatParentArchetype;
+
     private final ADL14ConversionConfiguration conversionConfiguration;
 
     private final ADL14TermConstraintConverter termConstraintConverter;
@@ -44,13 +47,14 @@ public class ADL14NodeIDConverter {
 
 
 
-    public ADL14NodeIDConverter(Archetype archetype) {
-        this(archetype, new ADL14ConversionConfiguration(), null);
+    public ADL14NodeIDConverter(Archetype archetype, Archetype flatParentArchetype) {
+        this(archetype, flatParentArchetype, new ADL14ConversionConfiguration(), null);
     }
 
-    public ADL14NodeIDConverter(Archetype archetype, ADL14ConversionConfiguration configuration, ADL2ConversionLog oldLog) {
+    public ADL14NodeIDConverter(Archetype archetype, Archetype flatParentArchetype, ADL14ConversionConfiguration configuration, ADL2ConversionLog oldLog) {
         this.conversionConfiguration = configuration;
         this.archetype = archetype;
+        this.flatParentArchetype = flatParentArchetype;
         this.termConstraintConverter = new ADL14TermConstraintConverter(this, archetype);
         this.previousConversionApplier = new PreviousConversionApplier(this, archetype, oldLog);
     }
@@ -143,16 +147,29 @@ public class ADL14NodeIDConverter {
     private void generateMissingNodeIds(CObject cObject) {
         if(!(cObject instanceof CPrimitiveObject) && cObject.getNodeId() == null) {
             String path = cObject.getPath();
-
-            cObject.setNodeId(archetype.generateNextIdCode());
-            CreatedCode createdCode = new CreatedCode(cObject.getNodeId(), ReasonForCodeCreation.C_OBJECT_WITHOUT_NODE_ID);
-            createdCode.setRmTypeName(cObject.getRmTypeName());
-            createdCode.setPathCreated(path);
-            addCreatedCode(cObject.getNodeId(), createdCode);
+            if(archetype.getParentArchetypeId() != null) {
+                //TODO: get the matching path in the parent archetype id. Find this node
+                //if found, this is a specialization of said node and needs to be checked for differences and/or
+                //given the same node id
+                //if not found, generate/synthesize a new node id.
+                String parentPath = AOMUtils.pathAtSpecializationLevel(cObject.getPathSegments(), archetype.specializationDepth()-1);
+                System.out.println("path: " + path + " parent path " + parentPath);
+                CAttribute cAttribute = flatParentArchetype.itemAtPath(parentPath);
+                System.out.println(cAttribute);
+            }
+            synthesizeNodeId(cObject, path);
         }
         for(CAttribute attribute:cObject.getAttributes()) {
             generateMissingNodeIds(attribute);
         }
+    }
+
+    private void synthesizeNodeId(CObject cObject, String path) {
+        cObject.setNodeId(archetype.generateNextIdCode());
+        CreatedCode createdCode = new CreatedCode(cObject.getNodeId(), ReasonForCodeCreation.C_OBJECT_WITHOUT_NODE_ID);
+        createdCode.setRmTypeName(cObject.getRmTypeName());
+        createdCode.setPathCreated(path);
+        addCreatedCode(cObject.getNodeId(), createdCode);
     }
 
     protected void addCreatedCode(String code, CreatedCode createdCode) {
