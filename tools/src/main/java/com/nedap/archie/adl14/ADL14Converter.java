@@ -66,7 +66,7 @@ public class ADL14Converter {
                 Archetype flatParent = new Flattener(repository, metaModels).flatten(parent);
                 result = convert(archetype, flatParent, conversionConfiguration, null);
                 if(result.getArchetype() != null) {
-                  //  result.setArchetype(differentiator.differentiate(archetype, result.getArchetype()));
+                    result.setArchetype(differentiator.differentiate(result.getArchetype(), flatParent));
                 }
             } else {
                 result = convert(archetype, conversionConfiguration, null);
