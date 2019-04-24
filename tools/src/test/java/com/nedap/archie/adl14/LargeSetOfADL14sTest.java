@@ -43,7 +43,7 @@ public class LargeSetOfADL14sTest {
 
         List<Archetype> archetypes = new ArrayList<>();
         for(String file:adlFiles) {
-            if(!file.contains("report")) {
+            if(!file.contains("address")) {
                 continue;
             }
             Archetype archetype = parse(exceptions, parseErrors, file);

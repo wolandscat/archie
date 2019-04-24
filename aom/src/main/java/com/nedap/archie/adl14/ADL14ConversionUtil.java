@@ -39,7 +39,14 @@ public class ADL14ConversionUtil {
         return new URI(MessageFormat.format("http://{0}.org/id/{1}", value.getTerminologyId(), value.getCodeString()));
     }
 
-    public static String findExistingTermBinding(Archetype archetype, URI uri, Map<String, URI> termBindingsMap) {
+    public static String findExistingTermBinding(String terminologyId, Archetype archetype, Archetype flatParentArchetype, URI uri, Map<String, URI> termBindingsMap) {
+        if(flatParentArchetype != null && flatParentArchetype.getTerminology().getTermBindings() != null) {
+            return findExistingTermBinding(uri, flatParentArchetype.getTerminology().getTermBindings().get(terminologyId));
+        }
+        return findExistingTermBinding(uri, termBindingsMap);
+    }
+
+    private static String findExistingTermBinding(URI uri, Map<String, URI> termBindingsMap) {
         for(Map.Entry<String, URI> existingBinding:termBindingsMap.entrySet()) {
             if(existingBinding.getValue().equals(uri) && !existingBinding.getKey().startsWith("/")) {
                 return existingBinding.getKey();

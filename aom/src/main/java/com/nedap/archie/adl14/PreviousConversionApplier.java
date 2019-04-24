@@ -92,7 +92,8 @@ public class PreviousConversionApplier {
                 archetype.getTerminology().getTermBindings().put(createdCode.getOriginalTerm().getTerminologyId(), termBindingsMap);
             }
             //TODO: check if this is a converted or old term binding - old is unusual, but could be possible!
-            String existingTermBinding = ADL14ConversionUtil.findExistingTermBinding(archetype, uri, termBindingsMap);
+            //TODO: add the flat parent here!
+            String existingTermBinding = ADL14ConversionUtil.findExistingTermBinding(createdCode.getOriginalTerm().getTerminologyId(), archetype, null, uri, termBindingsMap);
             if (existingTermBinding == null) {
                 String valueCode = createdCode.getGeneratedCode();
                 termBindingsMap.put(valueCode, uri);

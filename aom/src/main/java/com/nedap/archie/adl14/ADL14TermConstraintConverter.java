@@ -27,12 +27,14 @@ import java.util.Set;
 
 public class ADL14TermConstraintConverter {
 
+    private final Archetype flatParentArchetype;
     private Archetype archetype;
     private ADL14NodeIDConverter converter;
 
-    public ADL14TermConstraintConverter(ADL14NodeIDConverter converter, Archetype archetype) {
+    public ADL14TermConstraintConverter(ADL14NodeIDConverter converter, Archetype archetype, Archetype flatParentArchetype) {
         this.converter = converter;
         this.archetype = archetype;
+        this.flatParentArchetype = flatParentArchetype;
     }
 
     public void convert() {
@@ -105,7 +107,7 @@ public class ADL14TermConstraintConverter {
                             archetype.getTerminology().getTermBindings().put(termCode.getTerminologyId(), termBindingsMap);
                         }
                         //TODO: check if this is a converted or old term binding - old is unusual, but could be possible!
-                        String existingTermBinding = ADL14ConversionUtil.findExistingTermBinding(archetype, uri, termBindingsMap);
+                        String existingTermBinding = ADL14ConversionUtil.findExistingTermBinding(termCode.getTerminologyId(), archetype, flatParentArchetype, uri, termBindingsMap);
                         if (existingTermBinding != null) {
                             cTerminologyCode.setConstraint(Lists.newArrayList(existingTermBinding));
                         } else {

@@ -55,7 +55,7 @@ public class ADL14NodeIDConverter {
         this.conversionConfiguration = configuration;
         this.archetype = archetype;
         this.flatParentArchetype = flatParentArchetype;
-        this.termConstraintConverter = new ADL14TermConstraintConverter(this, archetype);
+        this.termConstraintConverter = new ADL14TermConstraintConverter(this, archetype, flatParentArchetype);
         this.previousConversionApplier = new PreviousConversionApplier(this, archetype, oldLog);
     }
 
@@ -296,7 +296,9 @@ public class ADL14NodeIDConverter {
             return oldCode;
         }
         nodeIdUtil.setPrefix(newCodePrefix); //will automatically strip the leading zeroes due to integer-parsing
-        nodeIdUtil.getCodes().set(0, nodeIdUtil.getCodes().get(0) + 1); //increment with 1, old is 0-based
+        if(!oldCode.startsWith("at0.")) { //TODO: check if correct! this is a specialized code, can it be at0000.X? Or is that the root code?
+            nodeIdUtil.getCodes().set(0, nodeIdUtil.getCodes().get(0) + 1); //increment with 1, old is 0-based
+        }
         return nodeIdUtil.toString();
     }
 
@@ -318,6 +320,10 @@ public class ADL14NodeIDConverter {
 
     public String getOldCodeForNewCode(String nodeId) {
         return this.newCodeToOldCodeMap.get(nodeId);
+    }
+
+    protected Archetype getFlatParentArchetype() {
+        return flatParentArchetype;
     }
 
 }
