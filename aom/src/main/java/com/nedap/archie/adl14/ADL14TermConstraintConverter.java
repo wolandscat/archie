@@ -153,12 +153,19 @@ public class ADL14TermConstraintConverter {
     }
 
     private ValueSet findOrCreateValueSet(Archetype archetype, Set<String> localCodes, CObject owningConstraint) {
-        for(ValueSet valueSet:archetype.getTerminology().getValueSets().values()) {
-            if(valueSet.getMembers().equals(localCodes)) {
+        //TODO: already checks for equal value sets. But if specialized check if parent contains a value set that  can be redefined to
+        //be the same
+        if(flatParentArchetype != null) {
+            ValueSet valueSet = findValueSet(flatParentArchetype, localCodes);
+            if (valueSet != null) {
                 return valueSet;
             }
         }
-        ValueSet valueSet = new ValueSet();
+        ValueSet valueSet = findValueSet(archetype, localCodes);
+        if (valueSet != null) {
+            return valueSet;
+        }
+        valueSet = new ValueSet();
         valueSet.setMembers(localCodes);
         valueSet.setId(archetype.generateNextValueSetCode());
         converter.addCreatedCode(valueSet.getId(), new CreatedCode(valueSet.getId(), ReasonForCodeCreation.CREATED_VALUE_SET));
@@ -177,6 +184,15 @@ public class ADL14TermConstraintConverter {
             }
         }
         return valueSet;
+    }
+
+    private ValueSet findValueSet(Archetype archetype, Set<String> localCodes) {
+        for(ValueSet valueSet:archetype.getTerminology().getValueSets().values()) {
+            if(valueSet.getMembers().equals(localCodes)) {
+                return valueSet;
+            }
+        }
+        return null;
     }
 
     /**

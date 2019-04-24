@@ -145,6 +145,13 @@ public class ADL14NodeIDConverter {
     }
 
     private void generateMissingNodeIds(CObject cObject) {
+
+        //depth first traversal, so the generated paths in the conversion log will not yet contain id codes
+        //so they can be directly applied after converting the node id at-codes to id-codes
+        for(CAttribute attribute:cObject.getAttributes()) {
+            generateMissingNodeIds(attribute);
+        }
+
         if(!(cObject instanceof CPrimitiveObject) && cObject.getNodeId() == null) {
             String path = cObject.getPath();
             if(archetype.getParentArchetypeId() != null && flatParentArchetype != null) {
@@ -154,25 +161,35 @@ public class ADL14NodeIDConverter {
                 //if not found, generate/synthesize a new node id.
                 String parentPath = AOMUtils.pathAtSpecializationLevel(cObject.getPathSegments(), archetype.specializationDepth()-1);
                 System.out.println("path: " + path + " parent path " + parentPath);
-                CAttribute cAttribute = flatParentArchetype.itemAtPath(parentPath);
-                if(cAttribute != null) {
-                    List<CObject> childrenWithMatchingChildName = cAttribute.getChildrenWithMatchingChildName(cObject.getRmTypeName());
-                    if(childrenWithMatchingChildName.size() > 0) {
-                        //TODO: this is way too simple of course :)
-                        cObject.setNodeId(childrenWithMatchingChildName.get(0).getNodeId());
-                    } else {
+                CAttribute cAttributeInParent = flatParentArchetype.itemAtPath(parentPath);
+                if(cAttributeInParent != null) {
+                    List<CObject> childrenWithMatchingChildNameInParent = cAttributeInParent.getChildrenWithMatchingChildName(cObject.getRmTypeName());
+                    if(childrenWithMatchingChildNameInParent.size() == 1 ) {
+                        cObject.setNodeId(childrenWithMatchingChildNameInParent.get(0).getNodeId());
+                    } else if(childrenWithMatchingChildNameInParent.size() > 1 ) {
+                        //TODO: redefine the first/any parent node that can be found?!
                         synthesizeNodeId(cObject, path);
+                    } else if (cAttributeInParent.getChildren().size() == 1) {
+                        //if type conforms to parent type:
+                        //  if cAttribtueInParent.isSingle() {
+                        //   refine id code
+                        //  else
+                        //   redefine id code
+                        //   something with terminology here in code
+                        //
+                        //
+                    } else {
+                        throw new RuntimeException("cannot convert node id at path " + path);//TODO: proper exception
                     }
                 } else {
                     synthesizeNodeId(cObject, path);
+                    //TODO: if cObject.getParent().isMultiple: add term to terminology
                 }
 
             } else {
                 synthesizeNodeId(cObject, path);
+                //TODO: if cObject.getParent().isMultiple: add term to terminology
             }
-        }
-        for(CAttribute attribute:cObject.getAttributes()) {
-            generateMissingNodeIds(attribute);
         }
     }
 
