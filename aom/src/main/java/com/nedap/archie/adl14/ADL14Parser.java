@@ -21,8 +21,7 @@ import java.nio.charset.Charset;
 
 
 /**
- * Parses ADL files to Archetype objects.
- *
+ * Parses ADL 1.4 files to Archetype objects. Does not convert to ADL 2 yet!
  */
 public class ADL14Parser {
 
@@ -44,15 +43,15 @@ public class ADL14Parser {
 
     }
 
-    public ADL2ConversionResult parse(String adl, ADL14ConversionConfiguration conversionConfiguration, ADL2ConversionLog previousConversion) throws IOException {
-        return parse(CharStreams.fromString(adl), conversionConfiguration, previousConversion);
+    public Archetype parse(String adl, ADL14ConversionConfiguration conversionConfiguration) throws IOException {
+        return parse(CharStreams.fromString(adl), conversionConfiguration);
     }
 
-    public ADL2ConversionResult parse(InputStream stream, ADL14ConversionConfiguration conversionConfiguration, ADL2ConversionLog previousConversion) throws IOException {
-        return parse(CharStreams.fromStream(new BOMInputStream(stream), Charset.availableCharsets().get("UTF-8")), conversionConfiguration, previousConversion);
+    public Archetype parse(InputStream stream, ADL14ConversionConfiguration conversionConfiguration) throws IOException {
+        return parse(CharStreams.fromStream(new BOMInputStream(stream), Charset.availableCharsets().get("UTF-8")), conversionConfiguration);
     }
 
-    public ADL2ConversionResult parse(CharStream stream, ADL14ConversionConfiguration conversionConfiguration, ADL2ConversionLog previousConversion) {
+    public Archetype parse(CharStream stream, ADL14ConversionConfiguration conversionConfiguration) {
 
         errors = new ANTLRParserErrors();
         errorListener = new ArchieErrorListener(errors);
@@ -68,23 +67,8 @@ public class ADL14Parser {
         walker= new ParseTreeWalker();
         walker.walk(listener, tree);
         Archetype result = listener.getArchetype();
+        return result;
 
-        new ADL14DescriptionConverter().convert(result);
-
-        ADL14NodeIDConverter adl14NodeIDConverter = new ADL14NodeIDConverter(result, conversionConfiguration, previousConversion);
-        ADL2ConversionLog convert = adl14NodeIDConverter.convert();//fixes archetype in place
-
-        setCorrectVersions(result);
-        //set some values that are not directly in ODIN or ADL
-        ArchetypeParsePostProcesser.fixArchetype(result);
-
-        return new ADL2ConversionResult(result, convert);
-
-    }
-
-    private void setCorrectVersions(Archetype result) {
-        result.setAdlVersion("2.0.6");
-        result.setRmRelease("1.0.4");
     }
 
     public ANTLRParserErrors getErrors() {

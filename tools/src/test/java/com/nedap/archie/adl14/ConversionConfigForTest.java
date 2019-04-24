@@ -7,9 +7,15 @@ import java.io.InputStream;
 
 public class ConversionConfigForTest {
 
+    private static ADL14ConversionConfiguration config = null;
+
     public static ADL14ConversionConfiguration getConfig() throws IOException {
-        try(InputStream stream = ConversionConfigForTest.class.getResourceAsStream("configuration.json")) {
-            return JacksonUtil.getObjectMapper().readValue(stream, ADL14ConversionConfiguration.class);
+        if(config != null) {
+            return config;
         }
+        try(InputStream stream = ConversionConfigForTest.class.getResourceAsStream("configuration.json")) {
+            config = JacksonUtil.getObjectMapper().readValue(stream, ADL14ConversionConfiguration.class);
+        }
+        return config;
     }
 }

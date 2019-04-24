@@ -216,7 +216,7 @@ public class ConstraintDifferentiator {
         if (attributeInParent == null) {
             return null;
         }
-        if(cObjectInChild instanceof CPrimitiveObject) {
+        if(cObjectInChild instanceof CPrimitiveObject || cObjectInChild.getNodeId() == null /* happens during ADL 1.4 conversion */) {
             int indexOfChildWithMatchingRmTypeName = attributeInParent.getIndexOfChildWithMatchingRmTypeName(cObjectInChild.getRmTypeName());
             if(indexOfChildWithMatchingRmTypeName > -1) {
                 return attributeInParent.getChildren().get(indexOfChildWithMatchingRmTypeName);

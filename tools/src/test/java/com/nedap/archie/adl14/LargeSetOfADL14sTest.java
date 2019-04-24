@@ -3,10 +3,13 @@ package com.nedap.archie.adl14;
 import com.nedap.archie.adl14.log.ADL2ConversionLog;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
 import com.nedap.archie.aom.Archetype;
-import com.nedap.archie.aom.CAttribute;
+import com.nedap.archie.diff.Differentiator;
+import com.nedap.archie.flattener.Flattener;
+import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 import com.nedap.archie.json.JacksonUtil;
 import com.nedap.archie.serializer.adl.ADLArchetypeSerializer;
 import org.junit.Test;
+import org.openehr.referencemodels.BuiltinReferenceModels;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.slf4j.Logger;
@@ -36,14 +39,42 @@ public class LargeSetOfADL14sTest {
         Map<String, Exception> exceptions = new LinkedHashMap<>();
         Map<String, ANTLRParserErrors> parseErrors = new LinkedHashMap<>();
 
+        InMemoryFullArchetypeRepository repository = new InMemoryFullArchetypeRepository();
+
         for(String file:adlFiles) {
-            if(!file.contains("226")) {
+            if(!file.contains("report")) {
                 continue;
             }
-            ADL2ConversionLog log = parse(exceptions, parseErrors, file, null);
+            ADL2ConversionResult result = parse(exceptions, parseErrors, file, null);
+            if(result != null && result.getArchetype() != null) {
+                repository.addArchetype(result.getArchetype());
+            } else {
+                logger.warn("no archetype found for " + file);
+            }
 //            if(log != null) {
 //                parse(exceptions, parseErrors, file, log);
 //            }
+        }
+
+        Differentiator differ = new Differentiator(BuiltinReferenceModels.getMetaModels());
+        for(Archetype archetype:repository.getAllArchetypes()) {
+            if(archetype.getParentArchetypeId() != null) {
+                try {
+                    Archetype parent = repository.getArchetype(archetype.getParentArchetypeId());
+
+                    if (parent == null) {
+                        logger.warn("Archetype parent not found with id " + archetype.getParentArchetypeId());
+                    } else {
+                        Flattener flattener = new Flattener(repository, BuiltinReferenceModels.getMetaModels());
+                        Archetype flatParent = flattener.flatten(parent);
+                        Archetype diffed = differ.differentiate(archetype, flatParent);
+                        System.out.println(ADLArchetypeSerializer.serialize(diffed));
+                        repository.addArchetype(diffed);
+                    }
+                } catch (Exception e) {
+                    exceptions.put(archetype.getArchetypeId().toString(), e);
+                }
+            }
         }
 
         for(String file:adlFiles) {
@@ -55,6 +86,11 @@ public class LargeSetOfADL14sTest {
                 logger.error("exception found in " + file, exceptions.get(file));
             }
 
+        }
+        for(String file:exceptions.keySet()) {
+            if(!adlFiles.contains(file)) {
+                logger.error("exception found in " + file, exceptions.get(file));
+            }
         }
 
         System.out.println("parsed adls: " + adlFiles.size());
@@ -73,21 +109,23 @@ public class LargeSetOfADL14sTest {
 
     }
 
-    private ADL2ConversionLog parse(Map<String, Exception> exceptions, Map<String, ANTLRParserErrors> parseErrors, String file, ADL2ConversionLog log) {
+    private ADL2ConversionResult parse(Map<String, Exception> exceptions, Map<String, ANTLRParserErrors> parseErrors, String file, ADL2ConversionLog log) {
         try (InputStream stream = getClass().getResourceAsStream("/" + file)) {
             logger.info("trying to parse " + file);
             ADL14Parser parser = new ADL14Parser();
-            ADL2ConversionResult conversionResult = parser.parse(stream, ConversionConfigForTest.getConfig(), log);
-            logger.info(JacksonUtil.getObjectMapper().writeValueAsString(conversionResult.getConversionLog()));
-            Archetype archetype = conversionResult.getArchetype();
-            System.out.println(ADLArchetypeSerializer.serialize(archetype));
+            Archetype archetype = parser.parse(stream, ConversionConfigForTest.getConfig());
+            //logger.info(JacksonUtil.getObjectMapper().writeValueAsString(conversionResult.getConversionLog()));
+           // System.out.println(ADLArchetypeSerializer.serialize(archetype));
             if(parser.errorListener.getErrors().getErrors().size() > 0) {
                 parseErrors.put(file, parser.errorListener.getErrors());
             }
             if(parser.getTree().exception != null) {
                 exceptions.put(file, parser.getTree().exception);
             }
-            return conversionResult.getConversionLog();
+            if(parser.errorListener.getErrors().hasNoErrors()) {
+                return new ADL14Converter().convert(archetype, ConversionConfigForTest.getConfig(), null);
+            }
+
         } catch (Exception e) {
             exceptions.put(file, e);
         }

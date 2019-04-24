@@ -155,11 +155,13 @@ public class PreviousConversionApplier {
             return;
         }
         Set<String> usedValueSets = gatherUsedValueSets(archetype.getDefinition());
-        List<String> valueSetsToRemove = new ArrayList<>();
         for(Map.Entry<String, ValueSet> valueSetEntry:this.conversionLog.getCreatedValueSets().entrySet()) {
             if(!usedValueSets.contains(valueSetEntry.getKey())) {
-                //TODO:remove value set from archetype!
-                System.out.println("TODO: Should remove created value set " + valueSetEntry.getKey());
+                //ok, unused, remove it
+                archetype.getTerminology().getValueSets().remove(valueSetEntry.getKey());
+                for(String language:archetype.getTerminology().getTermDefinitions().keySet()) {
+                    archetype.getTerminology().getTermDefinitions().get(language).remove(valueSetEntry.getKey());
+                }
             }
         }
         //TODO: Gather all unused term bindings and remove from archetype as well
