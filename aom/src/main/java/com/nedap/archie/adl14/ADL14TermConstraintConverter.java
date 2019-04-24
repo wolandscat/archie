@@ -3,13 +3,7 @@ package com.nedap.archie.adl14;
 import com.google.common.collect.Lists;
 import com.nedap.archie.adl14.log.CreatedCode;
 import com.nedap.archie.adl14.log.ReasonForCodeCreation;
-import com.nedap.archie.aom.Archetype;
-import com.nedap.archie.aom.ArchetypeSlot;
-import com.nedap.archie.aom.CArchetypeRoot;
-import com.nedap.archie.aom.CAttribute;
-import com.nedap.archie.aom.CComplexObject;
-import com.nedap.archie.aom.CComplexObjectProxy;
-import com.nedap.archie.aom.CObject;
+import com.nedap.archie.aom.*;
 import com.nedap.archie.aom.primitives.CTerminologyCode;
 import com.nedap.archie.aom.terminology.ArchetypeTerm;
 import com.nedap.archie.aom.terminology.ValueSet;
@@ -24,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ADL14TermConstraintConverter {
 
@@ -49,6 +44,43 @@ public class ADL14TermConstraintConverter {
         for(CAttribute attribute:cObject.getAttributes()) {
             convert(attribute);
         }
+        if(cObject instanceof CComplexObject) {
+            for (CAttributeTuple tuple : ((CComplexObject) cObject).getAttributeTuples()) {
+                //tuples have not been properly converted to CAttributes in this parsed model, so we can ignore them above
+                Set<Integer> tupleTermCodeIndices = getCTerminologyCodeIndices(tuple);
+                for (Integer index : tupleTermCodeIndices) {
+                    List<CPrimitiveObject> termCodes = tuple.getTuples().stream().map(p -> p.getMember(index)).collect(Collectors.toList());
+                    Set<String> atCodes = new LinkedHashSet<>();
+                    for (CPrimitiveObject cPrimitiveObject : termCodes) {
+                        CTerminologyCode cTerminologyCode = (CTerminologyCode) cPrimitiveObject;
+                        convertCTerminologyCode(cTerminologyCode);
+                        if(cTerminologyCode.getConstraint().size() == 1) {
+                            String constraint = cTerminologyCode.getConstraint().get(0);
+                            if(AOMUtils.isValueCode(constraint)) {
+                                atCodes.add(constraint);
+                            }
+                        }
+                    }
+                    if(!atCodes.isEmpty()) {
+                        findOrCreateValueSet(archetype, atCodes, cObject);
+                    }
+                }
+            }
+        }
+    }
+
+    private Set<Integer> getCTerminologyCodeIndices(CAttributeTuple tuple) {
+        Set<Integer> result = new LinkedHashSet<>();
+        for (CPrimitiveTuple primitiveTuple : tuple.getTuples()) {
+            int i = 0;
+            for (CPrimitiveObject cPrimitiveObject : primitiveTuple.getMembers()) {
+                if(cPrimitiveObject instanceof CTerminologyCode) {
+                    result.add(i);
+                }
+                i++;
+            }
+        }
+        return result;
     }
 
     private void convert(CAttribute attribute) {
@@ -216,10 +248,13 @@ public class ADL14TermConstraintConverter {
     private ArchetypeTerm getTerm(String language, CObject owningConstraint) {
         CObject cObject = owningConstraint;
         while(cObject != null) {
-            if (owningConstraint.getNodeId() != null) {
+            if (cObject.getNodeId() != null) {
                 String oldCode = converter.getOldCodeForNewCode(cObject.getNodeId());
                 if(oldCode != null && archetype.getTerminology().getTermDefinition(language, oldCode) != null) {
-                    return archetype.getTerminology().getTermDefinition(language, oldCode);
+                    ArchetypeTerm term = archetype.getTerminology().getTermDefinition(language, oldCode);
+                    if(term != null) {
+                        return term;
+                    }
                 }
             }
             cObject = cObject.getParent() == null ? null : cObject.getParent().getParent();
