@@ -21,4 +21,7 @@ public class ADL2ConversionResult {
         return conversionLog;
     }
 
+    public void setArchetype(Archetype archetype) {
+        this.archetype = archetype;
+    }
 }

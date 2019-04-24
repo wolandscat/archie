@@ -4,11 +4,13 @@ import com.nedap.archie.adl14.log.ADL2ConversionLog;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.ArchetypeHRID;
 import com.nedap.archie.aom.utils.ArchetypeParsePostProcesser;
+import com.nedap.archie.diff.Differentiator;
 import com.nedap.archie.flattener.Flattener;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 import com.nedap.archie.rminfo.MetaModels;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,36 +50,36 @@ public class ADL14Converter {
         InMemoryFullArchetypeRepository repository = new InMemoryFullArchetypeRepository();
         Map<String, ADL2ConversionResult> convertedArchetypes = new LinkedHashMap<>();
         List<Archetype> unprocessed = new ArrayList<>(archetypes);
-        int specializationLevel = 0;
+
         //process the archetypes ordered by specialization level
         //TODO: this is very ugly! Just sort the list on specialization level,
         //then process the list in that order
-        while(!unprocessed.isEmpty() && specializationLevel < 20) {
-            List<Archetype> processed = new ArrayList<>();
-            for(Archetype archetype:unprocessed) {
-                if(archetype.specializationDepth() == specializationLevel) {
-                    try {
-                        //convert!
-                        ADL2ConversionResult result = null;
-                        if (archetype.getParentArchetypeId() != null) {
-                            Archetype parent = repository.getArchetype(archetype.getParentArchetypeId());
-                            Archetype flatParent = new Flattener(repository, metaModels).flatten(parent);
-                            result = convert(archetype, flatParent, conversionConfiguration, null);
-                        } else {
-                            result = convert(archetype, conversionConfiguration, null);
-                        }
-                        convertedArchetypes.put(result.getArchetype().getArchetypeId().getSemanticId(), result);
-                        if (result.getArchetype() != null) {
-                            repository.addArchetype(result.getArchetype());
-                        }
-                    } finally {
-                        processed.add(archetype);
-                    }
+        unprocessed.sort(Comparator.comparingInt(a -> a.specializationDepth()));
+
+        Differentiator differentiator = new Differentiator(metaModels);
+        for(Archetype archetype:unprocessed) {
+
+            //convert!
+            ADL2ConversionResult result = null;
+            if (archetype.getParentArchetypeId() != null) {
+                Archetype parent = repository.getArchetype(archetype.getParentArchetypeId());
+                Archetype flatParent = new Flattener(repository, metaModels).flatten(parent);
+                result = convert(archetype, flatParent, conversionConfiguration, null);
+                if(result.getArchetype() != null) {
+                  //  result.setArchetype(differentiator.differentiate(archetype, result.getArchetype()));
                 }
+            } else {
+                result = convert(archetype, conversionConfiguration, null);
             }
-            unprocessed.removeAll(processed);
-            specializationLevel++;
+            convertedArchetypes.put(result.getArchetype().getArchetypeId().getSemanticId(), result);
+            if (result.getArchetype() != null) {
+                repository.addArchetype(result.getArchetype());
+            }
+
         }
+
+
+
         return new ArrayList<>(convertedArchetypes.values());
     }
 

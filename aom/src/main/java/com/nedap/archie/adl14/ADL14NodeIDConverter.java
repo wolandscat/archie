@@ -147,7 +147,7 @@ public class ADL14NodeIDConverter {
     private void generateMissingNodeIds(CObject cObject) {
         if(!(cObject instanceof CPrimitiveObject) && cObject.getNodeId() == null) {
             String path = cObject.getPath();
-            if(archetype.getParentArchetypeId() != null) {
+            if(archetype.getParentArchetypeId() != null && flatParentArchetype != null) {
                 //TODO: get the matching path in the parent archetype id. Find this node
                 //if found, this is a specialization of said node and needs to be checked for differences and/or
                 //given the same node id
@@ -155,9 +155,21 @@ public class ADL14NodeIDConverter {
                 String parentPath = AOMUtils.pathAtSpecializationLevel(cObject.getPathSegments(), archetype.specializationDepth()-1);
                 System.out.println("path: " + path + " parent path " + parentPath);
                 CAttribute cAttribute = flatParentArchetype.itemAtPath(parentPath);
-                System.out.println(cAttribute);
+                if(cAttribute != null) {
+                    List<CObject> childrenWithMatchingChildName = cAttribute.getChildrenWithMatchingChildName(cObject.getRmTypeName());
+                    if(childrenWithMatchingChildName.size() > 0) {
+                        //TODO: this is way too simple of course :)
+                        cObject.setNodeId(childrenWithMatchingChildName.get(0).getNodeId());
+                    } else {
+                        synthesizeNodeId(cObject, path);
+                    }
+                } else {
+                    synthesizeNodeId(cObject, path);
+                }
+
+            } else {
+                synthesizeNodeId(cObject, path);
             }
-            synthesizeNodeId(cObject, path);
         }
         for(CAttribute attribute:cObject.getAttributes()) {
             generateMissingNodeIds(attribute);
