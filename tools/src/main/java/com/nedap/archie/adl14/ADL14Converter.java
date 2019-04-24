@@ -50,6 +50,8 @@ public class ADL14Converter {
         List<Archetype> unprocessed = new ArrayList<>(archetypes);
         int specializationLevel = 0;
         //process the archetypes ordered by specialization level
+        //TODO: this is very ugly! Just sort the list on specialization level,
+        //then process the list in that order
         while(!unprocessed.isEmpty() && specializationLevel < 20) {
             List<Archetype> processed = new ArrayList<>();
             for(Archetype archetype:unprocessed) {
