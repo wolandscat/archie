@@ -107,39 +107,31 @@ public class ADL14TermConstraintConverter {
                             archetype.getTerminology().getTermBindings().put(termCode.getTerminologyId(), termBindingsMap);
                         }
                         //TODO: check if this is a converted or old term binding - old is unusual, but could be possible!
-                        String existingTermBinding = ADL14ConversionUtil.findExistingTermBinding(termCode.getTerminologyId(), archetype, flatParentArchetype, uri, termBindingsMap);
-                        if (existingTermBinding != null) {
-                            cTerminologyCode.setConstraint(Lists.newArrayList(existingTermBinding));
-                        } else {
-                            String valueCode = archetype.generateNextValueCode();
-                            termBindingsMap.put(valueCode, uri);
-                            CreatedCode createdCode = new CreatedCode(valueCode, ReasonForCodeCreation.CREATED_VALUE_FOR_EXTERNAL_TERM);
-                            createdCode.setOriginalTerm(termCode);
-                            converter.addCreatedCode(termCode.toString(), createdCode);
-                            cTerminologyCode.setConstraint(Lists.newArrayList(valueCode));
-                            for (String language : archetype.getTerminology().getTermDefinitions().keySet()) {
-                                ArchetypeTerm term = new ArchetypeTerm();
-                                term.setCode(valueCode);
-                                term.setText("Term binding for " + termCode.toString() + ", translation not known in ADL 1.4 -> ADL 2 converter");
-                                term.setDescription(term.getText());
-                                archetype.getTerminology().getTermDefinitions().get(language).put(valueCode, term);
-                            }
-                        }
-
+                        String termBinding = findOrAddTermBindingAndCode(termCode, uri, termBindingsMap);
+                        cTerminologyCode.setConstraint(Lists.newArrayList(termBinding));
                     } catch (URISyntaxException e) {
                         //TODO
                     }
                 } else {
-//                    //TODO: create a value set with codes, plus a term binding per code
-//                    Set<String> localCodes = new LinkedHashSet<>();
-//                    for(String code:cTerminologyCode.getConstraint()) {
-//                        String newCode = convertValueCode(code);
-//                        this.addConvertedCode(code, newCode);
-//                        localCodes.add(newCode);
-//                    }
-//
-//                    ValueSet valueSet = findOrCreateValueSet(cTerminologyCode.getArchetype(), localCodes, cTerminologyCode);
-//                    cTerminologyCode.setConstraint(Lists.newArrayList(valueSet.getId()));
+                    String terminologyId = termCode.getTerminologyId();
+                    Map<String, URI> termBindingsMap = archetype.getTerminology().getTermBindings().get(termCode.getTerminologyId());
+                    List<String> atCodes = new ArrayList<>();
+                    List<String> constraints = new ArrayList<>(cTerminologyCode.getConstraint());
+                    cTerminologyCode.setConstraint(atCodes);
+                    for(String constraint:constraints) {
+                        try {
+                            TerminologyCode constraintCode = new TerminologyCode();
+                            constraintCode.setTerminologyId(terminologyId);
+                            constraintCode.setCodeString(constraint);
+                            URI uri = new ADL14ConversionUtil(converter.getConversionConfiguration()).convertToUri(constraintCode);
+                            atCodes.add(findOrAddTermBindingAndCode(termCode, uri, termBindingsMap));
+                        } catch (URISyntaxException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    ValueSet valueSet = findOrCreateValueSet(cTerminologyCode.getArchetype(), new LinkedHashSet<>(atCodes), cTerminologyCode);
+                    cTerminologyCode.setConstraint(Lists.newArrayList(valueSet.getId()));
+
                 }
                 //TODO: assumed value!
 //                if(cTerminologyCode.getAssumedValue() != null) {
@@ -150,6 +142,27 @@ public class ADL14TermConstraintConverter {
 //                }
             }
         }
+    }
+
+    private String findOrAddTermBindingAndCode(TerminologyCode termCode, URI uri, Map<String, URI> termBindingsMap) {
+        String existingTermBinding = ADL14ConversionUtil.findExistingTermBinding(termCode.getTerminologyId(), archetype, flatParentArchetype, uri, termBindingsMap);
+        if(existingTermBinding != null) {
+            return existingTermBinding;
+        }
+        String valueCode = archetype.generateNextValueCode();
+        termBindingsMap.put(valueCode, uri);
+        CreatedCode createdCode = new CreatedCode(valueCode, ReasonForCodeCreation.CREATED_VALUE_FOR_EXTERNAL_TERM);
+        createdCode.setOriginalTerm(termCode);
+        converter.addCreatedCode(termCode.toString(), createdCode);
+
+        for (String language : archetype.getTerminology().getTermDefinitions().keySet()) {
+            ArchetypeTerm term = new ArchetypeTerm();
+            term.setCode(valueCode);
+            term.setText("Term binding for " + termCode.toString() + ", translation not known in ADL 1.4 -> ADL 2 converter");
+            term.setDescription(term.getText());
+            archetype.getTerminology().getTermDefinitions().get(language).put(valueCode, term);
+        }
+        return valueCode;
     }
 
     private ValueSet findOrCreateValueSet(Archetype archetype, Set<String> localCodes, CObject owningConstraint) {

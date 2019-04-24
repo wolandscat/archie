@@ -62,17 +62,22 @@ public class ADL14Converter {
             //convert!
             ADL2ConversionResult result = null;
             if (archetype.getParentArchetypeId() != null) {
-                Archetype parent = repository.getArchetype(archetype.getParentArchetypeId());
-                Archetype flatParent = new Flattener(repository, metaModels).flatten(parent);
-                result = convert(archetype, flatParent, conversionConfiguration, null);
-                if(result.getArchetype() != null) {
-                    result.setArchetype(differentiator.differentiate(result.getArchetype(), flatParent));
+                try {
+                    Archetype parent = repository.getArchetype(archetype.getParentArchetypeId());
+                    Archetype flatParent = new Flattener(repository, metaModels).flatten(parent);
+                    result = convert(archetype, flatParent, conversionConfiguration, null);
+                    if (result.getArchetype() != null) {
+                        result.setArchetype(differentiator.differentiate(result.getArchetype(), flatParent));
+                    }
+                } catch (Exception e) {
+                    //TODO: add exception to result
                 }
             } else {
                 result = convert(archetype, conversionConfiguration, null);
             }
-            convertedArchetypes.put(result.getArchetype().getArchetypeId().getSemanticId(), result);
-            if (result.getArchetype() != null) {
+            if(result != null && result.getArchetype() != null && result.getArchetype().getArchetypeId() != null) {
+                convertedArchetypes.put(result.getArchetype().getArchetypeId().getSemanticId(), result);
+
                 repository.addArchetype(result.getArchetype());
             }
 
