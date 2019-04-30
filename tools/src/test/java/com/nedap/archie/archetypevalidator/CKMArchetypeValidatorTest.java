@@ -13,6 +13,8 @@ import org.junit.Test;
 import org.openehr.referencemodels.BuiltinReferenceModels;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -34,6 +36,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class CKMArchetypeValidatorTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(CKMArchetypeValidatorTest.class);
+
     private static Set<String> archetypesWithKnownErrors = new HashSet<>();
     static {
         archetypesWithKnownErrors.add("openEHR-DEMOGRAPHIC-PERSON.person-patient.v1.0.0");
@@ -54,6 +58,7 @@ public class CKMArchetypeValidatorTest {
         FullArchetypeRepository repository = TestUtil.parseCKM();
         ReferenceModels models = new ReferenceModels();
         models.registerModel(ArchieRMInfoLookup.getInstance());
+        logger.info("archetypes parsed: " + repository.getAllArchetypes().size());
         repository.compile(models);
 
         runTest(repository);
@@ -65,6 +70,7 @@ public class CKMArchetypeValidatorTest {
         MetaModels bmmReferenceModels = new MetaModels(null, BuiltinReferenceModels.getBmmRepository(), BuiltinReferenceModels.getAomProfiles());
 
         FullArchetypeRepository repository = TestUtil.parseCKM();
+        logger.info("archetypes parsed: " + repository.getAllArchetypes().size());
         repository.compile(bmmReferenceModels);
 
         runTest(repository);

@@ -3,6 +3,7 @@ package com.nedap.archie.adl14;
 import com.nedap.archie.adl14.log.ADL2ConversionLog;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
 import com.nedap.archie.aom.Archetype;
+import com.nedap.archie.archetypevalidator.ValidationResult;
 import com.nedap.archie.diff.Differentiator;
 import com.nedap.archie.flattener.Flattener;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
@@ -43,9 +44,9 @@ public class LargeSetOfADL14sTest {
 
         List<Archetype> archetypes = new ArrayList<>();
         for(String file:adlFiles) {
-            if(!file.contains("braden")) {
-                continue;
-            }
+//            if(!file.contains("braden")) {
+//                continue;
+//            }
             Archetype archetype = parse(exceptions, parseErrors, file);
             if(archetype != null) {
                 archetypes.add(archetype);
@@ -54,7 +55,7 @@ public class LargeSetOfADL14sTest {
         }
         ADL2ConversionResultList converted = new ADL14Converter().convert(BuiltinReferenceModels.getMetaModels(), archetypes, ConversionConfigForTest.getConfig(), null);
         for(ADL2ConversionResult result:converted.getConversionResults()) {
-            System.out.println(ADLArchetypeSerializer.serialize(result.getArchetype()));
+     //       System.out.println(ADLArchetypeSerializer.serialize(result.getArchetype()));
         }
 
         for(String file:adlFiles) {
@@ -73,9 +74,39 @@ public class LargeSetOfADL14sTest {
             }
         }
 
-        System.out.println("parsed adls: " + adlFiles.size());
-        System.out.println("parsed adls with ANTLR parse errors: " + parseErrors.size());
-        System.out.println("parsed adls with Exceptions: " + exceptions.size());
+        int convertedArchetypes = 0;
+        for(ADL2ConversionResult conversionResult:converted.getConversionResults()) {
+            if(conversionResult.getException() != null) {
+                logger.error("exception in converter for archetype id " + conversionResult.getArchetypeId(), conversionResult.getException());
+            } else if (conversionResult.getArchetype() != null) {
+                convertedArchetypes++;
+            }
+        }
+
+        logger.info("parsed adls: " + adlFiles.size());
+        logger.info("number of archetypes: " + archetypes.size());
+        logger.info("number of adl 2 archetypes: " + convertedArchetypes);
+        logger.info("parsed adls with ANTLR parse errors: " + parseErrors.size());
+        logger.info("parsed adls with Exceptions: " + exceptions.size());
+
+        InMemoryFullArchetypeRepository adl2Repository = new InMemoryFullArchetypeRepository();
+        for(ADL2ConversionResult conversionResult:converted.getConversionResults()) {
+            if(conversionResult.getException() == null && conversionResult.getArchetype() != null) {
+                adl2Repository.addArchetype(conversionResult.getArchetype());
+            }
+        }
+        adl2Repository.compile(BuiltinReferenceModels.getMetaModels());
+        int passingValidations = 0;
+        for(ValidationResult validationResult:adl2Repository.getAllValidationResults()) {
+            if(validationResult.passes()) {
+                passingValidations++;
+            } else {
+                logger.error("error validating {}: {}", validationResult.getArchetypeId(), validationResult.getErrors());
+            }
+        }
+
+        logger.info("passing validation: " + passingValidations);
+
         //TODO: this is rather ugly, but I just want not more failing tests, that's all :)
         //this now contains regexp matching errors, version 1.5 (arguably, should not fail on that at all!)
         //and some other problems
