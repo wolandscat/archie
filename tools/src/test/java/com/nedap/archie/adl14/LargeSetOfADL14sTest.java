@@ -52,8 +52,8 @@ public class LargeSetOfADL14sTest {
             }
 
         }
-        List<ADL2ConversionResult> converted = new ADL14Converter().convert(BuiltinReferenceModels.getMetaModels(), archetypes, ConversionConfigForTest.getConfig());
-        for(ADL2ConversionResult result:converted) {
+        ADL2ConversionResultList converted = new ADL14Converter().convert(BuiltinReferenceModels.getMetaModels(), archetypes, ConversionConfigForTest.getConfig(), null);
+        for(ADL2ConversionResult result:converted.getConversionResults()) {
             System.out.println(ADLArchetypeSerializer.serialize(result.getArchetype()));
         }
 

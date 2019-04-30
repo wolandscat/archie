@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class ADL2ConversionLog {
 
-    private Map<String, ConvertedCodeResult> convertedCodes = new LinkedHashMap<>();
+    private String archetypeId;
     private Map<String, CreatedCode> createdCodes = new LinkedHashMap<>();
     private Map<String, ValueSet> createdValueSets = new LinkedHashMap<>();
 
@@ -18,17 +18,8 @@ public class ADL2ConversionLog {
     public ADL2ConversionLog(Map<String, ConvertedCodeResult> convertedCodes,
                              Map<String, CreatedCode> createdCodes,
                              Map<String, ValueSet> createdValueSets) {
-        this.convertedCodes = convertedCodes;
         this.createdCodes = createdCodes;
         this.createdValueSets = createdValueSets;
-    }
-
-    public Map<String, ConvertedCodeResult> getConvertedCodes() {
-        return convertedCodes;
-    }
-
-    public void setConvertedCodes(Map<String, ConvertedCodeResult> convertedCodes) {
-        this.convertedCodes = convertedCodes;
     }
 
     public Map<String, CreatedCode> getCreatedCodes() {
