@@ -4,10 +4,14 @@ import com.nedap.archie.adl14.log.ADL2ConversionLog;
 import com.nedap.archie.adl14.treewalkers.ADL14Listener;
 import com.nedap.archie.adlparser.antlr.Adl14Lexer;
 import com.nedap.archie.adlparser.antlr.Adl14Parser;
+import com.nedap.archie.adlparser.modelconstraints.BMMConstraintImposer;
+import com.nedap.archie.adlparser.modelconstraints.ModelConstraintImposer;
+import com.nedap.archie.adlparser.modelconstraints.ReflectionConstraintImposer;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
 import com.nedap.archie.antlr.errors.ArchieErrorListener;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.utils.ArchetypeParsePostProcesser;
+import com.nedap.archie.rminfo.MetaModels;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -25,6 +29,7 @@ import java.nio.charset.Charset;
  */
 public class ADL14Parser {
 
+    private final MetaModels metaModels;
     private ANTLRParserErrors errors;
 
     private Lexer lexer;
@@ -39,8 +44,8 @@ public class ADL14Parser {
      */
     private boolean logEnabled = true;
 
-    public ADL14Parser() {
-
+    public ADL14Parser(MetaModels models) {
+        this.metaModels = models;
     }
 
     public Archetype parse(String adl, ADL14ConversionConfiguration conversionConfiguration) throws IOException {
@@ -67,6 +72,16 @@ public class ADL14Parser {
         walker= new ParseTreeWalker();
         walker.walk(listener, tree);
         Archetype result = listener.getArchetype();
+        if (metaModels != null) {
+            metaModels.selectModel(result);
+            if(metaModels.getSelectedBmmModel() != null) {
+                ModelConstraintImposer imposer = new BMMConstraintImposer(metaModels.getSelectedBmmModel());
+                imposer.setSingleOrMultiple(result.getDefinition());
+            } else if (metaModels.getSelectedModelInfoLookup() != null) {
+                ModelConstraintImposer imposer = new ReflectionConstraintImposer(metaModels.getSelectedModelInfoLookup());
+                imposer.setSingleOrMultiple(result.getDefinition());
+            }
+        }
         return result;
 
     }

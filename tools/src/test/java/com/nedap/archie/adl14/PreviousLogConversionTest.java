@@ -20,7 +20,7 @@ public class PreviousLogConversionTest {
         try(InputStream stream = getClass().getResourceAsStream("openEHR-EHR-COMPOSITION.review.v1.adl")) {
             ADL2ConversionResultList result = new ADL14Converter().convert(
                     BuiltinReferenceModels.getMetaModels(),
-                    Lists.newArrayList(new ADL14Parser().parse(stream, ConversionConfigForTest.getConfig())),
+                    Lists.newArrayList(new ADL14Parser(BuiltinReferenceModels.getMetaModels()).parse(stream, ConversionConfigForTest.getConfig())),
                     ConversionConfigForTest.getConfig(), null);
             log = result.getConversionLog();
         }
@@ -30,7 +30,7 @@ public class PreviousLogConversionTest {
         try(InputStream stream = getClass().getResourceAsStream("openEHR-EHR-COMPOSITION.review.v1.modified.adl")) {
             ADL2ConversionResultList result = new ADL14Converter().convert(
                     BuiltinReferenceModels.getMetaModels(),
-                    Lists.newArrayList(new ADL14Parser().parse(stream, ConversionConfigForTest.getConfig())),
+                    Lists.newArrayList(new ADL14Parser(BuiltinReferenceModels.getMetaModels()).parse(stream, ConversionConfigForTest.getConfig())),
                     ConversionConfigForTest.getConfig(), log);
             CAttribute attribute = result.getConversionResults().get(0).getArchetype().itemAtPath("/category");
             assertEquals(2, attribute.getChildren().size());

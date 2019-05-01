@@ -245,7 +245,7 @@ public class ADL14TermConstraintConverter {
      * terminology, so using the newCodetoOldCodeMap to retrieve the old code first
      * @param owningConstraint
      */
-    private ArchetypeTerm getTerm(String language, CObject owningConstraint) {
+    protected ArchetypeTerm getTerm(String language, CObject owningConstraint) {
         CObject cObject = owningConstraint;
         while(cObject != null) {
             if (cObject.getNodeId() != null) {

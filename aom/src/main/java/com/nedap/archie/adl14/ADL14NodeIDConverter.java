@@ -16,11 +16,14 @@ import com.nedap.archie.aom.terminology.ArchetypeTerm;
 import com.nedap.archie.aom.terminology.ValueSet;
 import com.nedap.archie.aom.utils.AOMUtils;
 import com.nedap.archie.aom.utils.NodeIdUtil;
+import com.nedap.archie.base.Cardinality;
 import com.nedap.archie.paths.PathSegment;
 import com.nedap.archie.paths.PathUtil;
 import com.nedap.archie.query.APathQuery;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +68,7 @@ public class ADL14NodeIDConverter {
     }
 
     public ADL2ConversionLog convert() {
-
+        correctItemsCardinality(archetype.getDefinition());
         convert(archetype.getDefinition());
         if(previousConversionApplier != null) {
             //tricky stuff here:
@@ -90,10 +93,49 @@ public class ADL14NodeIDConverter {
         return new ADL2ConversionLog(/*convertedCodes*/ null, createdCodes, createdValueSets);
     }
 
-    private void convertTermDefinitions() {
-        for(ConvertedCodeResult convertedCode: convertedCodes.values()) {
-            updateTermDefinition(convertedCode.getOriginalCode(), convertedCode.getConvertedCodes());
+    private void correctItemsCardinality(CObject cObject) {
+        for(CAttribute attribute:cObject.getAttributes()) {
+            if(attribute.getRmAttributeName().equalsIgnoreCase("items") && cObject.getRmTypeName().equalsIgnoreCase("CLUSTER") && attribute.getCardinality() != null) {
+                Cardinality cardinality = attribute.getCardinality();
+                if(cardinality.getInterval().isUpperUnbounded() && cardinality.getInterval().getLower() == 0 && cardinality.getInterval().isLowerIncluded()) {
+                    //ok this is an invalid CLUSTER.items cardinality, since for a cluster this is apparently >= 1.
+                    cardinality.getInterval().setLower(1);
+                }
+
+            }
+            for(CObject child:attribute.getChildren()) {
+                correctItemsCardinality(child);
+            }
         }
+
+    }
+
+    private void convertTermDefinitions() {
+        //process the codes in alphabetical order, high to low, to prevent overwriting codes
+        //even better would probably be to create an empty terminology and separate all new+converted codes and old codes
+        //instead of doing this in place. Worth a refactor perhaps?
+        ArrayList<ConvertedCodeResult> sortedCodes = new ArrayList(convertedCodes.values());
+        Comparator<ConvertedCodeResult> comparator = Comparator.comparing(r -> r.getOriginalCode());
+        sortedCodes.sort(comparator.reversed());
+
+
+        for(ConvertedCodeResult convertedCode: sortedCodes) {
+            for (String language : archetype.getTerminology().getTermDefinitions().keySet()) {
+                Map<String, ArchetypeTerm> terms = archetype.getTerminology().getTermDefinitions().get(language);
+                ArchetypeTerm term = terms.remove(convertedCode.getOriginalCode());
+                if (term != null) {
+                    for (String newCode : convertedCode.getConvertedCodes()) {
+                        ArchetypeTerm newTerm = new ArchetypeTerm();
+                        newTerm.setCode(newCode);
+                        newTerm.setText(term.getText());
+                        newTerm.setDescription(term.getDescription());
+                        newTerm.putAll(term.getOtherItems());
+                        terms.put(newCode, term);
+                    }
+                }
+            }
+        }
+
         //TODO: scan terminology for any unused codes. Then warn or convert about them?
     }
 
@@ -183,12 +225,10 @@ public class ADL14NodeIDConverter {
                     }
                 } else {
                     synthesizeNodeId(cObject, path);
-                    //TODO: if cObject.getParent().isMultiple: add term to terminology
                 }
 
             } else {
                 synthesizeNodeId(cObject, path);
-                //TODO: if cObject.getParent().isMultiple: add term to terminology
             }
         }
     }
@@ -199,6 +239,19 @@ public class ADL14NodeIDConverter {
         createdCode.setRmTypeName(cObject.getRmTypeName());
         createdCode.setPathCreated(path);
         addCreatedCode(cObject.getNodeId(), createdCode);
+        if(cObject.getParent().isMultiple()) {
+            for(String language: archetype.getTerminology().getTermDefinitions().keySet()) {
+                //TODO: add new archetype term to conversion log!
+                ArchetypeTerm term = termConstraintConverter.getTerm(language, cObject);
+                if(term != null) {
+                    ArchetypeTerm newTerm = new ArchetypeTerm();
+                    newTerm.setCode(cObject.getNodeId());
+                    newTerm.setText(term.getText() + " (synthesised)");
+                    newTerm.setDescription(term.getDescription() + " (synthesised)");
+                    archetype.getTerminology().getTermDefinitions().get(language).put(newTerm.getCode(), newTerm);
+                }
+            }
+        }
     }
 
     protected void addCreatedCode(String code, CreatedCode createdCode) {
@@ -261,26 +314,6 @@ public class ADL14NodeIDConverter {
             convertedCodes.put(oldNodeId, new ConvertedCodeResult(oldNodeId, newNodeId));
         }
         this.newCodeToOldCodeMap.put(newNodeId, oldNodeId);
-    }
-
-    private void updateTermDefinition(String oldCode, List<String> newCodes) {
-        for(String language:archetype.getTerminology().getTermDefinitions().keySet()) {
-            Map<String, ArchetypeTerm> terms = archetype.getTerminology().getTermDefinitions().get(language);
-            ArchetypeTerm term = terms.remove(oldCode);
-            if(term != null) {
-                for (String newCode : newCodes) {
-                    ArchetypeTerm newTerm = new ArchetypeTerm();
-                    newTerm.setCode(newCode);
-                    newTerm.setText(term.getText());
-                    newTerm.setDescription(term.getDescription());
-                    newTerm.putAll(term.getOtherItems());
-                    terms.put(newCode, term);
-                }
-            } else {
-                //TODO
-                System.out.println("hmm, this is weird, cannot find term for code " + oldCode);
-            }
-        }
     }
 
     public String convertNodeId(String oldNodeId) {
