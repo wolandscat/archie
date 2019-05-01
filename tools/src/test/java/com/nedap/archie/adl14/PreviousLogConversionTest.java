@@ -17,7 +17,7 @@ public class PreviousLogConversionTest {
     @Test
     public void applyConsistentConversion() throws Exception {
         ADL2ConversionRunLog log = null;
-        try(InputStream stream = getClass().getResourceAsStream("openEHR-EHR-COMPOSITION.review.v1.adl")) {
+        try(InputStream stream = getClass().getResourceAsStream("openehr-EHR-COMPOSITION.review.v1.adl")) {
             ADL2ConversionResultList result = new ADL14Converter().convert(
                     BuiltinReferenceModels.getMetaModels(),
                     Lists.newArrayList(new ADL14Parser(BuiltinReferenceModels.getMetaModels()).parse(stream, ConversionConfigForTest.getConfig())),
