@@ -10,6 +10,7 @@ import com.nedap.archie.flattener.Flattener;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 import com.nedap.archie.rminfo.MetaModels;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -64,6 +65,9 @@ public class ADL14Converter {
                 if (archetype.getParentArchetypeId() != null) {
 
                         Archetype parent = repository.getArchetype(archetype.getParentArchetypeId());
+                        if(parent == null) {
+                            throw new RuntimeException(MessageFormat.format("Cannot find parent {0} for archetype {1}", archetype.getParentArchetypeId(), archetype.getArchetypeId()));
+                        }
                         Archetype flatParent = new Flattener(repository, metaModels).flatten(parent);
                         result = convert(archetype, flatParent, conversionConfiguration, previousConversion);
                         if (result.getArchetype() != null) {
