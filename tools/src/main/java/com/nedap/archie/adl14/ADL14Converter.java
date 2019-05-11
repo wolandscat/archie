@@ -19,36 +19,20 @@ import java.util.Map;
 
 public class ADL14Converter {
 
-    /*
-     * TODO: this should be a private method
-     */
-    public ADL2ConversionResult convert(Archetype archetype, ADL14ConversionConfiguration conversionConfiguration, ADL2ConversionRunLog previousConversion) {
-        return convert(archetype, null, conversionConfiguration, previousConversion);
-    }
+    private final MetaModels metaModels;
+    private final ADL14ConversionConfiguration conversionConfiguration;
 
-    /*
-     * TODO: this should be a private method
-     */
-    public ADL2ConversionResult convert(Archetype archetype, Archetype flatParent, ADL14ConversionConfiguration conversionConfiguration, ADL2ConversionRunLog previousConversion) {
-        ADL2ConversionLog previousLog = previousConversion == null ? null : previousConversion.getConversionLog(archetype.getArchetypeId().getSemanticId());
-        Archetype result = archetype.clone();
-        new ADL14DescriptionConverter().convert(result);
-
-        ADL14NodeIDConverter adl14NodeIDConverter = new ADL14NodeIDConverter(result, flatParent, conversionConfiguration, previousLog);
-        ADL2ConversionLog convert = adl14NodeIDConverter.convert();//fixes archetype in place
-
-        setCorrectVersions(result);
-        //set some values that are not directly in ODIN or ADL
-        ArchetypeParsePostProcesser.fixArchetype(result);
-
-        return new ADL2ConversionResult(result, convert);
+    public ADL14Converter(MetaModels metaModels, ADL14ConversionConfiguration conversionConfiguration) {
+        this.metaModels = metaModels;
+        this.conversionConfiguration = conversionConfiguration;
     }
 
 
-    public ADL2ConversionResultList convert(MetaModels metaModels,
-                                              List<Archetype> archetypes,
-                                              ADL14ConversionConfiguration conversionConfiguration,
-                                              ADL2ConversionRunLog previousConversion) {
+    public ADL2ConversionResultList convert(List<Archetype> archetypes) {
+        return convert(archetypes, null);
+    }
+
+    public ADL2ConversionResultList convert(List<Archetype> archetypes, ADL2ConversionRunLog previousConversion) {
         ADL2ConversionResultList resultList = new ADL2ConversionResultList();
 
         InMemoryFullArchetypeRepository repository = new InMemoryFullArchetypeRepository();
@@ -64,18 +48,18 @@ public class ADL14Converter {
             try {
                 if (archetype.getParentArchetypeId() != null) {
 
-                        Archetype parent = repository.getArchetype(archetype.getParentArchetypeId());
-                        if(parent == null) {
-                            throw new RuntimeException(MessageFormat.format("Cannot find parent {0} for archetype {1}", archetype.getParentArchetypeId(), archetype.getArchetypeId()));
-                        }
-                        Archetype flatParent = new Flattener(repository, metaModels).flatten(parent);
-                        result = convert(archetype, flatParent, conversionConfiguration, previousConversion);
-                        if (result.getArchetype() != null) {
-                            result.setArchetype(differentiator.differentiate(result.getArchetype(), flatParent));
-                        }
-                        resultList.addConversionResult(result);
+                    Archetype parent = repository.getArchetype(archetype.getParentArchetypeId());
+                    if(parent == null) {
+                        throw new RuntimeException(MessageFormat.format("Cannot find parent {0} for archetype {1}", archetype.getParentArchetypeId(), archetype.getArchetypeId()));
+                    }
+                    Archetype flatParent = new Flattener(repository, metaModels).flatten(parent);
+                    result = convert(archetype, flatParent, previousConversion);
+                    if (result.getArchetype() != null) {
+                        result.setArchetype(differentiator.differentiate(result.getArchetype(), flatParent));
+                    }
+                    resultList.addConversionResult(result);
                 } else {
-                    result = convert(archetype, conversionConfiguration, previousConversion);
+                    result = convert(archetype, previousConversion);
                     resultList.addConversionResult(result);
                 }
                 if(result != null && result.getArchetype() != null && result.getArchetype().getArchetypeId() != null) {
@@ -90,6 +74,28 @@ public class ADL14Converter {
 
         return resultList;
     }
+
+
+    private ADL2ConversionResult convert(Archetype archetype,  ADL2ConversionRunLog previousConversion) {
+        return convert(archetype, null, previousConversion);
+    }
+
+    private ADL2ConversionResult convert(Archetype archetype, Archetype flatParent, ADL2ConversionRunLog previousConversion) {
+        ADL2ConversionLog previousLog = previousConversion == null ? null : previousConversion.getConversionLog(archetype.getArchetypeId().getSemanticId());
+        Archetype convertedArchetype = archetype.clone();
+        new ADL14DescriptionConverter().convert(convertedArchetype);
+        ADL2ConversionResult result = new ADL2ConversionResult(convertedArchetype);
+        ADL14NodeIDConverter adl14NodeIDConverter = new ADL14NodeIDConverter(this.metaModels, convertedArchetype, flatParent, conversionConfiguration, previousLog, result);
+        ADL2ConversionLog conversionLog = adl14NodeIDConverter.convert();//fixes archetype in place
+        result.setConversionLog(conversionLog);
+        setCorrectVersions(convertedArchetype);
+        //set some values that are not directly in ODIN or ADL
+        ArchetypeParsePostProcesser.fixArchetype(convertedArchetype);
+        return result;
+
+    }
+
+
 
     private void setCorrectVersions(Archetype result) {
         result.setAdlVersion("2.0.6");

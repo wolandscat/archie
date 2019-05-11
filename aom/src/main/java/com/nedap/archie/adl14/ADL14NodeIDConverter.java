@@ -18,8 +18,8 @@ import com.nedap.archie.aom.utils.AOMUtils;
 import com.nedap.archie.aom.utils.NodeIdUtil;
 import com.nedap.archie.base.Cardinality;
 import com.nedap.archie.paths.PathSegment;
-import com.nedap.archie.paths.PathUtil;
 import com.nedap.archie.query.APathQuery;
+import com.nedap.archie.rminfo.MetaModels;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -37,6 +37,8 @@ public class ADL14NodeIDConverter {
 
     private final ADL14TermConstraintConverter termConstraintConverter;
     private final PreviousConversionApplier previousConversionApplier;
+    private final ADL2ConversionResult conversionResult;
+    private final MetaModels metaModels;
 
 
     /**
@@ -49,17 +51,14 @@ public class ADL14NodeIDConverter {
     private Map<String, String> newCodeToOldCodeMap = new LinkedHashMap<>();
 
 
-
-    public ADL14NodeIDConverter(Archetype archetype, Archetype flatParentArchetype) {
-        this(archetype, flatParentArchetype, new ADL14ConversionConfiguration(), null);
-    }
-
-    public ADL14NodeIDConverter(Archetype archetype, Archetype flatParentArchetype, ADL14ConversionConfiguration configuration, ADL2ConversionLog oldLog) {
+    public ADL14NodeIDConverter(MetaModels metaModels, Archetype archetype, Archetype flatParentArchetype, ADL14ConversionConfiguration configuration, ADL2ConversionLog oldLog, ADL2ConversionResult conversionResult) {
+        this.metaModels = metaModels;
         this.conversionConfiguration = configuration;
         this.archetype = archetype;
         this.flatParentArchetype = flatParentArchetype;
         this.termConstraintConverter = new ADL14TermConstraintConverter(this, archetype, flatParentArchetype);
         this.previousConversionApplier = new PreviousConversionApplier(this, archetype, oldLog);
+        this.conversionResult = conversionResult;
     }
 
 
@@ -188,12 +187,6 @@ public class ADL14NodeIDConverter {
 
     private void generateMissingNodeIds(CObject cObject) {
 
-        //depth first traversal, so the generated paths in the conversion log will not yet contain id codes
-        //so they can be directly applied after converting the node id at-codes to id-codes
-        for(CAttribute attribute:cObject.getAttributes()) {
-            generateMissingNodeIds(attribute);
-        }
-
         if(!(cObject instanceof CPrimitiveObject) && cObject.getNodeId() == null) {
             String path = cObject.getPath();
             if(archetype.getParentArchetypeId() != null && flatParentArchetype != null) {
@@ -205,22 +198,26 @@ public class ADL14NodeIDConverter {
                 System.out.println("path: " + path + " parent path " + parentPath);
                 CAttribute cAttributeInParent = flatParentArchetype.itemAtPath(parentPath);
                 if(cAttributeInParent != null) {
-                    List<CObject> childrenWithMatchingChildNameInParent = cAttributeInParent.getChildrenWithMatchingChildName(cObject.getRmTypeName());
-                    if(childrenWithMatchingChildNameInParent.size() == 1 ) {
-                        cObject.setNodeId(childrenWithMatchingChildNameInParent.get(0).getNodeId());
-                    } else if(childrenWithMatchingChildNameInParent.size() > 1 ) {
-                        //TODO: redefine the first/any parent node that can be found?!
+                    List<CObject> childrenWithSameRmTypeName = cAttributeInParent.getChildrenByRmTypeName   (cObject.getRmTypeName());
+                    if(childrenWithSameRmTypeName.size() == 1 ) {
+                        cObject.setNodeId(childrenWithSameRmTypeName.get(0).getNodeId());
+                    } else if(childrenWithSameRmTypeName.size() > 1 ) {
+                        //this is a bit odd - it now specializes the first child it finds. Let's warn
                         synthesizeNodeId(cObject, path);
+                        conversionResult.getLog().addWarningWithLocation(ADL14ConversionMessageCode.WARNING_SPECIALIZED_FIRST_MATCHING_CHILD, cObject.path());
                     } else if (cAttributeInParent.getChildren().size() == 1) {
-                        //if type conforms to parent type:
-                        //  if cAttribtueInParent.isSingle() {
-                        //   refine id code
-                        //  else
-                        //   redefine id code
-                        //   something with terminology here in code
-                        //
-                        //
+                        if(this.metaModels.rmTypesConformant(cObject.getRmTypeName(), cAttributeInParent.getChildren().get(0).getRmTypeName())) {
+                            //this replaces a parent node, so a specialisation. add id code and possibly a term
+                            createSpecialisedNodeId(cObject, path, childrenWithSameRmTypeName);
+                        } else {
+                            // doesn't conform to parent type, but we assume does to RM type.
+                            // E.g. DV_INTERVAL<> being added alongside a DV_QUANTITY
+                            synthesizeNodeId(cObject, path);
+                        }
                     } else {
+                        //TODO: this comes from ADL workbench. Does it cover all cases? I mean the else directly above could apply,
+                        //or there could be a conformant node that can be specialised - this does not check
+                        //TODO: log error, but continue instead of throwing exception?
                         throw new RuntimeException("cannot convert node id at path " + path);//TODO: proper exception
                     }
                 } else {
@@ -231,6 +228,19 @@ public class ADL14NodeIDConverter {
                 synthesizeNodeId(cObject, path);
             }
         }
+
+        for(CAttribute attribute:cObject.getAttributes()) {
+            generateMissingNodeIds(attribute);
+        }
+    }
+
+    private void createSpecialisedNodeId(CObject cObject, String path, List<CObject> childrenWithSameRmTypeName) {
+        cObject.setNodeId(archetype.generateNextSpecializedIdCode(childrenWithSameRmTypeName.get(0).getNodeId()));
+        CreatedCode createdCode = new CreatedCode(cObject.getNodeId(), ReasonForCodeCreation.C_OBJECT_WITHOUT_NODE_ID);
+        createdCode.setRmTypeName(cObject.getRmTypeName());
+        createdCode.setPathCreated(path);
+        addCreatedCode(cObject.getNodeId(), createdCode);
+        createTermForNewCode(cObject);
     }
 
     private void synthesizeNodeId(CObject cObject, String path) {
@@ -239,6 +249,10 @@ public class ADL14NodeIDConverter {
         createdCode.setRmTypeName(cObject.getRmTypeName());
         createdCode.setPathCreated(path);
         addCreatedCode(cObject.getNodeId(), createdCode);
+        createTermForNewCode(cObject);
+    }
+
+    private void createTermForNewCode(CObject cObject) {
         if(cObject.getParent().isMultiple()) {
             for(String language: archetype.getTerminology().getTermDefinitions().keySet()) {
                 //TODO: add new archetype term to conversion log!

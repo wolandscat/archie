@@ -322,4 +322,15 @@ public class Archetype extends AuthoredResource {
         return prefix;
     }
 
+    public String generateNextSpecializedIdCode(String nodeId) {
+        int specializationDepth = specializationDepth();
+        int nodeIdSpecializationDepth = AOMUtils.getSpecializationDepthFromCode(nodeId);
+        if(nodeIdSpecializationDepth >= specializationDepth) {
+            throw new IllegalArgumentException("cannot specialize a node id at the same or higher specialization depth as the archetype");
+        }
+
+        int maximumIdCode = AOMUtils.getMaximumIdCode(specializationDepth, nodeId, getAllUsedCodes());
+        return nodeId + AdlCodeDefinitions.SPECIALIZATION_SEPARATOR + generateSpecializationDepthCodePrefix(specializationDepth-nodeIdSpecializationDepth-1) + (maximumIdCode+1);
+
+    }
 }

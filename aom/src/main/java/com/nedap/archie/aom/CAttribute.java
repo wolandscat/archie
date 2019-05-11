@@ -478,7 +478,13 @@ public class CAttribute extends ArchetypeConstraint {
         return result;
     }
 
-    public List<CObject> getChildrenWithMatchingChildName(String rmTypeName) {
+
+    /**
+     * Return all children that have the exact same type name as input.
+     * @param rmTypeName
+     * @return
+     */
+    public List<CObject> getChildrenByRmTypeName(String rmTypeName) {
         List<CObject> result = new ArrayList<>();
 
         for(int i = 0; i < children.size(); i++) {
