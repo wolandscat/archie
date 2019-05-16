@@ -91,8 +91,7 @@ public class PreviousConversionApplier {
                 termBindingsMap = new LinkedHashMap<>();
                 archetype.getTerminology().getTermBindings().put(createdCode.getOriginalTerm().getTerminologyId(), termBindingsMap);
             }
-            //TODO: check if this is a converted or old term binding - old is unusual, but could be possible!
-            //TODO: add the flat parent here!
+
             String existingTermBinding = ADL14ConversionUtil.findExistingTermBinding(createdCode.getOriginalTerm().getTerminologyId(), archetype, null, uri, termBindingsMap);
             if (existingTermBinding == null) {
                 String valueCode = createdCode.getGeneratedCode();
@@ -118,8 +117,8 @@ public class PreviousConversionApplier {
     private void applyPreviousSynthesizedCode(CreatedCode createdCode) {
         ArchetypeModelObject object = archetype.itemAtPath(createdCode.getPathCreated());
         if(object == null) {
-            //throw new IllegalArgumentException("path in previously converted node id points null");
-            //TODO: warn.
+            //This happens when something has been deleted in the source archetype. That's fine
+            this.converter.getConversionResult().getLog().addInfoWithLocation(ADL14ConversionMessageCode.INFO_PREVIOUSLY_CONVERTED_CODE_DELETED, createdCode.getPathCreated());
         } else if(!(object instanceof CAttribute)) {
             //this MUST be an attribute, so something is wrong
             throw new IllegalArgumentException("path in previously converted node id points to a CObject, must be a CAttribute");
@@ -135,7 +134,7 @@ public class PreviousConversionApplier {
                 converter.addCreatedCode(createdCode.getGeneratedCode(), createdCode);
 
             } else {
-                //TODO: warn. has been deleted, can be fine, can be less than fine :)
+                this.converter.getConversionResult().getLog().addInfoWithLocation(ADL14ConversionMessageCode.INFO_PREVIOUSLY_CONVERTED_CODE_DELETED, createdCode.getPathCreated());
             }
         }
     }

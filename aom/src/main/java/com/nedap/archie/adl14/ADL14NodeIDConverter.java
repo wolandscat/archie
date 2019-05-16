@@ -81,7 +81,6 @@ public class ADL14NodeIDConverter {
             //unless they are in the converted codes.
             previousConversionApplier.addCreatedCodes();
             previousConversionApplier.addValueSets();
-            //TODO: remove all unused value sets and term bindings created here
         }
         termConstraintConverter.convert();
         convertTermBindings(archetype);
@@ -135,7 +134,7 @@ public class ADL14NodeIDConverter {
             }
         }
 
-        //TODO: scan terminology for any unused codes. Then warn or convert about them?
+        //the terminology can still contain old unused codes now. The archetype validation will warn about that later
     }
 
     private void convertTermBindings(Archetype archetype) {
@@ -155,8 +154,9 @@ public class ADL14NodeIDConverter {
                                 newTermbindingsMap.put(newCode, termbindingMap.get(valueOrPath));
                             }
                         } else {
-                            //TODO: bound to at-code without automated conversion. Not sure if this should be an at, ac or id code
+
                             newTermbindingsMap.put(valueOrPath, termbindingMap.get(valueOrPath));
+                            conversionResult.getLog().addWarningWithLocation(ADL14ConversionMessageCode.WARNING_UNKNOWN_CODE_TYPE_IN_TERMBINDING, valueOrPath, valueOrPath);
                         }
                     } else if (AOMUtils.isValueSetCode(valueOrPath)) {
                         if(convertedCodes.containsKey(valueOrPath)) {
@@ -164,8 +164,8 @@ public class ADL14NodeIDConverter {
                                 newTermbindingsMap.put(newCode, termbindingMap.get(valueOrPath));
                             }
                         } else {
-                            //TODO: bound to at-code without automated conversion. Not sure if this should be an at, ac or id code
-                            newTermbindingsMap.put(valueOrPath, termbindingMap.get(valueOrPath));
+                            //unused value set code, this can be converted
+                            newTermbindingsMap.put(this.convertCode(valueOrPath, "ac"), termbindingMap.get(valueOrPath));
                         }
                     } else if (AOMUtils.isIdCode(valueOrPath)) {
                         if(convertedCodes.containsKey(valueOrPath)) {
@@ -173,11 +173,13 @@ public class ADL14NodeIDConverter {
                                 newTermbindingsMap.put(newCode, termbindingMap.get(valueOrPath));
                             }
                         } else {
-                            //TODO: bound to at-code without automated conversion. Not sure if this should be an at, ac or id code
+                            //this is very strange, a term binding in an ADL 1.4 archetype starting with id. Warn and just add
                             newTermbindingsMap.put(valueOrPath, termbindingMap.get(valueOrPath));
+                            conversionResult.getLog().addWarningWithLocation(ADL14ConversionMessageCode.WARNING_UNKNOWN_CODE_TYPE_IN_TERMBINDING, valueOrPath, valueOrPath);
                         }
                     } else {
                         newTermbindingsMap.put(valueOrPath, termbindingMap.get(valueOrPath));
+                        conversionResult.getLog().addWarningWithLocation(ADL14ConversionMessageCode.WARNING_UNKNOWN_CODE_TYPE_IN_TERMBINDING, valueOrPath, valueOrPath);
                     }
                 }
             }
@@ -190,12 +192,12 @@ public class ADL14NodeIDConverter {
         if(!(cObject instanceof CPrimitiveObject) && cObject.getNodeId() == null) {
             String path = cObject.getPath();
             if(archetype.getParentArchetypeId() != null && flatParentArchetype != null) {
-                //TODO: get the matching path in the parent archetype id. Find this node
+                //get the matching path in the parent archetype id. Find this node
                 //if found, this is a specialization of said node and needs to be checked for differences and/or
                 //given the same node id
                 //if not found, generate/synthesize a new node id.
                 String parentPath = AOMUtils.pathAtSpecializationLevel(cObject.getPathSegments(), archetype.specializationDepth()-1);
-                System.out.println("path: " + path + " parent path " + parentPath);
+
                 CAttribute cAttributeInParent = flatParentArchetype.itemAtPath(parentPath);
                 if(cAttributeInParent != null) {
                     List<CObject> childrenWithSameRmTypeName = cAttributeInParent.getChildrenByRmTypeName   (cObject.getRmTypeName());
@@ -255,7 +257,7 @@ public class ADL14NodeIDConverter {
     private void createTermForNewCode(CObject cObject) {
         if(cObject.getParent().isMultiple()) {
             for(String language: archetype.getTerminology().getTermDefinitions().keySet()) {
-                //TODO: add new archetype term to conversion log!
+                //TODO: add new archetype term to conversion log?
                 ArchetypeTerm term = termConstraintConverter.getTerm(language, cObject);
                 if(term != null) {
                     ArchetypeTerm newTerm = new ArchetypeTerm();
@@ -360,7 +362,8 @@ public class ADL14NodeIDConverter {
             return oldCode;
         }
         nodeIdUtil.setPrefix(newCodePrefix); //will automatically strip the leading zeroes due to integer-parsing
-        if(!oldCode.startsWith("at0.")) { //TODO: check if correct! this is a specialized code, can it be at0000.X? Or is that the root code?
+        if(!oldCode.startsWith("at0.")) {
+            //a bit tricky, since the root of an archetype starts with at0000.0, but that's different from this I guess
             nodeIdUtil.getCodes().set(0, nodeIdUtil.getCodes().get(0) + 1); //increment with 1, old is 0-based
         }
         return nodeIdUtil.toString();
@@ -390,4 +393,7 @@ public class ADL14NodeIDConverter {
         return flatParentArchetype;
     }
 
+    public ADL2ConversionResult getConversionResult() {
+        return conversionResult;
+    }
 }

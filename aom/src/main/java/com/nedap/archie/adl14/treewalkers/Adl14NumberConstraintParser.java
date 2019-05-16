@@ -51,7 +51,7 @@ public class Adl14NumberConstraintParser extends BaseTreeWalker {
                 result.addConstraint(parseIntegerInterval(intervalListContext));
             }
         }
-        //TODO: set enumeratedTypeConstraint if only integers?
+
         if(result.getConstraint().size() == 1) {
             Interval<Long> interval = result.getConstraint().get(0);
         }
@@ -138,7 +138,7 @@ public class Adl14NumberConstraintParser extends BaseTreeWalker {
                 result.addConstraint(parseRealInterval(intervalListContext));
             }
         }
-        //TODO: set enumeratedTypeConstraint if only reals?
+
         if(result.getConstraint().size() == 1) {
             Interval<Double> interval = result.getConstraint().get(0);
         }

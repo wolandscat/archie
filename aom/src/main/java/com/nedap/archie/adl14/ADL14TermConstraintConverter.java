@@ -165,13 +165,25 @@ public class ADL14TermConstraintConverter {
                     cTerminologyCode.setConstraint(Lists.newArrayList(valueSet.getId()));
 
                 }
-                //TODO: assumed value!
-//                if(cTerminologyCode.getAssumedValue() != null) {
-//                    TerminologyCode assumedValue = cTerminologyCode.getAssumedValue();
-//                    String oldCode = assumedValue.getCodeString();
-//                    String newCode = convertValueCode(oldCode);
-//                    assumedValue.setCodeString(newCode);
-//                }
+            }
+            if(cTerminologyCode.getAssumedValue() != null) {
+                TerminologyCode assumedValue = cTerminologyCode.getAssumedValue();
+                if(isLocalCode) {
+                    String newCode = converter.convertValueCode(assumedValue.getCodeString());
+                    assumedValue.setCodeString(newCode);
+                    assumedValue.setTerminologyId(null);
+                } else {
+                    try {
+                        Map<String, URI> termBindingsMap = archetype.getTerminology().getTermBindings().get(assumedValue.getTerminologyId());
+                        URI uri = new ADL14ConversionUtil(converter.getConversionConfiguration()).convertToUri(assumedValue);
+                        assumedValue.setCodeString(findOrAddTermBindingAndCode(assumedValue, uri, termBindingsMap));
+                        assumedValue.setTerminologyId(null);
+                        assumedValue.setTerminologyVersion(null);
+                    } catch (URISyntaxException e) {
+                        //TODO
+                        e.printStackTrace();
+                    }
+                }
             }
         }
     }

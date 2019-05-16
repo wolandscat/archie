@@ -247,7 +247,8 @@ public class Adl14CComplexObjectParser extends BaseTreeWalker {
                             }
                             result.addAttributeTuple(tuple);
                         }
-                        //TODO: assumed value!?
+                        //TODO: assumed value is possible in ADL 1.4, but not really in ADL 2, unless there is just one option possible. Cannot be solved until
+                        //ADL 2 spec is changed
                     }
                 }
             } else {
@@ -258,7 +259,7 @@ public class Adl14CComplexObjectParser extends BaseTreeWalker {
         } else if (objectContext.c_ordinal() != null) {
             C_ordinalContext ordinalContext = objectContext.c_ordinal();
 
-            //TODO: ordinal assumed value
+            //TODO: ordinal assumed value is not really possible in ADL 2 thanks to tuples
             CComplexObject ordinal = new CComplexObject(); //create complex object. We'll generate a node id later!
             ordinal.setRmTypeName("DV_ORDINAL");
             //plus a tuple
@@ -354,7 +355,7 @@ public class Adl14CComplexObjectParser extends BaseTreeWalker {
             if(modContext.ordering_mod() != null) {
                 cardinality.setOrdered(modContext.ordering_mod().SYM_ORDERED() != null);
             } else {
-                cardinality.setOrdered(true);//TODO: this should retrieve it from the RM. This now matches the serializer, but both should be fixed!
+                cardinality.setOrdered(true);//this will be overwritten later from the meta models
             }
             if(modContext.unique_mod() != null) {
                 cardinality.setUnique(true);

@@ -40,7 +40,7 @@ public class ADL14Listener extends Adl14BaseListener {
 
     @Override
     public void exitArchetype(ArchetypeContext ctx) {
-        rootArchetype.setDifferential(true); //TODO: not possible to check from the content of the archetype without spec change
+        rootArchetype.setDifferential(true); //Technically this should be false in ADL 1.4, but it'll be converted to differential later
     }
 
     private void parseArchetypeHRID(TerminalNode hrId) {

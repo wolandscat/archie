@@ -105,6 +105,7 @@ public class Adl14PrimitivesConstraintParser extends BaseTreeWalker {
 
         Adl14Parser.QualifiedTermCodeContext qualifiedTermCodeContext = terminologyCodeContext.qualifiedTermCode();
         if(qualifiedTermCodeContext != null) {
+
             if (qualifiedTermCodeContext.TERM_CODE_REF() != null) {
                 //need to do parsing here because the lexer matched the entire term code ref
                 TerminologyCode terminologyCode = TerminologyCode.createFromString(qualifiedTermCodeContext.TERM_CODE_REF().getText());
@@ -126,9 +127,10 @@ public class Adl14PrimitivesConstraintParser extends BaseTreeWalker {
                     //non-local term constraints. Add the text here, will be converted later
                     result.addConstraint(qualifiedTermCodeContext.getText());
                 }
-                if(qualifiedTermCodeContext.assumed_value() != null) {
-                    result.setAssumedValue(TerminologyCode.createFromString(qualifiedTermCodeContext.assumed_value().getText()));
-                }
+
+            }
+            if(qualifiedTermCodeContext.assumed_value() != null) {
+                result.setAssumedValue(TerminologyCode.createFromString(qualifiedTermCodeContext.assumed_value().getText()));
             }
         } else {
             //this is an AC-code.
@@ -137,24 +139,14 @@ public class Adl14PrimitivesConstraintParser extends BaseTreeWalker {
             } else {
                 throw new RuntimeException("unknown terminology code format - this looks adl2 inside the adl 1.4 format?");
             }
-            //TODO: can this contain an assumed value?
+            if(containsAssumedValue) {
+                result.setAssumedValue(TerminologyCode.createFromString(terminologyCodeContext.localTermCode().AT_CODE().getText()));
+            }
+
         }
 
 
-     /*       String terminologyId = terminologyCodeContext.AT_CODE().getText();
-            TerminologyCode assumedValue = new TerminologyCode();
-            assumedValue.setTerminologyId(terminologyId);
-            String assumedValueString = terminologyCodeContext.AT_CODE().getText();
-            assumedValue.setCodeString(assumedValueString);
-            result.setAssumedValue(assumedValue);
-            result.addConstraint(assumedValue.getTerminologyIdString());
-        } else {
-            if(terminologyCodeContext.AC_CODE() != null) {
-                result.addConstraint(terminologyCodeContext.AC_CODE().getText());
-            } else {
-                result.addConstraint(terminologyCodeContext.AT_CODE().getText());
-            }
-        }*/
+
         return result;
     }
 
