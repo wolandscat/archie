@@ -255,13 +255,13 @@ public class Interval<T>  extends OpenEHRBase {
         if (o == null || getClass() != o.getClass()) return false;
 
         Interval<?> interval = (Interval<?>) o;
-
+        //TODO: 1..3 is equal to 1..<4. How to compare here?
         return (lowerUnbounded == interval.lowerUnbounded) &&
             (upperUnbounded == interval.upperUnbounded) &&
             (lowerIncluded == interval.lowerIncluded) &&
             (upperIncluded == interval.upperIncluded) &&
-            Objects.equals(lower, interval.lower) &&
-            Objects.equals(upper, interval.upper);
+                (lowerUnbounded || Objects.equals(lower, interval.lower)) &&
+                (upperUnbounded || Objects.equals(upper, interval.upper));
     }
 
     @Override

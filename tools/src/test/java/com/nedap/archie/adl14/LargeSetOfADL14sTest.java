@@ -51,7 +51,7 @@ public class LargeSetOfADL14sTest {
 
         List<Archetype> archetypes = new ArrayList<>();
         for(String file:adlFiles) {
-//            if(!file.contains("health_event")) {
+//            if(!file.contains("pressure")) {
 //                continue;
 //            }
             Archetype archetype = parse(exceptions, parseErrors, file);
@@ -64,7 +64,7 @@ public class LargeSetOfADL14sTest {
                 .convert(archetypes);
         for(ADL2ConversionResult result:converted.getConversionResults()) {
             if(result.getArchetype() != null) {// && result.getArchetype().getParentArchetypeId() != null) {
-              System.out.println(ADLArchetypeSerializer.serialize(result.getArchetype()));
+//              System.out.println(ADLArchetypeSerializer.serialize(result.getArchetype()));
             } else {
                 logger.warn("archetype null: " + result.getArchetypeId());
             }

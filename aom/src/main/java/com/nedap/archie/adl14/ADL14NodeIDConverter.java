@@ -67,6 +67,7 @@ public class ADL14NodeIDConverter {
     }
 
     public ADL2ConversionLog convert() {
+        metaModels.selectModel(archetype);
         correctItemsCardinality(archetype.getDefinition());
         convert(archetype.getDefinition());
         if(previousConversionApplier != null) {

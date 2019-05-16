@@ -84,13 +84,20 @@ public class ADL14Converter {
         ADL2ConversionLog previousLog = previousConversion == null ? null : previousConversion.getConversionLog(archetype.getArchetypeId().getSemanticId());
         Archetype convertedArchetype = archetype.clone();
         new ADL14DescriptionConverter().convert(convertedArchetype);
+        setCorrectVersions(convertedArchetype);
+
+
         ADL2ConversionResult result = new ADL2ConversionResult(convertedArchetype);
         ADL14NodeIDConverter adl14NodeIDConverter = new ADL14NodeIDConverter(this.metaModels, convertedArchetype, flatParent, conversionConfiguration, previousLog, result);
         ADL2ConversionLog conversionLog = adl14NodeIDConverter.convert();//fixes archetype in place
         result.setConversionLog(conversionLog);
-        setCorrectVersions(convertedArchetype);
+
+        //ADL 1.4 has cardinality, existence and occurrences always present, in ADL 2 they can be removed if same as default.
+        //so remove them
+        new DefaultMultiplicityRemover(metaModels).removeDefaultMultiplicity(convertedArchetype);
         //set some values that are not directly in ODIN or ADL
         ArchetypeParsePostProcesser.fixArchetype(convertedArchetype);
+
         return result;
 
     }
