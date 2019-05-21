@@ -40,6 +40,7 @@ public class ADL14NodeIDConverter {
     private final ADL2ConversionResult conversionResult;
     private final MetaModels metaModels;
 
+    private IdCodeGenerator idCodeGenerator;
 
     /**
      * Contains a mapping between the adl 1.4 codes and the generated adl 2 code
@@ -59,6 +60,7 @@ public class ADL14NodeIDConverter {
         this.termConstraintConverter = new ADL14TermConstraintConverter(this, archetype, flatParentArchetype);
         this.previousConversionApplier = new PreviousConversionApplier(this, archetype, oldLog);
         this.conversionResult = conversionResult;
+
     }
 
 
@@ -83,6 +85,7 @@ public class ADL14NodeIDConverter {
             previousConversionApplier.addCreatedCodes();
             previousConversionApplier.addValueSets();
         }
+        this.idCodeGenerator = new OutsideRangeIdCodeGenerator(archetype);
         termConstraintConverter.convert();
         convertTermBindings(archetype);
         generateMissingNodeIds(archetype.getDefinition());
@@ -238,7 +241,7 @@ public class ADL14NodeIDConverter {
     }
 
     private void createSpecialisedNodeId(CObject cObject, String path, List<CObject> childrenWithSameRmTypeName) {
-        cObject.setNodeId(archetype.generateNextSpecializedIdCode(childrenWithSameRmTypeName.get(0).getNodeId()));
+        cObject.setNodeId(idCodeGenerator.generateNextSpecializedIdCode(childrenWithSameRmTypeName.get(0).getNodeId()));
         CreatedCode createdCode = new CreatedCode(cObject.getNodeId(), ReasonForCodeCreation.C_OBJECT_WITHOUT_NODE_ID);
         createdCode.setRmTypeName(cObject.getRmTypeName());
         createdCode.setPathCreated(path);
@@ -247,7 +250,7 @@ public class ADL14NodeIDConverter {
     }
 
     private void synthesizeNodeId(CObject cObject, String path) {
-        cObject.setNodeId(archetype.generateNextIdCode());
+        cObject.setNodeId(idCodeGenerator.generateNextIdCode());
         CreatedCode createdCode = new CreatedCode(cObject.getNodeId(), ReasonForCodeCreation.C_OBJECT_WITHOUT_NODE_ID);
         createdCode.setRmTypeName(cObject.getRmTypeName());
         createdCode.setPathCreated(path);
@@ -396,5 +399,9 @@ public class ADL14NodeIDConverter {
 
     public ADL2ConversionResult getConversionResult() {
         return conversionResult;
+    }
+
+    protected IdCodeGenerator getIdCodeGenerator() {
+        return idCodeGenerator;
     }
 }

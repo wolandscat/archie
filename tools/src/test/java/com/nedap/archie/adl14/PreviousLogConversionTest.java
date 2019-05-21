@@ -39,8 +39,8 @@ public class PreviousLogConversionTest {
             CObject dvCodedText = attribute.getChildren().get(1);
             assertEquals("DV_CODED_TEXT", dvCodedText.getRmTypeName());
             assertEquals("DV_TEXT", dvText.getRmTypeName());
-            assertEquals("id3", dvCodedText.getNodeId());
-            assertEquals("id4", dvText.getNodeId());
+            assertEquals("id9001", dvCodedText.getNodeId());
+            assertEquals("id9002", dvText.getNodeId());
 
         }
     }

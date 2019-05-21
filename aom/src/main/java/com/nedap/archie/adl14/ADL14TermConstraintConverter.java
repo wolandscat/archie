@@ -193,7 +193,7 @@ public class ADL14TermConstraintConverter {
         if(existingTermBinding != null) {
             return existingTermBinding;
         }
-        String valueCode = archetype.generateNextValueCode();
+        String valueCode = converter.getIdCodeGenerator().generateNextValueCode();
         termBindingsMap.put(valueCode, uri);
         CreatedCode createdCode = new CreatedCode(valueCode, ReasonForCodeCreation.CREATED_VALUE_FOR_EXTERNAL_TERM);
         createdCode.setOriginalTerm(termCode);
@@ -224,7 +224,7 @@ public class ADL14TermConstraintConverter {
         }
         valueSet = new ValueSet();
         valueSet.setMembers(localCodes);
-        valueSet.setId(archetype.generateNextValueSetCode());
+        valueSet.setId(converter.getIdCodeGenerator().generateNextValueSetCode());
         converter.addCreatedCode(valueSet.getId(), new CreatedCode(valueSet.getId(), ReasonForCodeCreation.CREATED_VALUE_SET));
         converter.addCreatedValueSet(valueSet.getId(), valueSet);
         archetype.getTerminology().getValueSets().put(valueSet.getId(), valueSet);
