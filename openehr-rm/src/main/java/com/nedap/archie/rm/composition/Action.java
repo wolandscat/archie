@@ -35,9 +35,9 @@ public class Action extends CareEntry {
 
     private DvDateTime time;
     private ItemStructure description;
-    @XmlElement(name="ism_transition")
+    @XmlElement(name = "ism_transition")
     private IsmTransition ismTransition;
-    @XmlElement(name="instruction_details")
+    @XmlElement(name = "instruction_details")
     @Nullable
     private InstructionDetails instructionDetails;
 
@@ -68,7 +68,7 @@ public class Action extends CareEntry {
         this.description = description;
         setThisAsParent(description, "description");
     }
-    
+
     public IsmTransition getIsmTransition() {
         return ismTransition;
     }
@@ -77,7 +77,7 @@ public class Action extends CareEntry {
         this.ismTransition = ismTransition;
         setThisAsParent(ismTransition, "ism_transition");
     }
-    
+
     public InstructionDetails getInstructionDetails() {
         return instructionDetails;
     }
