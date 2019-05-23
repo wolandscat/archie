@@ -18,6 +18,13 @@ public abstract class ObjectId extends RMObject {
     @XmlElement
     private String value;
 
+    public ObjectId() {
+    }
+
+    public ObjectId(String value) {
+        this.value = value;
+    }
+
     public String getValue() {
         return value;
     }
