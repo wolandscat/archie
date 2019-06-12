@@ -1,6 +1,5 @@
 package com.nedap.archie.rm.composition;
 
-import com.nedap.archie.rm.Activity;
 import com.nedap.archie.rm.datavalues.DvText;
 import com.nedap.archie.rm.datavalues.encapsulated.DvParsable;
 import com.nedap.archie.rm.datavalues.quantity.datetime.DvDateTime;
@@ -34,6 +33,7 @@ public class Instruction extends CareEntry {
     @XmlElement(name = "wf_definition")
     private DvParsable wfDefinition;
     @Nullable
+    @XmlElement(name = "activities")
     private List<Activity> activities = new ArrayList<>();
 
     public DvText getNarrative() {

@@ -1,18 +1,16 @@
-package com.nedap.archie.rm;
+package com.nedap.archie.rm.composition;
 
 import com.nedap.archie.rm.archetyped.Locatable;
 import com.nedap.archie.rm.datastructures.ItemStructure;
 import com.nedap.archie.rm.datavalues.encapsulated.DvParsable;
 
 import javax.annotation.Nullable;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 /**
  * Created by pieter.bos on 04/11/15.
  */
+@XmlRootElement(name = "activity", namespace = "http://schemas.openehr.org/v1" )
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ACTIVITY", propOrder = {
         "description",
@@ -21,11 +19,14 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Activity extends Locatable {
 
+    @XmlElement(name = "description", required = true)
     private ItemStructure description;
+
     @Nullable
+    @XmlElement(name = "timing")
     private DvParsable timing;
-    @Nullable
-    @XmlElement(name = "action_archetype_id", required = true)
+
+    @XmlElement(name = "action_archetype_id")
     private String actionArchetypeId;
 
     public ItemStructure getDescription() {

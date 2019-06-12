@@ -4,6 +4,7 @@ import com.nedap.archie.rm.RMObject;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -14,7 +15,7 @@ import javax.xml.bind.annotation.XmlType;
         "value"
 })
 public abstract class ObjectId extends RMObject {
-
+    @XmlElement
     private String value;
 
     public String getValue() {
