@@ -57,6 +57,12 @@ public class DateTimeParserTest {
         assertEquals(OffsetDateTime.of(2015, 1, 1, 12, 1, 1, 123000000, ZoneOffset.of("-0200")), DateTimeParsers.parseDateTimeValue("2015-1-1T12:01:01.123-02:00"));
         assertEquals(OffsetDateTime.of(2015, 1, 1, 12, 1, 1, 123000000, ZoneOffset.of("Z")), DateTimeParsers.parseDateTimeValue("2015-1-1T12:01:01.123Z"));
         assertEquals(OffsetDateTime.of(2015, 12, 02, 17, 41, 56, 809000000, ZoneOffset.of("Z")), DateTimeParsers.parseDateTimeValue("2015-12-02T17:41:56.809Z"));
+    }
+
+    @Test
+    public void dateTimeISO8601CompactTest() {
+        //compact form
+        assertEquals(OffsetDateTime.of(2019, 01, 14, 18, 36, 49, 294000000, ZoneOffset.of("Z")), DateTimeParsers.parseDateTimeValue("20190114T183649,294+0000"));
 
     }
 

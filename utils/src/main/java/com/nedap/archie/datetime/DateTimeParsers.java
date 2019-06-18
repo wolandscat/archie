@@ -29,7 +29,12 @@ public class DateTimeParsers {
                 //to the parseBest query, unfortunately.
                 return DateTimeFormatters.ISO_8601_DATE_TIME_WITH_OPTIONAL_MICROS.parse(text);
             } catch (DateTimeParseException e1) {
-                throw new IllegalArgumentException(e1.getMessage() + ":" + text);
+                try {
+                    //some more interesting date_time expression without hyphens...
+                    return DateTimeFormatters.ISO_8601_DATE_TIME_COMPACT.parseBest(text, OffsetDateTime::from,  LocalDateTime::from);
+                } catch (DateTimeParseException e2) {
+                    throw new IllegalArgumentException(e2.getMessage() + ":" + text);
+                }
             }
         }
     }
