@@ -56,9 +56,14 @@ public class DateTimeParsers {
 
     public static Temporal parseDateValue(String text) {
         try {
-            return (Temporal) DateTimeFormatters.ISO_8601_DATE.parseBest(text, LocalDate::from, YearMonth::from, Year::from);
+            return (Temporal) DateTimeFormatters.ISO_8601_DATE_COMPACT.parseBest(text, LocalDate::from, YearMonth::from, Year::from);
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException(e.getMessage() + ":" + text);
+            try {
+                return (Temporal) DateTimeFormatters.ISO_8601_DATE.parseBest(text, LocalDate::from, YearMonth::from, Year::from);
+            }
+            catch (DateTimeParseException e1) {
+                throw new IllegalArgumentException(e.getMessage() + ":" + text);
+            }
         }
     }
 

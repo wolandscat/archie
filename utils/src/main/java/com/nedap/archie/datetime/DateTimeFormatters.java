@@ -147,4 +147,12 @@ public class DateTimeFormatters {
                 .optionalEnd()
                 .toFormatter();
     }
+
+    public static final DateTimeFormatter ISO_8601_DATE_COMPACT;
+    static {
+        ISO_8601_DATE_COMPACT = new DateTimeFormatterBuilder()
+                .parseCaseInsensitive()
+                .appendValue(ChronoField.YEAR, 4).appendValue(ChronoField.MONTH_OF_YEAR, 2).appendValue(ChronoField.DAY_OF_MONTH, 2)
+                .toFormatter();
+    }
 }
