@@ -41,15 +41,20 @@ public class DateTimeParsers {
 
     public static TemporalAccessor parseTimeValue(String text) {
         try {
-            return DateTimeFormatters.ISO_8601_TIME.parseBest(text, OffsetTime::from, LocalTime::from);
-        } catch (DateTimeParseException e) {
+            return DateTimeFormatters.ISO_8601_TIME_COMPACT.parseBest(text, OffsetTime::from, LocalTime::from);
+        }
+        catch (Exception e0) {
             try {
-                //Not parseable as a standard public object from datetime. We do not implement our own yet (we could!)
-                //so fallback to the Parsed object. The Parsed object is package-private, so cannot be added as a reference
-                //to the parseBest query, unfortunately.
-                return DateTimeFormatters.ISO_8601_TIME.parse(text);
-            } catch (DateTimeParseException e1) {
-                throw new IllegalArgumentException(e1.getMessage() + ":" + text);
+                return DateTimeFormatters.ISO_8601_TIME.parseBest(text, OffsetTime::from, LocalTime::from);
+            } catch (DateTimeParseException e) {
+                try {
+                    //Not parseable as a standard public object from datetime. We do not implement our own yet (we could!)
+                    //so fallback to the Parsed object. The Parsed object is package-private, so cannot be added as a reference
+                    //to the parseBest query, unfortunately.
+                    return DateTimeFormatters.ISO_8601_TIME.parse(text);
+                } catch (DateTimeParseException e1) {
+                    throw new IllegalArgumentException(e1.getMessage() + ":" + text);
+                }
             }
         }
     }

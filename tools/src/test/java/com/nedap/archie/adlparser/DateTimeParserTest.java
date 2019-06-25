@@ -63,7 +63,8 @@ public class DateTimeParserTest {
     public void dateTimeISO8601CompactTest() {
         //compact form
         assertEquals(OffsetDateTime.of(2019, 01, 14, 18, 36, 49, 294000000, ZoneOffset.of("Z")), DateTimeParsers.parseDateTimeValue("20190114T183649,294+0000"));
-
+        assertEquals(LocalDate.of(2019, 1, 14), DateTimeParsers.parseDateValue("20190114"));
+        assertEquals(LocalTime.of(18, 36, 49, 0), DateTimeParsers.parseTimeValue("183649"));
     }
 
 }
