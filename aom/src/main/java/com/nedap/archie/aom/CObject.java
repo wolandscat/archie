@@ -316,13 +316,23 @@ public abstract class CObject extends ArchetypeConstraint {
         if(getOccurrences() != null) {
             return getOccurrences();
         }
+        return getDefaultRMOccurrences(referenceModelPropMultiplicity);
+    }
+
+    /**
+     * Calculate the occurrences from the RM, ignoring any occurrences in this CObject. Note that is only useful
+     * when editing this archetype, not in general use.
+     * @param referenceModelPropMultiplicity
+     * @return
+     */
+    public MultiplicityInterval getDefaultRMOccurrences(BiFunction<String, String, MultiplicityInterval> referenceModelPropMultiplicity) {
         int occurrencesLower = 0;
         CAttribute parent = getParent();
         if(parent != null) {
             if(parent.getExistence() != null) {
                 occurrencesLower = parent.getExistence().getLower();
             }
-            if(parent.getCardinality() != null) {
+            if(parent.getCardinality() != null && parent.getCardinality().getInterval() != null) { //technically a cardinality without interval is an error, but let's handle it correctly
                 if(parent.getCardinality().getInterval().isUpperUnbounded()) {
                     return MultiplicityInterval.createUpperUnbounded(occurrencesLower);
                 } else {

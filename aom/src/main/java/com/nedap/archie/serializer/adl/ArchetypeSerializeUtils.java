@@ -8,7 +8,10 @@ import com.nedap.archie.base.MultiplicityInterval;
  */
 public class ArchetypeSerializeUtils {
     public static void buildOccurrences(ADLStringBuilder builder, MultiplicityInterval occ) {
-        if (occ.getLower() == null && occ.getUpper() == null) {
+        if(occ == null) {
+            builder.append("*");
+        }
+        else if (occ.getLower() == null && occ.getUpper() == null) {
             builder.append("*");
         } else if (occ.getLower() != null && occ.getLower().equals(occ.getUpper())) {
             builder.append(occ.getLower());

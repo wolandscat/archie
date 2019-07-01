@@ -180,10 +180,11 @@ public class BigArchetypeValidatorTest {
                         if(exception != null) {
                             if(errors != null) {
                                 log.error(errors.toString());
-                                errorStrings.add(archetype.getArchetypeId() + " has unexpected parse errors: " + errors.toString());
+                                errorStrings.add(archetype == null ? file : archetype.getArchetypeId()  + " has unexpected parse errors: " + errors.toString());
                             }
                             log.error("exception:", exception);
-                            errorStrings.add(archetype.getArchetypeId() + " has exception: " + exception.getMessage());
+
+                            errorStrings.add(archetype == null ? file : archetype.getArchetypeId() + " has exception: " + exception.getMessage());
                         } else {
                             log.error(errors.toString());
                         }
@@ -196,10 +197,10 @@ public class BigArchetypeValidatorTest {
                         log.info("{} has parse errors, but we don't know if it's fine:", file);
                         if(errors != null) {
                             log.error(errors.toString());
-                            errorStrings.add(archetype.getArchetypeId() + " has unknown parse errors: " + errors.toString());
+                            errorStrings.add(archetype == null ? file : archetype.getArchetypeId()  + " has unknown parse errors: " + errors.toString());
                         }
                         log.error("exception:", exception);
-                        errorStrings.add(archetype.getArchetypeId() + " has exception: " + exception.getMessage());
+                        errorStrings.add(archetype == null ? file : archetype.getArchetypeId()  + " has exception: " + exception.getMessage());
                         unexpectedParseErrors++;
                     }
                 } catch (IOException e) {

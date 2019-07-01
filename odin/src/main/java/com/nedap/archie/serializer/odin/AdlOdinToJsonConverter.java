@@ -2,12 +2,17 @@ package com.nedap.archie.serializer.odin;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.nedap.archie.adlparser.antlr.AdlParser.*;
+//import com.nedap.archie.adlparser.antlr.odinParser;
 import org.apache.commons.text.StringEscapeUtils;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -32,6 +37,18 @@ public class AdlOdinToJsonConverter {
         //keywords = <"value"> is indistinguishable from keywords = <"value1", "value2">
         objectMapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
         objectMapper.enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
+
+        //ignore the @type field when not needed
+        objectMapper.addHandler(new DeserializationProblemHandler() {
+            @Override
+            public boolean handleUnknownProperty(DeserializationContext ctxt, JsonParser p, JsonDeserializer<?> deserializer, Object beanOrClass, String propertyName) throws IOException {
+                if (propertyName.equalsIgnoreCase("@type")) {
+                    return true;
+                }
+                return super.handleUnknownProperty(ctxt, p, deserializer, beanOrClass, propertyName);
+            }
+        });
+
     }
 
 
@@ -111,10 +128,114 @@ public class AdlOdinToJsonConverter {
                 output(listContext);
 
             } else {
+                output.append("{ \"@type\": \"INTERVAL\" ");
+                Primitive_interval_valueContext intervalCtx = primitiveObjectContext.primitive_interval_value();
+
+                if(intervalCtx.date_interval_value() != null) {
+
+                } else if(intervalCtx.duration_interval_value() != null) {
+
+                } else if (intervalCtx.integer_interval_value() != null) {
+                    Integer_interval_valueContext interval = intervalCtx.integer_interval_value();
+                    if(interval.relop() != null) {
+                        String relopText = interval.relop().getText();
+                        if(relopText.contains(">")) {
+                            output.append(",\"lower_unbounded\": \"false\"");
+                            output.append(",\"upper_unbounded\": \"true\"");
+                            output.append(",\"lower\": " + interval.integer_value().get(0).getText());
+                            if(relopText.contains("=")) {
+                                output.append(",\"lower_included\": \"true\"");
+                            } else {
+                                output.append(",\"lower_included\": \"false\"");
+                            }
+                        } else if(relopText.contains("<")) {
+                            output.append(",\"lower_unbounded\": \"true\"");
+                            output.append(",\"upper_unbounded\": \"false\"");
+                            output.append(",\"upper\": " + interval.integer_value().get(0).getText());
+                            if(relopText.contains("=")) {
+                                output.append(",\"upper_included\": \"true\"");
+                            } else {
+                                output.append(",\"upper_included\": \"false\"");
+                            }
+                        }
+                    } else {
+                        output.append(",\"lower_unbounded\": \"false\"");
+                        output.append(",\"upper_unbounded\": \"false\"");
+                        if(interval.SYM_GT() != null) {
+                            output.append(",\"lower_included\": \"false\"");
+                        } else {
+                            output.append(",\"lower_included\": \"true\"");
+                        }
+                        if(interval.SYM_LT() != null) {
+                            output.append(",\"upper_included\": \"false\"");
+                        } else {
+                            output.append(",\"upper_included\": \"true\"");
+                        }
+                        output.append(",\"lower\": " + interval.integer_value().get(0).getText());
+                        if(interval.integer_value().size() > 1) {
+                            output.append(",\"upper\": " + interval.integer_value().get(1).getText());
+                        } else {
+                            output.append(",\"upper\": " + interval.integer_value().get(0).getText());
+                        }
+
+                    }
+
+                } else if (intervalCtx.real_interval_value() != null) {
+                    Real_interval_valueContext interval = intervalCtx.real_interval_value();
+                    if(interval.relop() != null) {
+                        String relopText = interval.relop().getText();
+                        if(relopText.contains(">")) {
+                            output.append(",\"lower_unbounded\": \"false\"");
+                            output.append(",\"upper_unbounded\": \"true\"");
+                            output.append(",\"lower\": " + interval.real_value().get(0).getText());
+                            if(relopText.contains("=")) {
+                                output.append(",\"lower_included\": \"true\"");
+                            } else {
+                                output.append(",\"lower_included\": \"false\"");
+                            }
+                        } else if(relopText.contains("<")) {
+                            output.append(",\"lower_unbounded\": \"true\"");
+                            output.append(",\"upper_unbounded\": \"false\"");
+                            output.append(",\"upper\": " + interval.real_value().get(0).getText());
+                            if(relopText.contains("=")) {
+                                output.append(",\"upper_included\": \"true\"");
+                            } else {
+                                output.append(",\"upper_included\": \"false\"");
+                            }
+                        }
+                    } else {
+                        output.append(",\"lower_unbounded\": \"false\"");
+                        output.append(",\"upper_unbounded\": \"false\"");
+                        if(interval.SYM_GT() != null) {
+                            output.append(",\"lower_included\": \"false\"");
+                        } else {
+                            output.append(",\"lower_included\": \"true\"");
+                        }
+                        if(interval.SYM_LT() != null) {
+                            output.append(",\"upper_included\": \"false\"");
+                        } else {
+                            output.append(",\"upper_included\": \"true\"");
+                        }
+                        output.append(",\"lower\": " + interval.real_value().get(0).getText());
+
+                        if(interval.real_value().size() > 1) {
+                            output.append(",\"upper\": " + interval.real_value().get(1).getText());
+                        } else {
+                            output.append(",\"upper\": " + interval.real_value().get(0).getText());
+                        }
+
+                    }
+                } else if(intervalCtx.date_time_interval_value() != null) {
+
+                } else if(intervalCtx.time_interval_value() != null) {
+
+                }
+                output.append("}");
+                //interval. TODO: implement interval-object notation in json :)
                 //interval. TODO: implement interval-object notation in json :)
             }
         } else {
-            output.append("{}");
+            output.append("[]");
         }
     }
 

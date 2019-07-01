@@ -30,15 +30,14 @@ import org.openehr.bmm.core.BmmProperty;
 import org.openehr.bmm.persistence.validation.BmmDefinitions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AOMUtils {
 
-    private static Pattern idCodePAttern = Pattern.compile("(id|at|ac)(0|[1-9][0-9]*)(\\.(0|[1-9][0-9]*))*");
+    private static Pattern idCodePattern = Pattern.compile("(id|at|ac)(0|[1-9][0-9]*)(\\.(0|[1-9][0-9]*))*");
+    private static Pattern adl14CodePattern = Pattern.compile("(id|at|ac)([0-9]+)(\\.(0|[1-9][0-9]*))*");
 
     public static int getSpecializationDepthFromCode(String code) {
         if(code == null) {
@@ -70,7 +69,7 @@ public class AOMUtils {
         if(code == null) {
             return false;
         }
-        return idCodePAttern.matcher(code).matches();
+        return idCodePattern.matcher(code).matches();
     }
 
     public static String pathAtSpecializationLevel(List<PathSegment> pathSegments, int level) {
@@ -347,8 +346,12 @@ public class AOMUtils {
             if (code.length() > 2) {
                 int numberOfDots = getSpecializationDepthFromCode(code);
                 if(specializationDepth == numberOfDots) {
-                    int numericCode = numberOfDots == 0 ? Integer.parseInt(code.substring(2)) : Integer.parseInt(code.substring(code.lastIndexOf('.')+1));
-                    maximumIdCode = Math.max(numericCode, maximumIdCode);
+                    try {
+                        int numericCode = numberOfDots == 0 ? Integer.parseInt(code.substring(2)) : Integer.parseInt(code.substring(code.lastIndexOf('.') + 1));
+                        maximumIdCode = Math.max(numericCode, maximumIdCode);
+                    } catch (NumberFormatException ex) {
+                        //TODO: get rid of this, temporary for term codes that still need conversion!
+                    }
                 }
             }
         }
@@ -393,5 +396,12 @@ public class AOMUtils {
         }
         return nodeIdUtil.getPrefix() + Joiner.on('.').join(codes.subList(0, newDepth+1));
 
+    }
+
+    public static boolean isValidADL14Code(String code) {
+        if(code == null) {
+            return false;
+        }
+        return adl14CodePattern.matcher(code).matches();
     }
 }

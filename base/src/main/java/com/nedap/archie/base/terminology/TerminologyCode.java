@@ -36,7 +36,7 @@ public class TerminologyCode extends OpenEHRBase {
             return null;
         }
         //'[' NAME_CHAR+ ( '(' NAME_CHAR+ ')' )? '::' NAME_CHAR+ ']' ;
-        Pattern pattern = Pattern.compile("\\[(?<terminologyId>.+)(\\((?<terminologyVersion>.+)\\))?::(?<codeString>.+)\\]");
+        Pattern pattern = Pattern.compile("\\[(?<terminologyId>[^\\(\\)]+)(\\((?<terminologyVersion>.+)\\))?::(?<codeString>.+)\\]");
         Matcher matcher = pattern.matcher(terminologyString);
         TerminologyCode result = new TerminologyCode();
         if(matcher.matches()) {
