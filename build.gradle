@@ -8,7 +8,7 @@ buildscript {
     classpath 'org.owasp:dependency-check-gradle:1.4.5.1'
   }
 
-  
+
 }
 
 repositories {
@@ -21,7 +21,7 @@ wrapper {
 }
 
 allprojects {
-  version = '0.7.0-SNAPSHOT'
+  version = '0.8.0-SNAPSHOT'
   group = 'com.nedap.healthcare.archie'
   ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
   //archivesBaseName = 'archie'
@@ -38,7 +38,7 @@ subprojects {
   apply plugin: 'java'
   apply plugin: 'ch.raffael.pegdown-doclet'
   apply plugin: 'org.owasp.dependencycheck'
-  apply from: "${gradleScriptDir}/publish-maven.gradle"  
+  apply from: "${gradleScriptDir}/publish-maven.gradle"
 
  // plugins {
    //   id 'com.github.ben-manes.versions' version '0.13.0'
@@ -112,18 +112,10 @@ subprojects {
   test {
    testLogging {
       events "failed"
-      exceptionFormat "full"      
+      exceptionFormat "full"
     }
   }
 
 }
 
-apply from: "${gradleScriptDir}/jacoco.gradle"  
-
-
-
-
-
-
-
-
+apply from: "${gradleScriptDir}/jacoco.gradle"
