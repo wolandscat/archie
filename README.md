@@ -479,6 +479,8 @@ for(ADL2ConversionResult adl2ConversionResult:resultList.getConversionResults())
 
 The converted archetypes are now in ADL 2, differential form. Note that it's a good idea to run these trough the archetype validator, especially if they are specialized archetypes. tooling for ADL 1.4 specialized archetypes often has limited validations, meaning that they often contain errors.
 
+In case an archetype has been specialized, you will need to supply both the specialized archetype and its parent to the converter at the same time to allow for conversion to succeed, otherwise there will be an exception in the ADL2ConversionResult.
+
 In ADL 2, at some nodes node ids are required where they are optional in ADL 1.4. As a result, the converter needs to generate new id codes. This has not yet been standardized. This is the reason you cannot yet expect all tools to generate the exact same or even entirely compatible ADL 2 archetypes. So use this tool carefully.
 
 
