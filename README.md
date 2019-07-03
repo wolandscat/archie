@@ -73,7 +73,7 @@ To install to your local maven repository for use in other gradle or maven proje
     + [Reference model APath queries](#reference-model-apath-queries)
     + [Validating RM Objects against an archetype](#validating-rm-objects-against-an-archetype)
 - [Experimental Features](#experimental-features)
-  * [Importing and converting ADL 1.4 files] (#importing-and-converting-adl14-files)
+  * [Importing and converting ADL 1.4 files](#importing-and-converting-adl14-files)
   * [Full XPath support on reference model](#full-xpath-support-on-reference-model)
   * [Rule evaluation](#rule-evaluation)
   * [Lower level APIs](#lower-level-apis)
