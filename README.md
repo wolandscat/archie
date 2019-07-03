@@ -72,6 +72,8 @@ To install to your local maven repository for use in other gradle or maven proje
     + [Reference model object creation](#reference-model-object-creation)
     + [Reference model APath queries](#reference-model-apath-queries)
     + [Validating RM Objects against an archetype](#validating-rm-objects-against-an-archetype)
+- [Experimental Features](#experimental-features)
+  * [Importing and converting ADL 1.4 files] (#importing-and-converting-adl14-files)
   * [Full XPath support on reference model](#full-xpath-support-on-reference-model)
   * [Rule evaluation](#rule-evaluation)
   * [Lower level APIs](#lower-level-apis)
@@ -445,6 +447,56 @@ Note that it is possible the API of the messages is still unstable and will like
 # Experimental features
 
 The following features are experimental. This means its working or API will likely change somewhat in the near future, but they can already be used.
+
+## Importing and converting ADL 1.4 files
+
+Starting from version 0.7, Archie can import ADL 1.4 files, and convert them to ADL 2. To do so, do the following:
+
+```java
+ADL14ConversionConfiguration conversionConfiguration = new ADL14ConversionConfiguration();
+ADL14Converter converter = new ADL14Converter(BuiltinReferenceModels.getMetaModels(), conversionConfiguration);
+
+List<Archetype> archetypes = new ArrayList<>();
+ADL14Parser parser = new ADL14Parser(BuiltinReferenceModels.getMetaModels())
+for(Strinf file:fileNames) {
+    try(InputStream stream = new FileInputStream(file)) {
+        Archetype archetype = parser.parse(stream, conversionConfiguration);
+        if(parser.getErrors().hasNoErrors()) {
+            archetypes.add(archetype))
+        } else { 
+          //handle parse error
+        }
+    }
+}
+ADL2ConversionResultList resultList = converter.convert(archetypes);
+for(ADL2ConversionResult adl2ConversionResult:resultList.getConversionResults()) {
+   if(adl2ConversionResult.getException() != null) {
+      // convertedArchetype is the ADL 2 conversion result. Additional warning messages in adl2ConversionResult.getLog()
+      Archetype converedArchetype = adl2ConversionResult.getArchetyp();
+   }
+}
+```
+
+The converted archetypes are now in ADL 2, differential form. Note that it's a good idea to run these trough the archetype validator, especially if they are specialized archetypes. tooling for ADL 1.4 specialized archetypes often has limited validations, meaning that they often contain errors.
+
+In ADL 2, at some nodes node ids are required where they are optional in ADL 1.4. As a result, the converter needs to generate new id codes. This has not yet been standardized. This is the reason you cannot yet expect all tools to generate the exact same or even entirely compatible ADL 2 archetypes. So use this tool carefully.
+
+
+### Storing the conversion log for later use
+
+One use case of this converter is to integrate it in modeling tools, so that modeling can still be ADL 1.4, but the output can be both ADL 1.4 and ADL 2. To ensure the tool generates the exact same node ids even after edits in ADL 1.4, a conversion log is generated that is output as the result of the conversion. It can be used as the input for a next conversion of the same archetypes, to ensure the same node ids are generated for the same nodes. To do so:
+
+```
+ADL2ConversionResultList resultList = converter.convert(archetypes, resultList.getConversionLog());
+```
+
+The conversion log can be serialized to a file for storage using Jackson, so it can be stored alongside the ADL 1.4 source archetypes.
+
+### Conversion Configuration
+
+You may have noticed an instance of `ADL14ConversionConfiguration` in the previous example. In this configuration the mapping from term codes as used in ADL 1.4 to term URIs as used in ADL 2 can be specified. See the `ConversionConfigForTest.java` file for an example on how this works, and how this can be serialized to a file, and the file `/tools/src/test/java/com/nedap/archie/adl14/configuration.json` for an example of a simple serialized configuration that contains sane defaults for snomed, loinc and openehr URIs.
+
+If you leave the configuration empty, the converter will fall back to a default URI conversion. 
 
 ## Full XPath support on reference model
 
