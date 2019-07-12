@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
  */
 public class ArchetypeID extends ObjectId {
 
+    private String namespace;
     private String qualifiedRmEntity;
     private String domainConcept;
     private String rmOriginator;
@@ -43,6 +44,7 @@ public class ArchetypeID extends ObjectId {
         if(!m.matches()) {
             throw new IllegalArgumentException(value + " is not a valid archetype human readable id");
         }
+        namespace = m.group("namespace");
         rmOriginator = m.group("publisher");
         rmName = m.group("package");
         rmEntity = m.group("class");
@@ -91,6 +93,8 @@ public class ArchetypeID extends ObjectId {
     @RMPropertyIgnore
     public String getFullId() {
         StringBuilder result = new StringBuilder(30);
+        result.append(namespace);
+        result.append("::");
         result.append(rmOriginator);
         result.append("-");
         result.append(rmName);
@@ -110,6 +114,8 @@ public class ArchetypeID extends ObjectId {
     @RMPropertyIgnore
     public String getSemanticId() {
         StringBuilder result = new StringBuilder();
+        result.append(namespace);
+        result.append("::");
         result.append(rmOriginator);
         result.append("-");
         result.append(rmName);
@@ -121,6 +127,14 @@ public class ArchetypeID extends ObjectId {
         result.append(versionId.split("\\.")[0]);
         return result.toString();
 
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 
     public String getQualifiedRmEntity() {
