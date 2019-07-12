@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nedap.archie.rminfo.RMPropertyIgnore;
 
+import javax.annotation.Nullable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,13 +14,21 @@ import java.util.regex.Pattern;
  */
 public class ArchetypeID extends ObjectId {
 
+    @Nullable
     private String namespace;
+    @Nullable
     private String qualifiedRmEntity;
+    @Nullable
     private String domainConcept;
+    @Nullable
     private String rmOriginator;
+    @Nullable
     private String rmName;
+    @Nullable
     private String rmEntity;
+    @Nullable
     private String specialisation;
+    @Nullable
     private String versionId;
 
     public ArchetypeID() {
@@ -48,11 +57,16 @@ public class ArchetypeID extends ObjectId {
         rmOriginator = m.group("publisher");
         rmName = m.group("package");
         rmEntity = m.group("class");
+        buildQualifiedRmEntity();
 
         specialisation = m.group("specialisation");
 
         domainConcept = m.group("concept");
         versionId = m.group("version");
+    }
+
+    public void buildQualifiedRmEntity() {
+        qualifiedRmEntity = rmOriginator + "-" + rmName + "-" + rmEntity;
     }
 
     /**
@@ -93,8 +107,10 @@ public class ArchetypeID extends ObjectId {
     @RMPropertyIgnore
     public String getFullId() {
         StringBuilder result = new StringBuilder(30);
-        result.append(namespace);
-        result.append("::");
+        if(namespace != null) {
+            result.append(namespace);
+            result.append("::");
+        }
         result.append(rmOriginator);
         result.append("-");
         result.append(rmName);
@@ -102,6 +118,10 @@ public class ArchetypeID extends ObjectId {
         result.append(rmEntity);
         result.append(".");
         result.append(domainConcept);
+        if(specialisation != null) {
+            result.append("-");
+            result.append(specialisation);
+        }
         if(versionId.startsWith("v")) {
             result.append(".");
         } else {
