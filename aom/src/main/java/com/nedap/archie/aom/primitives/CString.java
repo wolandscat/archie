@@ -63,8 +63,7 @@ public class CString extends CPrimitiveObject<String, String> {
         }
         for(String constraint:getConstraint()) {
             if(constraint.length() > 1 &&
-                    ((constraint.startsWith("/") && constraint.endsWith("/")) ||
-                            (constraint.startsWith("^") && constraint.endsWith("^")))) {
+                    isRegexConstraint(constraint)) {
                 //regexp. Strip first and last character and match. If you want to input
                 //data starting and ending with '/', you cannot in the AOM, although ADL lets you express if just fine.
                 //perhaps we should make the constraint object something more expressive than a String?
@@ -79,6 +78,11 @@ public class CString extends CPrimitiveObject<String, String> {
             }
         }
         return false;
+    }
+
+    public static boolean isRegexConstraint(String constraint) {
+        return (constraint.startsWith("/") && constraint.endsWith("/")) ||
+                (constraint.startsWith("^") && constraint.endsWith("^"));
     }
 
     @Override
