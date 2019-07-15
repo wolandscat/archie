@@ -1,5 +1,6 @@
 package com.nedap.archie.flattener;
 
+import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.CAttribute;
 import com.nedap.archie.aom.CObject;
 import com.nedap.archie.aom.CPrimitiveObject;
@@ -15,7 +16,11 @@ import java.util.Objects;
  */
 public class AssumedValueFiller {
 
-    public void fillAssumedValues(CObject cObject) {
+    public static void fillAssumedValues(Archetype archetype) {
+        fillAssumedValues(archetype.getDefinition());
+    }
+
+    public static void fillAssumedValues(CObject cObject) {
         if(cObject instanceof CPrimitiveObject) {
             fillAssumedValue((CPrimitiveObject) cObject);
         } else {
@@ -27,7 +32,7 @@ public class AssumedValueFiller {
         }
     }
 
-    private void fillAssumedValue(CPrimitiveObject cObject) {
+    private static void fillAssumedValue(CPrimitiveObject cObject) {
         if(cObject instanceof COrdered) {
             fillAssumedValueForOrdered((COrdered) cObject);
         } else if (cObject instanceof CString) {
@@ -35,7 +40,7 @@ public class AssumedValueFiller {
         }
     }
 
-    private void fillAssumedValueForString(CString cObject) {
+    private static void fillAssumedValueForString(CString cObject) {
         CString cString = cObject;
         List<String> constraint = cString.getConstraint();
         if(constraint != null && constraint.size() == 1) {
@@ -46,7 +51,7 @@ public class AssumedValueFiller {
         }
     }
 
-    private void fillAssumedValueForOrdered(COrdered cObject) {
+    private static void fillAssumedValueForOrdered(COrdered cObject) {
         COrdered cOrdered = cObject;
         List<Interval> constraint = cOrdered.getConstraint();
         if(constraint != null && constraint.size() == 1) {
