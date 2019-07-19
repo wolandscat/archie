@@ -3,6 +3,8 @@ sudo: false
 jdk:
   - oraclejdk8
   - oraclejdk9
+# Force dist to trusty, as oraclejdk8 is not available on newer dists.
+dist: trusty
 before_script:
   - chmod +x gradlew
 script:
