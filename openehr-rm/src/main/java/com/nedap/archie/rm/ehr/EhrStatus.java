@@ -4,6 +4,7 @@ package com.nedap.archie.rm.ehr;
  * Created by pieter.bos on 08/07/16.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nedap.archie.rm.archetyped.Locatable;
 import com.nedap.archie.rm.datastructures.ItemStructure;
 import com.nedap.archie.rm.generic.PartySelf;
@@ -22,9 +23,11 @@ public class EhrStatus extends Locatable {
     private PartySelf subject;
     @XmlElement(name="is_queryable")
     @RMProperty("is_queryable")
+    @JsonProperty(value = "is_queryable")
     private boolean isQueryable;
     @XmlElement(name="is_modifiable")
     @RMProperty("is_modifiable")
+    @JsonProperty(value = "is_modifiable")
     private boolean isModifiable;
     @Nullable
     @XmlElement(name="other_details")
