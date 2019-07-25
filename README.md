@@ -18,7 +18,7 @@ You can depend on parts of Archie, or the entire library at once. If you want th
 
 ```gradle
 dependencies {
-    compile 'com.nedap.healthcare.archie:archie-all:0.6.1'
+    compile 'com.nedap.healthcare.archie:archie-all:0.7.0'
 }
 ```
 
@@ -28,11 +28,11 @@ or if you use maven, in your pom.xml
 <dependency>
     <groupId>com.nedap.healthcare.archie</groupId>
     <artifactId>archie-all</artifactId>
-    <version>0.6.1</version>
+    <version>0.7.0</version>
 </dependency>
 ```
 
-If you want to depend on just the AOM and BMM, without any reference model implementation, depend on com.nedap.healthcare.archie:tools:0.6.1 and com.nedap.healthcare.archie:referencemodels:0.6.1 instead
+If you want to depend on just the AOM and BMM, without any reference model implementation, depend on com.nedap.healthcare.archie:tools:0.7.0 and com.nedap.healthcare.archie:referencemodels:0.7.0 instead
 
 
 ## Build
@@ -457,22 +457,24 @@ ADL14ConversionConfiguration conversionConfiguration = new ADL14ConversionConfig
 ADL14Converter converter = new ADL14Converter(BuiltinReferenceModels.getMetaModels(), conversionConfiguration);
 
 List<Archetype> archetypes = new ArrayList<>();
-ADL14Parser parser = new ADL14Parser(BuiltinReferenceModels.getMetaModels())
-for(Strinf file:fileNames) {
-    try(InputStream stream = new FileInputStream(file)) {
-        Archetype archetype = parser.parse(stream, conversionConfiguration);
-        if(parser.getErrors().hasNoErrors()) {
-            archetypes.add(archetype))
-        } else { 
-          //handle parse error
-        }
-    }
+ADL14Parser parser = new ADL14Parser(BuiltinReferenceModels.getMetaModels());
+
+for(String file:fileNames) {
+   try(InputStream stream = new FileInputStream(file)) {
+       Archetype archetype = parser.parse(stream, conversionConfiguration);
+       if(parser.getErrors().hasNoErrors()) {
+           archetypes.add(archetype);
+       } else {
+           //handle parse error
+       }
+   }
 }
+
 ADL2ConversionResultList resultList = converter.convert(archetypes);
 for(ADL2ConversionResult adl2ConversionResult:resultList.getConversionResults()) {
-   if(adl2ConversionResult.getException() != null) {
-      // convertedArchetype is the ADL 2 conversion result. Additional warning messages in adl2ConversionResult.getLog()
-      Archetype converedArchetype = adl2ConversionResult.getArchetyp();
+   if(adl2ConversionResult.getException() == null) {
+       // convertedArchetype is the ADL 2 conversion result. Additional warning messages in adl2ConversionResult.getLog()
+       Archetype convertedArchetype = adl2ConversionResult.getArchetype();
    }
 }
 ```
