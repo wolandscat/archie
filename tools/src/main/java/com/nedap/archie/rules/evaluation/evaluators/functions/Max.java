@@ -31,7 +31,7 @@ public class Max implements FunctionImplementation {
         //check that all valueList are equal length or 1 length
         int length = checkEqualLength(arguments);
         if(length == -1) {
-            throw new FunctionCallException("value lists of min operator not the same length");
+            throw new FunctionCallException("value lists of max operator not the same length");
         }
         ValueList result = new ValueList();
         result.setType(PrimitiveType.Real);
