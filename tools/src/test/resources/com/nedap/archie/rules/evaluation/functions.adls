@@ -71,6 +71,8 @@ rules
 
 	$min:Real ::= min(10.0, 3.0)
 
+	$sum:Real ::= sum(3.3, 4.0, 1.0)
+
 	$value_when_undefined:Real ::= value_when_undefined(10.0, /data[id2]/events[id3]/data[id4]/items[id5]/value/magnitude)
 
 	$value_when_undefined_2:Real ::=

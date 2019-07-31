@@ -50,12 +50,24 @@ public class FunctionsTest {
         RuleEvaluation ruleEvaluation = getRuleEvaluation();
         Observation root = new Observation();
         ruleEvaluation.evaluate(root, archetype.getRules().getRules());
-        ValueList min = ruleEvaluation.getVariableMap().get("max");
-        assertEquals("max should work", 2.0, (double) min.getValues().get(0).getValue(), 0.001);
+        ValueList max = ruleEvaluation.getVariableMap().get("max");
+        assertEquals("max should work", 2.0, (double) max.getValues().get(0).getValue(), 0.001);
     }
 
     private RuleEvaluation getRuleEvaluation() {
         return new RuleEvaluation(ArchieRMInfoLookup.getInstance(), JAXBUtil.getArchieJAXBContext(), archetype);
+    }
+
+    @Test
+    public void sum() throws Exception {
+        archetype = parser.parse(ParsedRulesEvaluationTest.class.getResourceAsStream("functions.adls"));
+        assertTrue(parser.getErrors().hasNoErrors());
+        System.out.println(archetype);
+        RuleEvaluation ruleEvaluation = getRuleEvaluation();
+        Observation root = new Observation();
+        ruleEvaluation.evaluate(root, archetype.getRules().getRules());
+        ValueList max = ruleEvaluation.getVariableMap().get("sum");
+        assertEquals("sum should work", 8.3, (double) max.getValues().get(0).getValue(), 0.001);
     }
 
     @Test
