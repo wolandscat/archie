@@ -28,7 +28,7 @@ public class FeederAudit extends RMObject {
     @Nullable
     @XmlElement(name = "original_content")
     protected DvEncapsulated originalContent;
-    @Nullable
+
     @XmlElement(name = "originating_system_audit")
     protected FeederAuditDetails originatingSystemAudit;
     @Nullable
