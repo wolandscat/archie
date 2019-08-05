@@ -78,7 +78,7 @@ public class Cardinality extends OpenEHRBase {
     /**
      * True if the semantics of this cardinality represent a bag, i.e. unordered, non-unique membership.
      *
-     * @return
+     * @return true if this is a bag
      */
     @JsonIgnore
     public Boolean isBag() {
@@ -88,7 +88,7 @@ public class Cardinality extends OpenEHRBase {
     /**
      * True if the semantics of this cardinality represent a list, i.e. ordered, non-unique membership.
      *
-     * @return
+     * @return true if this is a list
      */
     @JsonIgnore
     public Boolean isList() {
@@ -98,7 +98,7 @@ public class Cardinality extends OpenEHRBase {
     /**
      * True if the semantics of this cardinality represent a set, i.e. unordered, unique membership.
      *
-     * @return
+     * @return true if this is a set
      */
     @JsonIgnore
     public Boolean isSet() {
@@ -109,8 +109,8 @@ public class Cardinality extends OpenEHRBase {
     /**
      * Checks whether the cardinality interval of 'other' is subsumed by the interval for this cardinality
      *
-     * @param other
-     * @return
+     * @param other the other cardinality
+     * @return true if this cardinality contains the other
      */
     public Boolean contains(Cardinality other) {
         return getInterval().contains(other.getInterval());

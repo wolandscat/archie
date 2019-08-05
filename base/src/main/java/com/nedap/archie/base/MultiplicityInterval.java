@@ -35,7 +35,7 @@ public class MultiplicityInterval extends Interval<Integer> {
 
     /**
      * Equal to '0..*' or '*'
-     * @return
+     * @return a new unbounded multiplicity interval
      */
     public static MultiplicityInterval unbounded() {
         MultiplicityInterval result = new MultiplicityInterval();
@@ -63,7 +63,7 @@ public class MultiplicityInterval extends Interval<Integer> {
     /**
      * Creates interval of type [0,inf)
      *
-     * @return
+     * @return the created interval
      */
     public static MultiplicityInterval createOpen() {
         return new MultiplicityInterval(0, true, false, null, false, true);
@@ -72,7 +72,7 @@ public class MultiplicityInterval extends Interval<Integer> {
     /**
      * Creates interval of type [0,1]
      *
-     * @return
+     * @return the created interval
      */
     public static MultiplicityInterval createOptional() {
         return new MultiplicityInterval(0, true, false, 1, true, false);
@@ -81,7 +81,7 @@ public class MultiplicityInterval extends Interval<Integer> {
     /**
      * Creates interval of type [1,1]
      *
-     * @return
+     * @return the created interval
      */
     public static MultiplicityInterval createMandatory() {
         return new MultiplicityInterval(1, true, false, 1, true, false);
@@ -90,7 +90,7 @@ public class MultiplicityInterval extends Interval<Integer> {
     /**
      * Creates interval of type [0,1]
      *
-     * @return
+     * @return the created interval
      */
     public static MultiplicityInterval createProhibited() {
         return new MultiplicityInterval(0, true, false, 0, true, false);

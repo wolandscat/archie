@@ -44,7 +44,7 @@ public class OdinSerializationUtils {
      * Creates a new ODIN object declaration:
      * <pre>
      *     <code>
-     *         objectName = <
+     *         objectName = &lt;
      *     </code>
      * </pre>
      * @param objectName
@@ -57,7 +57,7 @@ public class OdinSerializationUtils {
     /**
      * <pre>
      *     <code>
-     *         propertyName = <"content">
+     *         propertyName = &lt;"content"&gt;
      *
      *     </code>
      * </pre>
@@ -72,7 +72,7 @@ public class OdinSerializationUtils {
     /**
      * <pre>
      *     <code>
-     *         propertyName = <True>
+     *         propertyName = &lt;True&gt;
      *
      *     </code>
      * </pre>
@@ -87,7 +87,7 @@ public class OdinSerializationUtils {
     /**
      * <pre>
      *     <code>
-     *         propertyName = <[0..*]>
+     *         propertyName = &lt;[0..*]&gt;
      *     </code>
      * </pre>
      * @param propertyName
@@ -221,7 +221,7 @@ public class OdinSerializationUtils {
      * <br>
      * <pre>
      *     <code>
-     *         ["key"] = <
+     *         ["key"] = &lt;
      *
      *     </code>
      * </pre>
@@ -239,7 +239,7 @@ public class OdinSerializationUtils {
      * <br>
      * <pre>
      *     <code>
-     *         ["key"] = (cast) <
+     *         ["key"] = (cast) &lt;
      *
      *     </code>
      * </pre>
@@ -257,7 +257,7 @@ public class OdinSerializationUtils {
      * <br>
      * <pre>
      *     <code>
-     *         ["key"] = <"value">
+     *         ["key"] = &lt;"value"&gt;
      *
      *     </code>
      * </pre>
@@ -275,11 +275,11 @@ public class OdinSerializationUtils {
      * <br>
      * <pre>
      *     <code>
-     *         (cast) <
+     *         (cast) &lt;
      *
      *     </code>
      * </pre>
-     * @param key
+     * @param cast
      * @return
      */
     public static String buildOpeningDeclarationWithCast(String cast) {
@@ -291,7 +291,7 @@ public class OdinSerializationUtils {
     /**
      * <pre>
      *     <code>
-     *         objectName = <
+     *         objectName = &lt;
      *
      *     </code>
      * </pre>
@@ -307,7 +307,7 @@ public class OdinSerializationUtils {
     /**
      * <pre>
      *     <code>
-     *         objectName = (cast) <
+     *         objectName = (cast) &lt;
      *
      *     </code>
      * </pre>
@@ -325,7 +325,7 @@ public class OdinSerializationUtils {
      * <br>
      * <pre>
      *     <code>
-     *         >
+     *         &gt;
      *
      *     </code>
      * </pre>

@@ -40,12 +40,12 @@ public abstract class BmmClassifier extends BmmModelElement {
      */
     private String typeCategory;
     /**
-     * Signature form of the type, which for generics includes generic parameter constrainer types E.g. Interval<T:Ordered>
+     * Signature form of the type, which for generics includes generic parameter constrainer types E.g. Interval&lt;T:Ordered&gt;
      */
     private String typeSignature;
     /**
      * Name of the this type in form allowing other type to be RT-conformance tested against it; 'RT' conformance means
-     * 'relation-target' conformance, which abstracts away container types like List<>, Set<> etc and compares the
+     * 'relation-target' conformance, which abstracts away container types like List&lt;&gt;, Set&lt;&gt; etc and compares the
      * dynamic type with the relation target type in the UML sense, i.e. regardless of whether there is single or
      * multiple containment.
      *
@@ -98,7 +98,7 @@ public abstract class BmmClassifier extends BmmModelElement {
 
     /**
      * Returns the signature form of the type, which for generics includes generic parameter constrainer types
-     * E.g. Interval<T:Ordered>
+     * E.g. Interval&lt;T:Ordered&gt;
      *
      * @return
      */
@@ -108,7 +108,7 @@ public abstract class BmmClassifier extends BmmModelElement {
 
     /**
      * Sets the signature form of the type, which for generics includes generic parameter constrainer types
-     * E.g. Interval<T:Ordered>
+     * E.g. Interval&lt;T:Ordered&gt;
      *
      * @param typeSignature
      */
@@ -118,7 +118,7 @@ public abstract class BmmClassifier extends BmmModelElement {
 
     /**
      * Returns the name of the this type in form allowing other type to be RT-conformance tested against it; 'RT' conformance means
-     * 'relation-target' conformance, which abstracts away container types like List<>, Set<> etc and compares the
+     * 'relation-target' conformance, which abstracts away container types like List&lt;&gt;, Set&lt;&gt; etc and compares the
      * dynamic type with the relation target type in the UML sense, i.e. regardless of whether there is single or
      * multiple containment.
      *
@@ -130,7 +130,7 @@ public abstract class BmmClassifier extends BmmModelElement {
 
     /**
      * Sets the name of the this type in form allowing other type to be RT-conformance tested against it; 'RT' conformance means
-     * 'relation-target' conformance, which abstracts away container types like List<>, Set<> etc and compares the
+     * 'relation-target' conformance, which abstracts away container types like List&lt;&gt;, Set&lt;&gt; etc and compares the
      * dynamic type with the relation target type in the UML sense, i.e. regardless of whether there is single or
      * multiple containment.
      *

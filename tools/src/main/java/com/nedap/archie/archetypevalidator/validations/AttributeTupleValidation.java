@@ -16,8 +16,7 @@ public class AttributeTupleValidation extends ValidatingVisitor {
 
     /**
      * Override for validation on complex objects
-     * @param cObject
-     * @return
+     * @param cObject the cobject to validate
      */
     protected void validate(CComplexObject cObject) {
         if(cObject.getAttributeTuples() != null) {

@@ -35,7 +35,7 @@ public class BmmSimpleType extends BmmType implements Serializable {
     /**
      * Returns the target type; this converts to the first parameter in generic_parameters in BMM_GENERIC_TYPE.
      *
-     * @return
+     * @return the base class
      */
     public BmmClass getBaseClass() {
         return baseClass;
@@ -43,8 +43,6 @@ public class BmmSimpleType extends BmmType implements Serializable {
 
     /**
      * Sets the target type; this converts to the first parameter in generic_parameters in BMM_GENERIC_TYPE.
-     *
-     * @return
      */
     public void setBaseClass(BmmClass baseClass) {
         this.baseClass = baseClass;
@@ -53,7 +51,7 @@ public class BmmSimpleType extends BmmType implements Serializable {
     /**
      * Return base_class.type_name.
      *
-     * @return
+     * @return the type name
      */
     @Override
     public String getTypeName() {

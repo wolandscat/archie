@@ -14,7 +14,7 @@ public class ArchieLanguageConfiguration {
 
     /**
      * The language for use in logical paths
-     * @return
+     * @return The language for use in logical paths
      */
     public static String getLogicalPathLanguage() {
         String language = currentLogicalPathLanguage.get();
@@ -27,7 +27,7 @@ public class ArchieLanguageConfiguration {
 
     /**
      * The language for use in logical paths
-     * @return
+     * @return The language for use in logical paths
      */
     public static String getMeaningAndDescriptionLanguage() {
         String language = currentMeaningAndDescriptionLanguage.get();
@@ -48,14 +48,15 @@ public class ArchieLanguageConfiguration {
 
     /**
      * Override the language used in logical paths, on a thread local basis
-     * @param language
+     * @param language The language the use
      */
     public static void setThreadLocalLogicalPathLanguage(String language) {
         currentLogicalPathLanguage.set(language);
     }
 
     /*
-     *
+     * Override the language used in descriptions and meanings, on a thread local basis
+     * @Param language the language to use
      */
     public static void setThreadLocalDescriptiongAndMeaningLanguage(String language) {
         currentMeaningAndDescriptionLanguage.set(language);

@@ -23,10 +23,13 @@ public class TermMapping extends RMObject {
     /**
      * This is an interesting one, that could be implemented with an enum
      * //TODO: look at it
-     * < = narrower term
-     * = = equals term
-     * > = broader term
-     * ? = the kind of mapping is unknown
+     * <dl>
+     *  <dt>&lt;</dt>
+     *  <dd>narrower term</dd>
+     *  <dt>=</dt> <dd>equals term</dd>
+     *  <dt>&gt;</dt> <dd>broader term</dd>
+     * <dt>?</dt> <dd>the kind of mapping is unknown</dd>
+     * </dl>
      */
     @XmlJavaTypeAdapter(TermMappingMatchAdapter.class)
     private Character match = '?';

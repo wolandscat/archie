@@ -24,7 +24,7 @@ package org.openehr.bmm.core;
 import com.nedap.archie.base.MultiplicityInterval;
 
 /**
- * Subtype of BMM_PROPERTY that represents a container type based on one of the inbuilt types List <>, Set <>, Array <>.
+ * Subtype of BMM_PROPERTY that represents a container type based on one of the inbuilt types List &lt;&gt;, Set &lt;&gt;, Array &lt;&gt;.
  *
  * Created by cnanjo on 4/11/16.
  */

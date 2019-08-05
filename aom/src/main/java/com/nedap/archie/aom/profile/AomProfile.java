@@ -23,7 +23,7 @@ public class AomProfile {
 
     /**
      * Allowed type substitutions: Actual RM type names keyed by AOM built-in types which can substitute
-     * for them in an archetype. E.g. <value = "String", key = "ISO8601_DATE"> means that if RM property
+     * for them in an archetype. E.g. &lt;value = "String", key = "ISO8601_DATE"&gt; means that if RM property
      * TYPE.some_property is of type String, an ISO8601_DATE is allowed at that position in the archetype.
      */
     private Map<String, String> aomRmTypeSubstitutions;
@@ -45,7 +45,7 @@ public class AomProfile {
 
     /**
      * @return Allowed type substitutions: Actual RM type names keyed by AOM built-in types which can substitute
-     * for them in an archetype. E.g. <value = "String", key = "ISO8601_DATE"> means that if RM property
+     * for them in an archetype. E.g. &lt;value = "String", key = "ISO8601_DATE"&gt; means that if RM property
      * TYPE.some_property is of type String, an ISO8601_DATE is allowed at that position in the archetype.
      */
     public Map<String, String> getAomRmTypeSubstitutions() {
@@ -55,7 +55,7 @@ public class AomProfile {
     /**
      *
      * @param aomRmTypeSubstitutions Allowed type substitutions: Actual RM type names keyed by AOM built-in types which can substitute
-     * for them in an archetype. E.g. <value = "String", key = "ISO8601_DATE"> means that if RM property
+     * for them in an archetype. E.g. &lt;value = "String", key = "ISO8601_DATE"&gt; means that if RM property
      * TYPE.some_property is of type String, an ISO8601_DATE is allowed at that position in the archetype.
      */
     public void setAomRmTypeSubstitutions(Map<String, String> aomRmTypeSubstitutions) {

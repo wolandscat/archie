@@ -140,7 +140,7 @@ public class BmmModel extends BmmPackageContainer implements IBmmSchemaCore, IBm
 
     /**
      * True if `a_ms_property_type' is a valid 'MS' dynamic type for `a_property' in BMM type `a_bmm_type_name'.
-     * 'MS' conformance means 'model-semantic' conformance, which abstracts away container types like List<>, Set<>
+     * 'MS' conformance means 'model-semantic' conformance, which abstracts away container types like List&lt;&gt;, Set&lt;&gt;
      *  etc and compares the dynamic type with the relation target type in the UML sense, i.e. regardless of whether
      *  there is single or multiple containment.
      *

@@ -44,7 +44,7 @@ import java.util.Map;
 /**
  * generates an example structure for any model based on an operational template + a BMM model + the AOP profile
  *
- * Output is a Map<String, Object>, where object is again a Map<String, Object>, or a simple type directly serializable
+ * Output is a Map&lt;String, Object&gt;, where object is again a Map&lt;String, Object&gt;, or a simple type directly serializable
  * using the jackson object mapper. This can be simply serialized to JSON if desired.
  *
  *

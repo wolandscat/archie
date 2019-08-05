@@ -11,11 +11,13 @@ import java.util.Set;
  * Class whose instances represent any kind of 1:N relationship between a source term and 1-N target terms.
  */
 public class TerminologyRelation extends ArchetypeModelObject {
+
     /**
      * Code of source term of this relation.
      *
      */
     private String id;
+
     /**
      * List of target terms in this relation.
      *
@@ -25,7 +27,7 @@ public class TerminologyRelation extends ArchetypeModelObject {
     /**
      * Returns code of source term of this relation.
      *
-     * @return
+     * @return to code of the source term
      */
     public String getId() {
         return id;
@@ -34,7 +36,7 @@ public class TerminologyRelation extends ArchetypeModelObject {
     /**
      * Sets code of source term of this relation.
      *
-     * @param id
+     * @param id the id code to set
      */
     public void setId(String id) {
         this.id = id;
@@ -43,7 +45,7 @@ public class TerminologyRelation extends ArchetypeModelObject {
     /**
      * Returns list of target terms in this relation.
      *
-     * @return
+     * @return the list of target terms
      */
     public Set<String> getMembers() {
         return members;
@@ -52,7 +54,7 @@ public class TerminologyRelation extends ArchetypeModelObject {
     /**
      * Sets list of target terms in this relation.
      *
-     * @param members
+     * @param members the list of members
      */
     public void setMembers(Collection<String> members) {
         this.members = new LinkedHashSet<>(members);
@@ -62,7 +64,7 @@ public class TerminologyRelation extends ArchetypeModelObject {
     /**
      * Add a member to this relation
      *
-     * @param members
+     * @param member the member to add
      */
     public void addMember(String member) {
         this.members.add(member);

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Type reference based on a generic class, e.g. 'HashTable <List <Packet>, String>'
+ * Type reference based on a generic class, e.g. 'HashTable &lt;List &lt;Packet&gt;, String&gt;'
  *
  * Created by cnanjo on 4/11/16.
  */
@@ -96,7 +96,7 @@ public class BmmGenericType extends BmmType implements Serializable {
     }
 
     /**
-     * Return the full name of the type including generic parameters, e.g. 'DV_INTERVAL<T>', 'TABLE<List<THING>,String>'.
+     * Return the full name of the type including generic parameters, e.g. 'DV_INTERVAL&lt;T&gt;', 'TABLE&lt;List&lt;THING&gt;,String&gt;'.
      *
      * @return
      */

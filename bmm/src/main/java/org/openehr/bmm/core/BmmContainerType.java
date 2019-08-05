@@ -79,7 +79,7 @@ public class BmmContainerType extends BmmType {
     }
 
     /**
-     * Return full type name, e.g. 'List<ELEMENT>'.
+     * Return full type name, e.g. 'List&lt;ELEMENT&gt;'.
      *
      * @return
      */
@@ -89,7 +89,7 @@ public class BmmContainerType extends BmmType {
     }
 
     /**
-     * Return base_type.conformance_type_name; e.g. if this type is 'List<ELEMENT>', return 'ELEMENT'.
+     * Return base_type.conformance_type_name; e.g. if this type is 'List&lt;ELEMENT&gt;', return 'ELEMENT'.
      *
      * @return
      */

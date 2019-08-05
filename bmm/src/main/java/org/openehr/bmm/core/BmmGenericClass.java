@@ -137,7 +137,7 @@ public class BmmGenericClass extends BmmClass implements Serializable {
 
     /**
      * Signature form of the type, which for generics includes generic parameter constrainer types
-     * E.g. Interval<T:Ordered>
+     * E.g. Interval&lt;T:Ordered&gt;
      *
      * @return
      */
