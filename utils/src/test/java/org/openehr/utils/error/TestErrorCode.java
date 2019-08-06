@@ -1,4 +1,4 @@
-package org.openehr.utils.validation;
+package org.openehr.utils.error;
 
 import org.openehr.utils.message.MessageCode;
 

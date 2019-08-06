@@ -6,7 +6,6 @@ import org.openehr.utils.message.MessageCode;
 import org.openehr.utils.message.MessageDescriptor;
 import org.openehr.utils.message.MessageLogger;
 import org.openehr.utils.message.MessageSeverity;
-import org.openehr.utils.validation.TestErrorCode;
 
 import java.util.List;
 
