@@ -151,8 +151,7 @@ public class ValueList {
     /**
      * If this is a list of booleans and at least one of the values is false, return false. return true if all values are true.
      * Returns false if there are no booleans
-     * @param valueList
-     * @return
+     * @return the single boolean result of this value list
      */
     public boolean getSingleBooleanResult() {
         if(isEmpty()) {

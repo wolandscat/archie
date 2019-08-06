@@ -163,10 +163,10 @@ public interface ModelInfoLookup {
     /**
      * True if the given attribute at given type is ok for given CPrimitiveObject, false otherwise
      * TODO: this should be solved with AOM_PROFILE
-     * @param rmTypeName
-     * @param rmAttributeName
-     * @param cObject
-     * @return
+     * @param rmTypeName the type name of the type to checjk
+     * @param rmAttributeName the attribute name of the attribute to check
+     * @param cObject the primitive object to validate
+     * @return true if valid, false if not valid
      */
     boolean validatePrimitiveType(String rmTypeName, String rmAttributeName, CPrimitiveObject cObject);
 
@@ -174,8 +174,8 @@ public interface ModelInfoLookup {
 
     /**
      * Pass this method to cObject.effectiveOccurrences to get the reference model property multiplicity
-     * @param rmTypeName
-     * @param rmAttributeName
+     * @param rmTypeName the type name of the type to get occurrences for
+     * @param rmAttributeNameOrPath The rm attribute name or path lookup to an rm attribute to get the occurrences for
      * @return
      */
     default MultiplicityInterval referenceModelPropMultiplicity(String rmTypeName, String rmAttributeNameOrPath) {

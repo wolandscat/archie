@@ -318,8 +318,8 @@ public class BmmDefinitions extends BasicDefinitions {
     /**
      * for a generic type name, extract the parameter type name(s) (which could themselves be generic)
      * and put them into a list.
-     * Example: for "Hash <List <String>, Integer>", return a list with contents:
-     * "List <String>", "Integer"
+     * Example: for "Hash &lt;List &lt;String&gt;, Integer&gt;", return a list with contents:
+     * "List &lt;String&gt;", "Integer"
      * @param aTypeName
      * @return
      */

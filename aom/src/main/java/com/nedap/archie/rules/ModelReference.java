@@ -7,7 +7,7 @@ public class ModelReference extends Leaf {
 
     /**
      * The path can be prefixed with a variable, referencing another path.
-     * For example 'every $event in /data/events satisfies $event/value > 5'
+     * For example 'every $event in /data/events satisfies $event/value &gt; 5'
      */
     private String variableReferencePrefix;
 

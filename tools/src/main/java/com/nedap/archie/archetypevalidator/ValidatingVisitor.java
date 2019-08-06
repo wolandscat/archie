@@ -45,8 +45,6 @@ public abstract class ValidatingVisitor extends ArchetypeValidationBase {
 
     /**
      * Override to get a callback when validation begins
-     * @param archetype the archetype that is currently being validated
-     * @param flatParent
      */
     protected void beginValidation() {
 
@@ -54,8 +52,6 @@ public abstract class ValidatingVisitor extends ArchetypeValidationBase {
 
     /**
      * Override to get a callback when validation ends
-     * @param archetype the archetype that is currently being validated
-     * @return
      */
     protected void endValidation() {
 
@@ -75,24 +71,21 @@ public abstract class ValidatingVisitor extends ArchetypeValidationBase {
 
     /**
      * Override for validation on archetype slots
-     * @param cObject
-     * @return
+     * @param cObject the cobject to validate
      */
     protected void validate(ArchetypeSlot cObject) {
     }
 
     /**
      * Override for validation on complex object proxy constraints
-     * @param cObject
-     * @return
+     * @param cObject the cobject to validate
      */
     protected void validate(CComplexObjectProxy cObject) {
     }
 
     /**
      * Override for validation on complex objects
-     * @param cObject
-     * @return
+     * @param cObject the cobject to validate
      */
     protected void validate(CComplexObject cObject) {
     }

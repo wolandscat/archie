@@ -68,7 +68,7 @@ public class RMAttributeInfo {
     }
 
     /**
-     * If isMultipleValued == true, this will return the type used in the collection, eg if the the collection is List<String>, this will return String.class
+     * If isMultipleValued == true, this will return the type used in the collection, eg if the the collection is List&lt;String&gt;, this will return String.class
      * @return
      */
     public Class getTypeInCollection() {

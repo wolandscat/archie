@@ -4,7 +4,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import javax.annotation.Resource;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.MissingResourceException;

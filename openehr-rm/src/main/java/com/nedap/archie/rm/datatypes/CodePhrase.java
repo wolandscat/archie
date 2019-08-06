@@ -32,11 +32,11 @@ public class CodePhrase extends RMObject {
 
     /**
      * Construct a code phrase in the form:
-     * <br/>
+     * <br>
      * [terminologyId::codeString]
-     * <br/>
+     * <br>
      * or
-     * <br/>
+     * <br>
      * terminologyId::codeString
      *
      * terminologyId can be just a a string, or contain a version as in  terminologyId(version)
