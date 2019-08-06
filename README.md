@@ -1,4 +1,4 @@
-# Archie: OpenEHR Library 
+# Archie: OpenEHR Library
 
 Archie is an openEHR Library written in Java, which can be used to implement openEHR tools and systems. See http://www.openehr.org for information about openEHR.
 Archie works with the most recent versions of openEHR. This includes ADL version 2.
@@ -18,7 +18,7 @@ You can depend on parts of Archie, or the entire library at once. If you want th
 
 ```gradle
 dependencies {
-    compile 'com.nedap.healthcare.archie:archie-all:0.7.0'
+    compile 'com.nedap.healthcare.archie:archie-all:0.7.1'
 }
 ```
 
@@ -28,11 +28,11 @@ or if you use maven, in your pom.xml
 <dependency>
     <groupId>com.nedap.healthcare.archie</groupId>
     <artifactId>archie-all</artifactId>
-    <version>0.7.0</version>
+    <version>0.7.1</version>
 </dependency>
 ```
 
-If you want to depend on just the AOM and BMM, without any reference model implementation, depend on com.nedap.healthcare.archie:tools:0.7.0 and com.nedap.healthcare.archie:referencemodels:0.7.0 instead
+If you want to depend on just the AOM and BMM, without any reference model implementation, depend on com.nedap.healthcare.archie:tools:0.7.1 and com.nedap.healthcare.archie:referencemodels:0.7.1 instead
 
 
 ## Build
@@ -147,8 +147,8 @@ The validation result contains the validation result, listing any errors in the 
 
 ### Reference model metadata
 
-You may have noticed a call to ```BuiltinReferenceModels.getMetaModels()```. This retrieves the metadata for the reference models, which are needed to validate and flatten archetypes. Archie contains two types of metamodels: BMM, and reflection based metadata. 
-The BMM models are a file containing metadata in a form defined by the OpenEHR specifications. 
+You may have noticed a call to ```BuiltinReferenceModels.getMetaModels()```. This retrieves the metadata for the reference models, which are needed to validate and flatten archetypes. Archie contains two types of metamodels: BMM, and reflection based metadata.
+The BMM models are a file containing metadata in a form defined by the OpenEHR specifications.
 The reflection based metadata contains ModelInfoLookup classes. They are derived from an implementation of a reference model. Note that the ModelInfoLookup classes are only added if you depended on them. If you depended on archie-all, you're all set.
 
 ### Operational templates
@@ -237,7 +237,7 @@ The Differentiator supports differentiating the definition of the archetype, plu
 - removes any translations that exist in the parent archetype, but not in the specialised archetype
 - removing terminology extracts
 
-It returns a new archetype as its result, the input archetypes are never altered. 
+It returns a new archetype as its result, the input archetypes are never altered.
 The sibling order algorithm is written so that it creates a very small number of sibling order markers, and only generates them if necessary.
 The diff operation does not diff any template overlays if presented with a Template. However, you can use a flattened TemplateOverlay plus its flat parent as arguments and obtain the differential form of the template overlay. You can then replace the edited template overlay in the template yourself. It is possible that this feature will be added in a later version.
 It also does not yet diff the rules section, this must be manually performed.
@@ -277,14 +277,14 @@ Archetype parsedArchetype = (Archetype) unmarshaller.unmarshal(new StringReader(
 
 ### ODIN
 
-ODIN is a JSON/YAML like notation used as part of ADL, for meta-data, terminologies and annotations. See https://github.com/openehr/odin for what more it can do. To our knowledge it's not used widely outside of ADL/openEHR. Archie can map ODIN data directly to Java-objects using Jackson. 
+ODIN is a JSON/YAML like notation used as part of ADL, for meta-data, terminologies and annotations. See https://github.com/openehr/odin for what more it can do. To our knowledge it's not used widely outside of ADL/openEHR. Archie can map ODIN data directly to Java-objects using Jackson.
 
 ```java
     YourType type = OdinObjectParser.convert(odinText, YourType.class);
 ```
 
 It works by first converting to JSON, then binding that to objects with Jackson.
-This means you can also convert ODIN to JSON. 
+This means you can also convert ODIN to JSON.
 
 ```java
     String json = new OdinToJsonConverter().convert(odinText);
@@ -500,7 +500,7 @@ The conversion log can be serialized to a file for storage using Jackson, so it 
 
 You may have noticed an instance of `ADL14ConversionConfiguration` in the previous example. In this configuration the mapping from term codes as used in ADL 1.4 to term URIs as used in ADL 2 can be specified. See the `ConversionConfigForTest.java` file for an example on how this works, and how this can be serialized to a file, and the file `/tools/src/test/java/com/nedap/archie/adl14/configuration.json` for an example of a simple serialized configuration that contains sane defaults for snomed, loinc and openehr URIs.
 
-If you leave the configuration empty, the converter will fall back to a default URI conversion. 
+If you leave the configuration empty, the converter will fall back to a default URI conversion.
 
 ## Full XPath support on reference model
 
@@ -564,7 +564,7 @@ ValidationResult validationResult = new ArchetypeValidator(metaModels).validate(
 
 This runs all the implemented archetype validation and returns a result. This result contains the validation results, the validation results of any template overlays and a flattened version of the input archetype.
 
-Note that it requires a MetaModels class. This contains the Metadata of the reference models used. 
+Note that it requires a MetaModels class. This contains the Metadata of the reference models used.
 
 ### Reference Model Metadata
 
@@ -606,7 +606,7 @@ for(String resource:resourceNames) {
 
 This instantiates a MetaModels class that has both the archie reference model implementation, the BMM models and AOM profiles. The BMM models and AOM profiles will be used for the flattener and archetype validator, the other models for tools that work on reference models.
 
-After validating and converting, the BmmRepository allows access to the PBmmSchema, the BmmModels, all validation messages and more, through the BmmValidationResult class. See Javadoc for more information.B 
+After validating and converting, the BmmRepository allows access to the PBmmSchema, the BmmModels, all validation messages and more, through the BmmValidationResult class. See Javadoc for more information.B
 
 ### BMM and P_BMM implementation
 
