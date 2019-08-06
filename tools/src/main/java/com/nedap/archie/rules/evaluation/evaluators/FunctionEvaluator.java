@@ -32,6 +32,7 @@ public class FunctionEvaluator  implements Evaluator<Function> {
         registerFunction(new Min());
         registerFunction(new Mean());
         registerFunction(new Sum());
+        registerFunction(new FlatSum());
         registerFunction(new ValueWhenUndefined());
         registerFunction(new Round());
     }

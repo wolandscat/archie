@@ -5,6 +5,7 @@ import com.nedap.archie.adlparser.modelconstraints.RMConstraintImposer;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.rm.archetyped.Locatable;
 import com.nedap.archie.rm.composition.Observation;
+import com.nedap.archie.rm.datastructures.Element;
 import com.nedap.archie.rm.datastructures.Item;
 import com.nedap.archie.rm.datastructures.ItemTree;
 import com.nedap.archie.rm.datavalues.quantity.DvQuantity;
@@ -50,12 +51,40 @@ public class FunctionsTest {
         RuleEvaluation ruleEvaluation = getRuleEvaluation();
         Observation root = new Observation();
         ruleEvaluation.evaluate(root, archetype.getRules().getRules());
-        ValueList min = ruleEvaluation.getVariableMap().get("max");
-        assertEquals("max should work", 2.0, (double) min.getValues().get(0).getValue(), 0.001);
+        ValueList max = ruleEvaluation.getVariableMap().get("max");
+        assertEquals("max should work", 2.0, (double) max.getValues().get(0).getValue(), 0.001);
     }
 
     private RuleEvaluation getRuleEvaluation() {
         return new RuleEvaluation(ArchieRMInfoLookup.getInstance(), JAXBUtil.getArchieJAXBContext(), archetype);
+    }
+
+    @Test
+    public void flatSum() throws Exception {
+        archetype = parser.parse(ParsedRulesEvaluationTest.class.getResourceAsStream("functions.adls"));
+        assertTrue(parser.getErrors().hasNoErrors());
+        System.out.println(archetype);
+        RuleEvaluation ruleEvaluation = getRuleEvaluation();
+
+        Locatable rmObject = (Locatable) new TestUtil().constructEmptyRMObject(archetype.getDefinition());
+        DvQuantity quantity = (DvQuantity) rmObject.itemAtPath("/data[id2]/events[id3]/data[id4]/items[id5]/value");
+        quantity.setMagnitude(65d);
+
+        quantity = (DvQuantity) rmObject.itemAtPath("/data[id2]/events[id3]/data[id4]/items[id6]/value");
+        quantity.setMagnitude(21d);
+
+        // Add an extra id5 element
+        Element elem = new Element();
+        elem.setArchetypeNodeId("id5");
+        quantity = new DvQuantity();
+        quantity.setMagnitude(33.3);
+        elem.setValue(quantity);
+
+        ((ItemTree) rmObject.itemAtPath("/data[id2]/events[id3]/data[id4]")).addItem(elem);
+
+        ruleEvaluation.evaluate(rmObject, archetype.getRules().getRules());
+        ValueList flatSum = ruleEvaluation.getVariableMap().get("flat_sum");
+        assertEquals("flat_sum should work", 122.6, (double) flatSum.getValues().get(0).getValue(), 0.001);
     }
 
     @Test

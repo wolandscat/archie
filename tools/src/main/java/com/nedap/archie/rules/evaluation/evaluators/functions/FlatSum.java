@@ -9,15 +9,16 @@ import com.nedap.archie.rules.evaluation.ValueList;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.nedap.archie.rules.evaluation.evaluators.FunctionUtil.*;
+import static com.nedap.archie.rules.evaluation.evaluators.FunctionUtil.castToDouble;
+import static com.nedap.archie.rules.evaluation.evaluators.FunctionUtil.checkAndHandleNull;
 
 /**
- * Created by pieter.bos on 07/04/2017.
+ * flat_sum function which will sum the argument values always return a single value.
  */
-public class Max implements FunctionImplementation {
+public class FlatSum implements FunctionImplementation {
     @Override
     public String getName() {
-        return "max";
+        return "flat_sum";
     }
 
     @Override
@@ -28,28 +29,22 @@ public class Max implements FunctionImplementation {
             possiblyNullResult.setType(PrimitiveType.Real);
             return possiblyNullResult;
         }
-        //check that all valueList are equal length or 1 length
-        int length = checkEqualLength(arguments);
-        if(length == -1) {
-            throw new FunctionCallException("value lists of max operator not the same length");
-        }
-        ValueList result = new ValueList();
-        result.setType(PrimitiveType.Real);
-        for(int i = 0; i < length; i++) {
-            Double max = null;
-            List<String> paths = new ArrayList<>();
-            for(ValueList list: arguments) {
-                Value value = list.get(i);
-                if(!value.isNull() && ((max == null) || castToDouble(value) > max)) {
-                    max = castToDouble(value);
-                }
-                paths.addAll(value.getPaths());
-            }
-            result.addValue(max, paths);
-        }
 
+        double sum = 0.0;
+        ValueList result = new ValueList();
+        List<String> paths = new ArrayList<>();
+
+        for (ValueList argument: arguments) {
+            List<Value> values = argument.getValues();
+            for (Value val: values) {
+                if (!val.isNull()) {
+                    sum += castToDouble(val);
+                }
+                paths.addAll(val.getPaths());
+            }
+        }
+        result.addValue(sum, paths);
+        result.setType(PrimitiveType.Real);
         return result;
     }
-
-
 }
