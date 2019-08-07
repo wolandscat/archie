@@ -26,19 +26,37 @@ import org.reflections.scanners.ResourcesScanner;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 public class JsonSchemaValidator {
 
+    private static final String ITS_JSON_NAMESPACE = "https://specifications.openehr.org/releases/ITS-JSON/latest/components";
+
+    Map<String, String> hardcodedLocations = new HashMap();
+
+    {
+        hardcodedLocations.put("COMPOSITION", "Composition");
+        hardcodedLocations.put("OBSERVATION", "Composition");
+        hardcodedLocations.put("EVALUATION", "Composition");
+        hardcodedLocations.put("ACTIVITY", "Composition");
+        hardcodedLocations.put("ACTION", "Composition");
+        hardcodedLocations.put("SECTION", "Composition");
+        hardcodedLocations.put("INSTRUCTION", "Composition");
+        hardcodedLocations.put("INSTRUCTION_DETAILS", "Composition");
+        hardcodedLocations.put("CLUSTER", "Data_structures");
+    }
+
     private final SchemaClient schemaClient = new SchemaClient() {
 
         @Override
         public InputStream get(String url) {
-            if (url.startsWith("https://www.openEHR.org/releases/ITS-JSON/Release-1.0.0")) {
-                return getClass().getResourceAsStream("/jsonschema/" + url.substring("https://www.openEHR.org/releases/ITS-JSON/Release-1.0.0".length()));
+            if (url.startsWith(ITS_JSON_NAMESPACE)) {
+                return getClass().getResourceAsStream("/jsonschema/" + url.substring(ITS_JSON_NAMESPACE.length()));
             } else {
                 throw new RuntimeException("could not find schema " + url);
             }
@@ -48,14 +66,17 @@ public class JsonSchemaValidator {
     private final LoadingCache<String, Schema> schemaCache = CacheBuilder.newBuilder().build(new CacheLoader<String, Schema>() {
         @Override
         public Schema load(String type) throws Exception {
-            BmmClass classDefinition = bmm.getClassDefinition(BmmDefinitions.typeNameToClassKey(type));
-            String test = getPackagePath(classDefinition.getPackage());
-            String packageName = test.substring(0, 1).toUpperCase() + test.substring(1);
+            String packageName = null;
+            if(hardcodedLocations.containsKey(type.toUpperCase(Locale.ENGLISH))) {
+                packageName = hardcodedLocations.get(type.toUpperCase(Locale.ENGLISH));
+            } else {
+                BmmClass classDefinition = bmm.getClassDefinition(BmmDefinitions.typeNameToClassKey(type));
+                String test = getPackagePath(classDefinition.getPackage());
+                packageName = test.substring(0, 1).toUpperCase() + test.substring(1);
+            }
             try(InputStream inputStream = getClass().getResourceAsStream("/jsonschema/RM/Release-1.0.4/" + packageName + "/" + type + ".json")) {
                 JSONObject schemaJson = new JSONObject(new JSONTokener(inputStream));
-
                 return SchemaLoader.load(schemaJson, schemaClient);
-
             }
         }
     });

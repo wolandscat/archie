@@ -149,7 +149,7 @@ public class ExampleJsonInstanceGeneratorTest {
                     jsonSchemaValidationFailed++;
                 } catch (Exception e) {
                     if(generatedException <= 4) {
-                        logger.error("error generating example", e);
+                        logger.error("error generating example for " + result.getArchetypeId(), e);
                         //logger.error(json);
                     }
                     generatedException++;
