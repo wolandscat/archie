@@ -119,6 +119,7 @@ public class ExampleJsonInstanceGeneratorTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         int numberCreated = 0, validationFailed = 0, generatedException = 0, jsonSchemaValidationRan = 0, jsonSchemaValidationFailed = 0;
+        int reserializedJsonSchemaValidationFailed = 0;
         repository.compile(BuiltinReferenceModels.getMetaModels());
         JsonSchemaValidator jsonSchemaValidator = new JsonSchemaValidator(BuiltinReferenceModels.getBmmRepository().getModel("openehr_rm_1.0.4").getModel());
         for(ValidationResult result:repository.getAllValidationResults()) {
@@ -129,14 +130,20 @@ public class ExampleJsonInstanceGeneratorTest {
                     OperationalTemplate template = (OperationalTemplate) flattener.flatten(result.getSourceArchetype());
                     Map<String, Object> example = structureGenerator.generate(template);
                     json = mapper.writeValueAsString(example);
-                    JacksonUtil.getObjectMapper().readValue(json, RMObject.class);
+                    RMObject parsed = JacksonUtil.getObjectMapper().readValue(json, RMObject.class);
                     numberCreated++;
                    // if(Sets.newHashSet("COMPOSITION", "OBSERVATION", "EVALUATION", "INSTRUCTION", "SECTION", "ACTION").contains(template.getDefinition().getRmTypeName())) {
                         jsonSchemaValidationRan++;
                         jsonSchemaValidator.validate(template.getDefinition().getRmTypeName(), json);
                    // }
 
-
+                    String serializedAgain = JacksonUtil.getObjectMapper().writeValueAsString(parsed);
+                    try {
+                        jsonSchemaValidator.validate(template.getDefinition().getRmTypeName(), serializedAgain);
+                    } catch (ValidationException ex) {
+                        logger.error(Joiner.on("\n").join(ex.getAllMessages()));
+                        reserializedJsonSchemaValidationFailed++;
+                    }
                 } catch (ValidationException ex) {
                     logger.error(Joiner.on("\n").join(ex.getAllMessages()));
                     jsonSchemaValidationFailed++;
@@ -155,6 +162,7 @@ public class ExampleJsonInstanceGeneratorTest {
         }
         logger.info("created " + numberCreated + " examples, " + validationFailed + " failed to validate, " + generatedException + " threw exception in test");
         logger.info("failed validation " + jsonSchemaValidationFailed + " of " + jsonSchemaValidationRan);
+        logger.info("failed validation of reserialized json " + reserializedJsonSchemaValidationFailed + " of " + jsonSchemaValidationRan);
     }
 
 
