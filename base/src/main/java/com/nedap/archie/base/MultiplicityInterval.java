@@ -2,10 +2,12 @@ package com.nedap.archie.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.io.Serializable;
+
 /**
  * Created by pieter.bos on 15/10/15.
  */
-public class MultiplicityInterval extends Interval<Integer> {
+public class MultiplicityInterval extends Interval<Integer> implements Serializable {
 
     /**
      * Marker to use in string form of interval between limits.
