@@ -1,5 +1,7 @@
 package com.nedap.archie.rm.support.identification;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -14,6 +16,7 @@ public abstract class UIDBasedId extends ObjectId {
 
     public static final String UUID_REGEXP = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}";
 
+    @JsonIgnore
     public UID getRoot() {
         String value = getValue();
         if(value == null) {
@@ -42,6 +45,7 @@ public abstract class UIDBasedId extends ObjectId {
     }
 
     @Nullable
+    @JsonIgnore
     public String getExtension() {
         String value = getValue();
         if(value == null) {
