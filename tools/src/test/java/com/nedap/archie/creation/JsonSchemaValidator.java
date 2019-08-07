@@ -51,7 +51,7 @@ public class JsonSchemaValidator {
             BmmClass classDefinition = bmm.getClassDefinition(BmmDefinitions.typeNameToClassKey(type));
             String test = getPackagePath(classDefinition.getPackage());
             String packageName = test.substring(0, 1).toUpperCase() + test.substring(1);
-            try(InputStream inputStream = getClass().getResourceAsStream("/jsonschema/RM/latest/" + packageName + "/" + type + ".json")) {
+            try(InputStream inputStream = getClass().getResourceAsStream("/jsonschema/RM/Release-1.0.4/" + packageName + "/" + type + ".json")) {
                 JSONObject schemaJson = new JSONObject(new JSONTokener(inputStream));
 
                 return SchemaLoader.load(schemaJson, schemaClient);
