@@ -119,7 +119,7 @@ public class ExampleJsonInstanceGeneratorTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         int numberCreated = 0, validationFailed = 0, generatedException = 0, jsonSchemaValidationRan = 0, jsonSchemaValidationFailed = 0;
-        int reserializedJsonSchemaValidationFailed = 0;
+        int secondJsonSchemaValidationRan = 0, reserializedJsonSchemaValidationFailed = 0;
         repository.compile(BuiltinReferenceModels.getMetaModels());
         JsonSchemaValidator jsonSchemaValidator = new JsonSchemaValidator(BuiltinReferenceModels.getBmmRepository().getModel("openehr_rm_1.0.4").getModel());
         for(ValidationResult result:repository.getAllValidationResults()) {
@@ -135,20 +135,25 @@ public class ExampleJsonInstanceGeneratorTest {
                    // if(Sets.newHashSet("COMPOSITION", "OBSERVATION", "EVALUATION", "INSTRUCTION", "SECTION", "ACTION").contains(template.getDefinition().getRmTypeName())) {
                         jsonSchemaValidationRan++;
                         jsonSchemaValidator.validate(template.getDefinition().getRmTypeName(), json);
+                        logger.error("first validation ok for {}", result.getArchetypeId());
                    // }
 
                     String serializedAgain = JacksonUtil.getObjectMapper().writeValueAsString(parsed);
                     try {
+                        secondJsonSchemaValidationRan++;
                         jsonSchemaValidator.validate(template.getDefinition().getRmTypeName(), serializedAgain);
+                        logger.error("second validation ok for {}", result.getArchetypeId());
                     } catch (ValidationException ex) {
+                        logger.error("second validation failed for {}", result.getArchetypeId());
                         logger.error(Joiner.on("\n").join(ex.getAllMessages()));
                         reserializedJsonSchemaValidationFailed++;
                     }
                 } catch (ValidationException ex) {
+                    logger.error("validation failed for {}", result.getArchetypeId());
                     logger.error(Joiner.on("\n").join(ex.getAllMessages()));
                     jsonSchemaValidationFailed++;
                 } catch (Exception e) {
-                    if(generatedException <= 4) {
+                    if(generatedException <= 100) {
                         logger.error("error generating example for " + result.getArchetypeId(), e);
                         //logger.error(json);
                     }
@@ -162,7 +167,7 @@ public class ExampleJsonInstanceGeneratorTest {
         }
         logger.info("created " + numberCreated + " examples, " + validationFailed + " failed to validate, " + generatedException + " threw exception in test");
         logger.info("failed validation " + jsonSchemaValidationFailed + " of " + jsonSchemaValidationRan);
-        logger.info("failed validation of reserialized json " + reserializedJsonSchemaValidationFailed + " of " + jsonSchemaValidationRan);
+        logger.info("failed validation of reserialized json " + reserializedJsonSchemaValidationFailed + " of " + secondJsonSchemaValidationRan);
     }
 
 
