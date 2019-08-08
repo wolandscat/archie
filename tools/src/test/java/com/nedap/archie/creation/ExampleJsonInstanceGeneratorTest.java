@@ -115,6 +115,7 @@ public class ExampleJsonInstanceGeneratorTest {
     @Test
     public void generateAllCKMExamples() throws Exception {
         ExampleJsonInstanceGenerator structureGenerator = new ExampleJsonInstanceGenerator(BuiltinReferenceModels.getMetaModels(), "en");
+        structureGenerator.setTypePropertyName("_type");
         FullArchetypeRepository repository = TestUtil.parseCKM();
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -130,6 +131,7 @@ public class ExampleJsonInstanceGeneratorTest {
                     OperationalTemplate template = (OperationalTemplate) flattener.flatten(result.getSourceArchetype());
                     Map<String, Object> example = structureGenerator.generate(template);
                     json = mapper.writeValueAsString(example);
+
                     RMObject parsed = JacksonUtil.getObjectMapper().readValue(json, RMObject.class);
                     numberCreated++;
                    // if(Sets.newHashSet("COMPOSITION", "OBSERVATION", "EVALUATION", "INSTRUCTION", "SECTION", "ACTION").contains(template.getDefinition().getRmTypeName())) {

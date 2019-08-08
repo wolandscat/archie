@@ -72,7 +72,7 @@
         },
         "performer": {
             "description": "Reference to Version container of Actor playing the role.",
-            "$ref": "all.json#/definitions/ACTOR"
+            "$ref": "https://specifications.openehr.org/releases/ITS-JSON/latest/components/BASE/Release-1.1.0/Base_types/all.json#/definitions/PARTY_REF"
         },
         "capabilities": {
             "description": "The capabilities of this role.",

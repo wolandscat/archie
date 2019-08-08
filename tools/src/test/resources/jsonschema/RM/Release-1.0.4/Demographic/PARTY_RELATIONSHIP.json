@@ -39,7 +39,7 @@
         },
         "target": {
             "description": "Target of relationship.",
-            "$ref": "all.json#/definitions/PARTY"
+            "$ref": "https://specifications.openehr.org/releases/ITS-JSON/latest/components/BASE/Release-1.1.0/Base_types/all.json#/definitions/PARTY_REF"
         },
         "time_validity": {
             "description": "Valid time interval for this relationship.",
@@ -47,7 +47,7 @@
         },
         "source": {
             "description": "Source of relationship.",
-            "$ref": "all.json#/definitions/PARTY"
+            "$ref": "https://specifications.openehr.org/releases/ITS-JSON/latest/components/BASE/Release-1.1.0/Base_types/all.json#/definitions/PARTY_REF"
         }
     },
     "required": [
