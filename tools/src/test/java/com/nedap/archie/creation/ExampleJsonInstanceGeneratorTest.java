@@ -117,7 +117,7 @@ public class ExampleJsonInstanceGeneratorTest {
         Map<String, Object> structure = structureGenerator.generate(opt);
         String s = serializeToJson(structure, false);
         //check the ordinal creation, including correct DV_CODED_TEXT and CODE_PHRASE
-        assertTrue(s.contains("{\"@type\":\"DV_ORDINAL\",\"value\":0,\"symbol\":{\"@type\":\"DV_CODED_TEXT\",\"defining_code\":{\"@type\":\"CODE_PHRASE\",\"terminology_id\":{\"@type\":\"TERMINOLOGY_ID\",\"value\":\"local\"},\"code_string\":\"at11\"},\"value\":\"Absent\"}}"));
+        assertTrue(s.contains("{\"_type\":\"DV_ORDINAL\",\"value\":0,\"symbol\":{\"_type\":\"DV_CODED_TEXT\",\"defining_code\":{\"_type\":\"CODE_PHRASE\",\"terminology_id\":{\"_type\":\"TERMINOLOGY_ID\",\"value\":\"local\"},\"code_string\":\"at11\"},\"value\":\"Absent\"}}"));
     }
 
 
