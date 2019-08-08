@@ -60,6 +60,8 @@ public  class ExampleJsonInstanceGenerator {
     private BmmModel bmm;
     private AomProfile aomProfile;
 
+    private String typePropertyName = "@type";
+
     public ExampleJsonInstanceGenerator(MetaModels models, String language) {
         this.language = language;
         this.models = models;
@@ -73,12 +75,16 @@ public  class ExampleJsonInstanceGenerator {
         return generate(archetype.getDefinition());
     }
 
+    public void setTypePropertyName(String typePropertyName) {
+        this.typePropertyName = typePropertyName;
+    }
+
     private Map<String, Object> generate(CComplexObject cObject) {
         String type = getConcreteTypeName(cObject.getRmTypeName());
         Map<String, Object> result = generateCustomExampleType(type);
         if(result == null) {
             result = new LinkedHashMap<>();
-            result.put("@type", type);
+            result.put(typePropertyName, type);
         }
 
         BmmClass classDefinition = bmm.getClassDefinition(BmmDefinitions.typeNameToClassKey(cObject.getRmTypeName()));
@@ -109,9 +115,12 @@ public  class ExampleJsonInstanceGenerator {
                         children.add(generateCPrimitive((CPrimitiveObject) child));
                     } else if (child instanceof ArchetypeSlot) {
                         Map<String, Object> next = new LinkedHashMap<>();
+
                         String concreteTypeName = getConcreteTypeName(child.getRmTypeName());
-                        next.put("@type", concreteTypeName);
+                        BmmClass childClassDefinition = bmm.getClassDefinition(BmmDefinitions.typeNameToClassKey(child.getRmTypeName()));
+                        next.put(typePropertyName, concreteTypeName);
                         addAdditionalPropertiesAtBegin(classDefinition, next, child);
+                        addRequiredPropertiesFromBmm(next, childClassDefinition);
                         addAdditionalPropertiesAtEnd(classDefinition, next, child);
                         children.add(next);
                     } else {
@@ -143,7 +152,8 @@ public  class ExampleJsonInstanceGenerator {
             for(String descendant: allDescendants) {
                 BmmClass descendantClassDefinition = bmm.getClassDefinition(descendant);
                 if(!descendantClassDefinition.isAbstract()) {
-                    return descendantClassDefinition.getTypeName();
+                    //TODO: should we return generics here? for now left out
+                    return BmmDefinitions.typeNameToClassKey(descendantClassDefinition.getTypeName());
                 }
 
             }
@@ -194,7 +204,7 @@ public  class ExampleJsonInstanceGenerator {
         Map<String, Object> result = new LinkedHashMap<>();
         String className = getConcreteTypeName(actualType);
         BmmClass classDefinition = bmm.getClassDefinition(BmmDefinitions.typeNameToClassKey(actualType));
-        result.put("@type", className);
+        result.put(typePropertyName, className);
         if(classDefinition != null) {
             addRequiredPropertiesFromBmm(result, classDefinition);
         }
@@ -312,12 +322,12 @@ public  class ExampleJsonInstanceGenerator {
         } else {
             Map<String, Object> result = new LinkedHashMap<>();
             String type = termCodeMapping.getTargetClassName();
-            result.put("@type", type);
+            result.put(typePropertyName, type);
             AomPropertyMapping terminologyIdMapping = termCodeMapping.getPropertyMappings().get("terminology_id");
             AomPropertyMapping codeStringMapping = termCodeMapping.getPropertyMappings().get("code_string");
             String codeString = "term code";
             Map<String, Object> terminologyId = new LinkedHashMap<>();
-            terminologyId.put("@type", "TERMINOLOGY_ID");
+            terminologyId.put(typePropertyName, "TERMINOLOGY_ID");
             terminologyId.put("value", "local");
             String termString = "term";
             if(child.getConstraint().isEmpty()) {
@@ -416,7 +426,7 @@ public  class ExampleJsonInstanceGenerator {
         if (classDefinition.getTypeName().equalsIgnoreCase("LOCATABLE") || classDefinition.findAllAncestors().contains("LOCATABLE")) {
 
             Map<String, Object> name = new LinkedHashMap<>();
-            name.put("@type", "DV_TEXT");
+            name.put(typePropertyName, "DV_TEXT");
             ArchetypeTerm term = archetype.getTerm(cObject, language);
             if (term == null) {
                 name.put("value", MISSING_TERM_IN_ARCHETYPE_FOR_LANGUAGE + language);
@@ -441,9 +451,9 @@ public  class ExampleJsonInstanceGenerator {
 
     private Map<String, Object> constructArchetypeDetails(String archetypeIdValue) {
         Map<String, Object> archetypeDetails = new LinkedHashMap<>();
-        archetypeDetails.put("@type", "ARCHETYPED");
+        archetypeDetails.put(typePropertyName, "ARCHETYPED");
         Map<String, Object> archetypeId = new LinkedHashMap<>();
-        archetypeId.put("@type", "ARCHETYPE_ID");
+        archetypeId.put(typePropertyName, "ARCHETYPE_ID");
         archetypeId.put("value", archetypeIdValue);
         archetypeDetails.put("archetype_id", archetypeId); //TODO: add template id?
         archetypeDetails.put("rm_version", "1.0.4");
@@ -468,25 +478,25 @@ public  class ExampleJsonInstanceGenerator {
         if(actualType.equalsIgnoreCase("DV_DATE_TIME")) {
             //In BMM, value is a string, and not a date time, so impossible to map automatically
             LinkedHashMap<String, Object> result = new LinkedHashMap<>();
-            result.put("@type", "DV_DATE_TIME");
+            result.put(typePropertyName, "DV_DATE_TIME");
             result.put("value", "2018-01-01T12:00:00+0000");
             return result;
         } else if (actualType.equalsIgnoreCase("DV_DATE")) {
             //In BMM, value is a string, and not a date time, so impossible to map automatically
             LinkedHashMap<String, Object> result = new LinkedHashMap<>();
-            result.put("@type", "DV_DATE");
+            result.put(typePropertyName, "DV_DATE");
             result.put("value", "2018-01-01");
             return result;
         }  else if (actualType.equalsIgnoreCase("DV_TIME")) {
             //In BMM, value is a string, and not a date time, so impossible to map automatically
             LinkedHashMap<String, Object> result = new LinkedHashMap<>();
-            result.put("@type", "DV_TIME");
+            result.put(typePropertyName, "DV_TIME");
             result.put("value", "12:00:00");
             return result;
         }  else if (actualType.equalsIgnoreCase("DV_DURATION")) {
             //In BMM, value is a string, and not a date time, so impossible to map automatically
             LinkedHashMap<String, Object> result = new LinkedHashMap<>();
-            result.put("@type", "DV_DURATION");
+            result.put(typePropertyName, "DV_DURATION");
             result.put("value", "PT20m");
             return result;
         }
