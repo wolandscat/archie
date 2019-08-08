@@ -48,7 +48,15 @@ public class JsonSchemaValidator {
         hardcodedLocations.put("SECTION", "Composition");
         hardcodedLocations.put("INSTRUCTION", "Composition");
         hardcodedLocations.put("INSTRUCTION_DETAILS", "Composition");
+        hardcodedLocations.put("ADMIN_ENTRY", "Composition");
         hardcodedLocations.put("CLUSTER", "Data_structures");
+        hardcodedLocations.put("CAPABILITY", "Demographic");
+        hardcodedLocations.put("PERSON", "Demographic");
+        hardcodedLocations.put("ADDRESS", "Demographic");
+        hardcodedLocations.put("ROLE", "Demographic");
+        hardcodedLocations.put("ORGANISATION", "Demographic");
+        hardcodedLocations.put("PARTY_IDENTITY", "Demographic");
+        hardcodedLocations.put("ITEM_TREE", "Data_structures");
     }
 
     private final SchemaClient schemaClient = new SchemaClient() {
