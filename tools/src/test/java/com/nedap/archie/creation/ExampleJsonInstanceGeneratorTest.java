@@ -35,17 +35,19 @@ public class ExampleJsonInstanceGeneratorTest {
 
     private static Logger logger = LoggerFactory.getLogger(ExampleJsonInstanceGeneratorTest.class);
 
+    private static final String TYPE_PROPERTY_NAME = "_type";
+
     @Test
     public void bloodPressure() throws Exception {
         OperationalTemplate opt = createOPT("/ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.blood_pressure.v1.1.0.adls");
+        ExampleJsonInstanceGenerator structureGenerator = createExampleJsonInstanceGenerator();
 
-        ExampleJsonInstanceGenerator structureGenerator = new ExampleJsonInstanceGenerator(BuiltinReferenceModels.getMetaModels(), "en");
         Map<String, Object> structure = structureGenerator.generate(opt);
         String s = serializeToJson(structure, true);
         System.out.println(s);
 
         Map<String, Object> data = (Map<String, Object>) structure.get("data");
-        assertEquals("HISTORY", data.get("@type"));
+        assertEquals("HISTORY", data.get(TYPE_PROPERTY_NAME));
         Map<String, Object> name = (Map<String, Object>) data.get("name");
         assertEquals("history", name.get("value"));
         assertEquals("id2", data.get("archetype_node_id"));
@@ -53,14 +55,14 @@ public class ExampleJsonInstanceGeneratorTest {
 
         //assert that the required encoding property is set, even though not present in archetype
         Map<String, Object> encoding = (Map<String, Object>) structure.get("encoding");
-        assertEquals("CODE_PHRASE", encoding.get("@type"));
+        assertEquals("CODE_PHRASE", encoding.get(TYPE_PROPERTY_NAME));
         Map<String, Object> terminologyId = (Map<String, Object>) encoding.get("terminology_id");
         assertEquals("the default value for a string type should be \"string\"", "string", terminologyId.get("value"));
         List events = (List) data.get("events");
         assertEquals(3, events.size());
-        assertEquals("POINT_EVENT<T>", ((Map) events.get(0)).get("@type"));
-        assertEquals("POINT_EVENT<T>", ((Map) events.get(1)).get("@type"));
-        assertEquals("INTERVAL_EVENT", ((Map) events.get(2)).get("@type"));
+        assertEquals("POINT_EVENT", ((Map) events.get(0)).get(TYPE_PROPERTY_NAME));
+        assertEquals("POINT_EVENT", ((Map) events.get(1)).get(TYPE_PROPERTY_NAME));
+        assertEquals("INTERVAL_EVENT", ((Map) events.get(2)).get(TYPE_PROPERTY_NAME));
 
 
 
@@ -75,12 +77,17 @@ public class ExampleJsonInstanceGeneratorTest {
     public void parseBloodPressure() throws Exception {
         //check that the generated blood pressure can be parsed
         OperationalTemplate opt = createOPT("/ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.blood_pressure.v1.1.0.adls");
-        ExampleJsonInstanceGenerator structureGenerator = new ExampleJsonInstanceGenerator(BuiltinReferenceModels.getMetaModels(), "en");
+        ExampleJsonInstanceGenerator structureGenerator = createExampleJsonInstanceGenerator();
+
         Map<String, Object> structure = structureGenerator.generate(opt);
         String s = serializeToJson(structure, true);
         System.out.println(s);
-        RMObject rmObject = JacksonUtil.getObjectMapper().readValue(s, RMObject.class);
+        RMObject rmObject = getArchieObjectMapper().readValue(s, RMObject.class);
         assertTrue(rmObject instanceof Observation);
+    }
+
+    private ObjectMapper getArchieObjectMapper() {
+        return JacksonUtil.getObjectMapper(TYPE_PROPERTY_NAME);
     }
 
     @Test
@@ -91,10 +98,11 @@ public class ExampleJsonInstanceGeneratorTest {
     public void parseOrdinal() throws Exception {
         //check that the generated blood pressure can be parsed
         OperationalTemplate opt = createOPT("/adl2-tests/features/aom_structures/tuples/openEHR-EHR-OBSERVATION.ordinal_tuple.v1.0.0.adls");
-        ExampleJsonInstanceGenerator structureGenerator = new ExampleJsonInstanceGenerator(BuiltinReferenceModels.getMetaModels(), "en");
+        ExampleJsonInstanceGenerator structureGenerator = createExampleJsonInstanceGenerator();
+
         Map<String, Object> structure = structureGenerator.generate(opt);
         String s = serializeToJson(structure, false);
-        RMObject rmObject = JacksonUtil.getObjectMapper().readValue(s, RMObject.class);
+        RMObject rmObject = getArchieObjectMapper().readValue(s, RMObject.class);
         assertTrue(rmObject instanceof Observation);
     }
 
@@ -104,7 +112,8 @@ public class ExampleJsonInstanceGeneratorTest {
     public void ordinal() throws Exception {
         //ordinal handling in openEHR RM is a bit tricky, since a CTerminologyCode maps directly to a DV_CODED_TEXT
         OperationalTemplate opt = createOPT("/adl2-tests/features/aom_structures/tuples/openEHR-EHR-OBSERVATION.ordinal_tuple.v1.0.0.adls");
-        ExampleJsonInstanceGenerator structureGenerator = new ExampleJsonInstanceGenerator(BuiltinReferenceModels.getMetaModels(), "en");
+        ExampleJsonInstanceGenerator structureGenerator = createExampleJsonInstanceGenerator();
+
         Map<String, Object> structure = structureGenerator.generate(opt);
         String s = serializeToJson(structure, false);
         //check the ordinal creation, including correct DV_CODED_TEXT and CODE_PHRASE
@@ -114,8 +123,7 @@ public class ExampleJsonInstanceGeneratorTest {
 
     @Test
     public void generateAllCKMExamples() throws Exception {
-        ExampleJsonInstanceGenerator structureGenerator = new ExampleJsonInstanceGenerator(BuiltinReferenceModels.getMetaModels(), "en");
-        structureGenerator.setTypePropertyName("_type");
+        ExampleJsonInstanceGenerator structureGenerator = createExampleJsonInstanceGenerator();
         FullArchetypeRepository repository = TestUtil.parseCKM();
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -123,6 +131,9 @@ public class ExampleJsonInstanceGeneratorTest {
         int secondJsonSchemaValidationRan = 0, reserializedJsonSchemaValidationFailed = 0;
         repository.compile(BuiltinReferenceModels.getMetaModels());
         JsonSchemaValidator jsonSchemaValidator = new JsonSchemaValidator(BuiltinReferenceModels.getBmmRepository().getModel("openehr_rm_1.0.4").getModel());
+
+        ObjectMapper archieObjectMapper = getArchieObjectMapper();
+
         for(ValidationResult result:repository.getAllValidationResults()) {
             if(result.passes()) {
                 String json = "";
@@ -132,7 +143,7 @@ public class ExampleJsonInstanceGeneratorTest {
                     Map<String, Object> example = structureGenerator.generate(template);
                     json = mapper.writeValueAsString(example);
 
-                    RMObject parsed = JacksonUtil.getObjectMapper().readValue(json, RMObject.class);
+                    RMObject parsed = archieObjectMapper.readValue(json, RMObject.class);
                     numberCreated++;
                    // if(Sets.newHashSet("COMPOSITION", "OBSERVATION", "EVALUATION", "INSTRUCTION", "SECTION", "ACTION").contains(template.getDefinition().getRmTypeName())) {
                         jsonSchemaValidationRan++;
@@ -140,7 +151,7 @@ public class ExampleJsonInstanceGeneratorTest {
                         logger.error("first validation ok for {}", result.getArchetypeId());
                    // }
 
-                    String serializedAgain = JacksonUtil.getObjectMapper().writeValueAsString(parsed);
+                    String serializedAgain = archieObjectMapper.writeValueAsString(parsed);
                     try {
                         secondJsonSchemaValidationRan++;
                         jsonSchemaValidator.validate(template.getDefinition().getRmTypeName(), serializedAgain);
@@ -170,6 +181,17 @@ public class ExampleJsonInstanceGeneratorTest {
         logger.info("created " + numberCreated + " examples, " + validationFailed + " failed to validate, " + generatedException + " threw exception in test");
         logger.info("failed validation " + jsonSchemaValidationFailed + " of " + jsonSchemaValidationRan);
         logger.info("failed validation of reserialized json " + reserializedJsonSchemaValidationFailed + " of " + secondJsonSchemaValidationRan);
+        assertEquals("Example JSON schema should not fail", 0, jsonSchemaValidationFailed);
+        assertEquals("Example JSON schema serialized from RM implementation should not fail", 0, reserializedJsonSchemaValidationFailed);
+        assertEquals("no exceptions should occur during schema validation", 0, generatedException);
+        assertEquals("example data from all archetypes should be validated", 402, jsonSchemaValidationRan);
+        assertEquals("example data from all archetypes should be validated from the rm", 402, secondJsonSchemaValidationRan);
+    }
+
+    private ExampleJsonInstanceGenerator createExampleJsonInstanceGenerator() {
+        ExampleJsonInstanceGenerator structureGenerator = new ExampleJsonInstanceGenerator(BuiltinReferenceModels.getMetaModels(), "en");
+        structureGenerator.setTypePropertyName(TYPE_PROPERTY_NAME);
+        return structureGenerator;
     }
 
 

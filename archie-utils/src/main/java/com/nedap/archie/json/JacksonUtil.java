@@ -18,6 +18,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nedap.archie.rm.support.identification.ArchetypeID;
 
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Class to obtain an ObjectMapper that works with both archie RM and AOM objects, serializing into
@@ -30,7 +31,9 @@ import java.io.IOException;
 public class JacksonUtil {
 
     //threadsafe, can be cached
-    private volatile static ObjectMapper objectMapper;
+    private static final ConcurrentHashMap<String, ObjectMapper> objectMapperByTypePropertyName = new ConcurrentHashMap<>();
+
+    private static final String DEFAULT_TYPE_PARAMETER = "@type";
 
     /**
      * Get an object mapper that works with Archie RM and AOM objects. It will be cached in a static variable for
@@ -38,9 +41,15 @@ public class JacksonUtil {
      * @return
      */
     public static ObjectMapper getObjectMapper() {
+        return getObjectMapper(DEFAULT_TYPE_PARAMETER);
+    }
+
+    public static ObjectMapper getObjectMapper(String typePropertyName) {
+        ObjectMapper objectMapper = objectMapperByTypePropertyName.get(typePropertyName);
         if(objectMapper == null) {
             objectMapper = new ObjectMapper();
-            configureObjectMapper(objectMapper);
+            configureObjectMapper(objectMapper, typePropertyName);
+            objectMapperByTypePropertyName.put(typePropertyName, objectMapper);
 
         }
         return objectMapper;
@@ -52,6 +61,10 @@ public class JacksonUtil {
      * @param objectMapper
      */
     public static void configureObjectMapper(ObjectMapper objectMapper) {
+        configureObjectMapper(objectMapper, DEFAULT_TYPE_PARAMETER);
+    }
+
+    public static void configureObjectMapper(ObjectMapper objectMapper, String typePropertyName) {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         objectMapper.enable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE);
         objectMapper.disable(SerializationFeature.WRITE_NULL_MAP_VALUES);
@@ -70,7 +83,7 @@ public class JacksonUtil {
 
         TypeResolverBuilder typeResolverBuilder = new ArchieTypeResolverBuilder()
                 .init(JsonTypeInfo.Id.NAME, new OpenEHRTypeNaming())
-                .typeProperty("@type")
+                .typeProperty(typePropertyName)
                 .typeIdVisibility(true)
                 .inclusion(JsonTypeInfo.As.PROPERTY);
 
@@ -78,7 +91,7 @@ public class JacksonUtil {
         objectMapper.addHandler(new DeserializationProblemHandler() {
             @Override
             public boolean handleUnknownProperty(DeserializationContext ctxt, JsonParser p, JsonDeserializer<?> deserializer, Object beanOrClass, String propertyName) throws IOException {
-                if (propertyName.equalsIgnoreCase("@type")) {
+                if (propertyName.equalsIgnoreCase(typePropertyName)) {
                     return true;
                 }
                 return super.handleUnknownProperty(ctxt, p, deserializer, beanOrClass, propertyName);
