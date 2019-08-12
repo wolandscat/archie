@@ -48,20 +48,20 @@ terminology
 	>
 
 annotations
-    documentation = <
-        ["en"] = <
-            ["/subject"] = <
-                ["design note"] = <"xxxxxx">
-            >
-            ["/data[id2]/events[id3]/data[id4]/items[id5]"] = <
-                ["design note"] = <"this is a design note on allergic reaction, with some extra information">
-                ["requirements note"] = <"this is a requirements note on allergic reaction">
-                ["medline ref"] = <"this is a medline ref on allergic reaction">
-            >
-            ["/data[id2]/events[id3]/data[id4]/items[id7]"] = <
-                ["design note"] = <"this is also a design note on intelerance">
-                ["requirements note"] = <"this is a requirements note on intolerance">
-                ["national data dictionary"] = <"NDD ref for intolerance">
-            >
-        >
-    >
+	documentation = <
+		["en"] = <
+			["/subject"] = <
+				["design note"] = <"xxxxxx">
+			>
+			["/data[id2]/events[id3]/data[id4]/items[id5]"] = <
+				["design note"] = <"this is a design note on allergic reaction, with some extra information">
+				["requirements note"] = <"this is a requirements note on allergic reaction">
+				["medline ref"] = <"this is a medline ref on allergic reaction">
+			>
+			["/data[id2]/events[id3]/data[id4]/items[id7]"] = <
+				["design note"] = <"this is also a design note on intelerance">
+				["requirements note"] = <"this is a requirements note on intolerance">
+				["national data dictionary"] = <"NDD ref for intolerance">
+			>
+		>
+	>
