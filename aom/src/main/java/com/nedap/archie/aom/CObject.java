@@ -336,7 +336,9 @@ public abstract class CObject extends ArchetypeConstraint {
                 }
             } else if(parent.getParent() != null) {
                 MultiplicityInterval multiplicity = referenceModelPropMultiplicity.apply(parent.getParent().getRmTypeName(), parent.getDifferentialPath() == null ? parent.getRmAttributeName() : parent.getDifferentialPath());
-                if(multiplicity.isUpperUnbounded()) {
+                if(multiplicity == null) {
+                    return null;
+                } else if (multiplicity.isUpperUnbounded()) {
                     return MultiplicityInterval.createOpen();
                 } else {
                     return MultiplicityInterval.createBounded(0, multiplicity.getUpper());

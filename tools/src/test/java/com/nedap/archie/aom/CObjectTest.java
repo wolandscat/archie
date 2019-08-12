@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.util.function.BiFunction;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Created by pieter.bos on 20/04/16.
@@ -111,6 +112,25 @@ public class CObjectTest {
             @Override
             public MultiplicityInterval apply(String s, String s2) {
                 return MultiplicityInterval.createUpperUnbounded(1);
+            }
+        }));
+    }
+
+    @Test
+    public void effectiveOccurrencesReturnsDefaultOccurrencesNull() {
+        CComplexObject parentCObject = new CComplexObject();
+        parentCObject.setRmTypeName("COMPOSITION");
+        CAttribute parentAttribute = new CAttribute();
+        parentAttribute.setRmAttributeName("content");
+        parentCObject.addAttribute(parentAttribute);
+        CComplexObject object = new CComplexObject();
+        object.setRmTypeName("OBSERVATION");
+        parentAttribute.addChild(object);
+
+        assertNull(object.effectiveOccurrences(new BiFunction<String, String, MultiplicityInterval>() {
+            @Override
+            public MultiplicityInterval apply(String s, String s2) {
+                return null;
             }
         }));
     }
