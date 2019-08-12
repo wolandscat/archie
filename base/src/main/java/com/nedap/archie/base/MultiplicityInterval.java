@@ -109,13 +109,28 @@ public class MultiplicityInterval extends Interval<Integer> {
         return has(1) && !has(2);
     }
 
+    @Override
     public String toString() {
-        if(isOpen()) {
-            return getLower() + MULTIPLICITY_RANGE_MARKER + MULTIPLICITY_UNBOUNDED_MARKER;
+        Integer lower = getLower();
+        Integer upper = getUpper();
+        StringBuilder result = new StringBuilder();
+        if (isLowerUnbounded()) {
+            result.append(MULTIPLICITY_UNBOUNDED_MARKER);
         } else {
-            return getLower() + MULTIPLICITY_RANGE_MARKER + getUpper();
+            if (!isLowerIncluded()) {
+                result.append(">");
+            }
+            result.append(lower);
         }
+        result.append(MULTIPLICITY_RANGE_MARKER);
+        if (isUpperUnbounded()) {
+            result.append(MULTIPLICITY_UNBOUNDED_MARKER);
+        } else {
+            if(!isUpperIncluded()) {
+                result.append("<");
+            }
+            result.append(upper);
+        }
+        return result.toString();
     }
-
-
 }
