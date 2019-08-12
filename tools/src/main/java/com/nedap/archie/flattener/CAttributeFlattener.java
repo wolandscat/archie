@@ -289,7 +289,13 @@ public class CAttributeFlattener {
             //REFINE the parent node case 1, the parent has occurrences upper == 1
             return true;
         } else if (differentialNodes.size() == 1) {
-            MultiplicityInterval effectiveOccurrences = differentialNodes.get(0).effectiveOccurrences(flattener.getMetaModels()::referenceModelPropMultiplicity);
+            MultiplicityInterval effectiveOccurrences;
+            if(parent.getParent() == null || parent.getParent().getParent() == null) {
+                effectiveOccurrences = differentialNodes.get(0).effectiveOccurrences(flattener.getMetaModels()::referenceModelPropMultiplicity);
+            } else {
+                effectiveOccurrences = differentialNodes.get(0).effectiveOccurrences((s, s2) -> flattener.getMetaModels().referenceModelPropMultiplicity(
+                        parent.getParent().getParent().getRmTypeName(), parent.getParent().getRmAttributeName()));
+            }
             if(effectiveOccurrences != null && effectiveOccurrences.upperIsOne()) {
                 //REFINE the parent node case 2, only one child with occurrences upper == 1
                 return true;
