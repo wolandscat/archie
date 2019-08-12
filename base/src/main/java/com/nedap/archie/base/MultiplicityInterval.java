@@ -66,7 +66,7 @@ public class MultiplicityInterval extends Interval<Integer> {
      * @return the created interval
      */
     public static MultiplicityInterval createOpen() {
-        return new MultiplicityInterval(0, true, false, null, false, true);
+        return new MultiplicityInterval(0, true, false, null, true, true);
     }
 
     /**
