@@ -290,6 +290,13 @@ public class CAttributeFlattener {
             return true;
         } else if (differentialNodes.size() == 1) {
             MultiplicityInterval effectiveOccurrences;
+            //the differentialNode can have a differential path instead of an attribute name. In that case, we need to replace the rm type name
+            //of the parent with the actual typename in the parent archetype. Otherwise, it may fall back to the default type in the RM,
+            //and that can be an abstract type that does not have the attribute that we are trying to constrain. For example:
+            //diff archetype:
+            // /events[id6]/data/items matches {
+            //in the rm, data maps to an ITEM_STRUCTURE that does not have the attribute items.
+            //in the parent archetype, that is then an ITEM_TREE. We need to use ITEM_TREE here, which is what this code accomplishes.
             if(parent.getParent() == null || parent.getParent().getParent() == null) {
                 effectiveOccurrences = differentialNodes.get(0).effectiveOccurrences(flattener.getMetaModels()::referenceModelPropMultiplicity);
             } else {
