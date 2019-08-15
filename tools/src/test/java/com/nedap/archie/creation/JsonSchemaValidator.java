@@ -1,5 +1,6 @@
 package com.nedap.archie.creation;
 
+import com.google.common.base.Charsets;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -23,8 +24,11 @@ import org.openehr.bmm.persistence.validation.BmmDefinitions;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringBufferInputStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +40,8 @@ import java.util.regex.Pattern;
 public class JsonSchemaValidator {
 
     private static final String ITS_JSON_NAMESPACE = "https://specifications.openehr.org/releases/ITS-JSON/latest/components";
+
+    private boolean allowAdditionalProperties = true;
 
     Map<String, String> hardcodedLocations = new HashMap();
 
@@ -59,19 +65,38 @@ public class JsonSchemaValidator {
         hardcodedLocations.put("ITEM_TREE", "Data_structures");
     }
 
+    public void setAllowAdditionalProperties(boolean allowAdditionalProperties) {
+        this.allowAdditionalProperties = allowAdditionalProperties;
+    }
+
     private final SchemaClient schemaClient = new SchemaClient() {
 
         @Override
         public InputStream get(String url) {
             if (url.startsWith(ITS_JSON_NAMESPACE)) {
-                return getClass().getResourceAsStream("/jsonschema/" + url.substring(ITS_JSON_NAMESPACE.length()));
+                if(allowAdditionalProperties) {
+                    return getInputStream(url);
+                } else {
+                    try (InputStream stream = getInputStream(url)) {
+                        JSONObject schemaJson = parse(stream);
+                        return new ByteArrayInputStream(schemaJson.toString().getBytes(Charsets.UTF_8));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             } else {
                 throw new RuntimeException("could not find schema " + url);
             }
         }
+
+        private InputStream getInputStream(String url) {
+            return getClass().getResourceAsStream("/jsonschema/" + url.substring(ITS_JSON_NAMESPACE.length()));
+        }
     };
 
     private final LoadingCache<String, Schema> schemaCache = CacheBuilder.newBuilder().build(new CacheLoader<String, Schema>() {
+
+
         @Override
         public Schema load(String type) throws Exception {
             String packageName = null;
@@ -83,11 +108,37 @@ public class JsonSchemaValidator {
                 packageName = test.substring(0, 1).toUpperCase() + test.substring(1);
             }
             try(InputStream inputStream = getClass().getResourceAsStream("/jsonschema/RM/Release-1.0.4/" + packageName + "/" + type + ".json")) {
-                JSONObject schemaJson = new JSONObject(new JSONTokener(inputStream));
+                JSONObject schemaJson = parse(inputStream);
                 return SchemaLoader.load(schemaJson, schemaClient);
             }
         }
     });
+
+    private JSONObject parse(InputStream inputStream) {
+        JSONObject schemaJson = new JSONObject(new JSONTokener(inputStream));
+        if(!allowAdditionalProperties) {
+            //addAdditionalProperties(schemaJson);
+
+            if(schemaJson.has("definitions")) {
+                JSONObject definitions = schemaJson.getJSONObject("definitions");
+                for(String key:definitions.keySet()) {
+                    JSONObject jsonObject = definitions.getJSONObject(key);
+                    addAdditionalProperties(jsonObject);
+                }
+            }
+
+        }
+        return schemaJson;
+    }
+
+    private void addAdditionalProperties(JSONObject schemaJson) {
+        if(schemaJson.has("type")) {
+            String jsonType = schemaJson.getString("type");
+            if (jsonType.equalsIgnoreCase("object")) {
+                schemaJson.put("additionalProperties", false);
+            }
+        }
+    }
 
     private String getPackagePath(BmmPackage bmmPackage) {
         BmmPackage currentPackage = bmmPackage;
