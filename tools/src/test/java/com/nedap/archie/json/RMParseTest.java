@@ -17,12 +17,14 @@ public class RMParseTest {
     @Test
     public void parseEhrBaseJsonExample() throws Exception {
         try(InputStream stream = getClass().getResourceAsStream("pablos_example.json")) {
-            Composition parsed = JacksonUtil.getObjectMapper("_type").readValue(stream, Composition.class);
+            RMJacksonConfiguration configuration = new RMJacksonConfiguration();
+            configuration.setTypePropertyName("_type");
+            Composition parsed = JacksonUtil.getObjectMapper(configuration).readValue(stream, Composition.class);
             assertEquals("__THIS_SHOULD_BE_MODIFIED_BY_THE_TEST_::piri.ehrscape.com::1", parsed.getUid().getValue());
             assertEquals("openEHR-EHR-COMPOSITION.report-mnd.v1", parsed.getArchetypeNodeId());
 
 
-            String json = JacksonUtil.getObjectMapper("_type").writeValueAsString(parsed);
+            String json = JacksonUtil.getObjectMapper(configuration).writeValueAsString(parsed);
             ObjectMapper simpleMapper = new ObjectMapper();
             LinkedHashMap mapped = simpleMapper.readValue(json, LinkedHashMap.class);
             assertEquals("openEHR-EHR-COMPOSITION.report-mnd.v1", mapped.get("archetype_node_id"));

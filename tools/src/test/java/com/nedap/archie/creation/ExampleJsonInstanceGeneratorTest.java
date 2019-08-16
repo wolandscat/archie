@@ -13,6 +13,7 @@ import com.nedap.archie.flattener.Flattener;
 import com.nedap.archie.flattener.FullArchetypeRepository;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 import com.nedap.archie.json.JacksonUtil;
+import com.nedap.archie.json.RMJacksonConfiguration;
 import com.nedap.archie.rm.RMObject;
 import com.nedap.archie.rm.composition.Observation;
 import com.nedap.archie.testutil.TestUtil;
@@ -87,7 +88,14 @@ public class ExampleJsonInstanceGeneratorTest {
     }
 
     private ObjectMapper getArchieObjectMapper() {
-        return JacksonUtil.getObjectMapper(TYPE_PROPERTY_NAME);
+        RMJacksonConfiguration configuration = new RMJacksonConfiguration();
+        configuration.setTypePropertyName("_type");
+        configuration.setAddExtraFieldsInArchetypeId(false);
+        configuration.setAddPathProperty(false);
+        configuration.setAlwaysIncludeTypeProperty(false);
+        configuration.setFailOnUnknownProperties(true);
+        //configuration.setSerializeEmptyCollections(false);
+        return JacksonUtil.getObjectMapper(configuration);
     }
 
     @Test
@@ -130,12 +138,14 @@ public class ExampleJsonInstanceGeneratorTest {
         int numberCreated = 0, validationFailed = 0, generatedException = 0, jsonSchemaValidationRan = 0, jsonSchemaValidationFailed = 0;
         int secondJsonSchemaValidationRan = 0, reserializedJsonSchemaValidationFailed = 0;
         repository.compile(BuiltinReferenceModels.getMetaModels());
-        JsonSchemaValidator jsonSchemaValidator = new JsonSchemaValidator(BuiltinReferenceModels.getBmmRepository().getModel("openehr_rm_1.0.4").getModel());
+        JsonSchemaValidator firstValidator = new JsonSchemaValidator(BuiltinReferenceModels.getBmmRepository().getModel("openehr_rm_1.0.4").getModel());
+        JsonSchemaValidator secondValidator = new JsonSchemaValidator(BuiltinReferenceModels.getBmmRepository().getModel("openehr_rm_1.0.4").getModel());
+        secondValidator.setAllowAdditionalProperties(false);
 
         ObjectMapper archieObjectMapper = getArchieObjectMapper();
 
         for(ValidationResult result:repository.getAllValidationResults()) {
-            if(result.passes()) {
+            if(result.passes() && result.getArchetypeId().contains("waist")) {
                 String json = "";
                 try {
                     Flattener flattener = new Flattener(repository, BuiltinReferenceModels.getMetaModels()).createOperationalTemplate(true);
@@ -147,14 +157,14 @@ public class ExampleJsonInstanceGeneratorTest {
                     numberCreated++;
                    // if(Sets.newHashSet("COMPOSITION", "OBSERVATION", "EVALUATION", "INSTRUCTION", "SECTION", "ACTION").contains(template.getDefinition().getRmTypeName())) {
                         jsonSchemaValidationRan++;
-                        jsonSchemaValidator.validate(template.getDefinition().getRmTypeName(), json);
+                        firstValidator.validate(template.getDefinition().getRmTypeName(), json);
                         logger.error("first validation ok for {}", result.getArchetypeId());
                    // }
 
                     String serializedAgain = archieObjectMapper.writeValueAsString(parsed);
                     try {
                         secondJsonSchemaValidationRan++;
-                        jsonSchemaValidator.validate(template.getDefinition().getRmTypeName(), serializedAgain);
+                        secondValidator.validate(template.getDefinition().getRmTypeName(), serializedAgain);
                         logger.error("second validation ok for {}", result.getArchetypeId());
                     } catch (ValidationException ex) {
                         logger.error("second validation failed for {}", result.getArchetypeId());
