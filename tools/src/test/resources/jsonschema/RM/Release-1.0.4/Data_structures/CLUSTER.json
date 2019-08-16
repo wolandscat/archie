@@ -37,9 +37,12 @@
             "description": "Ordered list of items - `CLUSTER` or `ELEMENT` objects - under this `CLUSTER`. ",
             "type": "array",
             "items": {
-                "$ref": "all.json#/definitions/ITEM"
+                "anyOf": [
+                    {"$ref": "all.json#/definitions/CLUSTER"},
+                    {"$ref": "all.json#/definitions/ELEMENT"}
+                ]
             },
-            "minItems": 1
+            "minItems": 0
         }
     },
     "required": [

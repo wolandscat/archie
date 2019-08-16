@@ -337,6 +337,11 @@
             "$comments": "Defined in Data_structures IM, inherits from ITEM_STRUCTURE",
             "type": "object",
             "properties": {
+                "_type": {
+                    "enum": [
+                        "ITEM_TREE"
+                    ]
+                },
                 "name": {
                     "description": "Runtime name of this fragment, used to build runtime paths. This is the term provided via a clinical application or batch process to name this EHR construct: its retention in the EHR faithfully preserves the original label by which this entry was known to end users. \n",
                     "$ref": "https://specifications.openehr.org/releases/ITS-JSON/latest/components/RM/Release-1.0.4/Data_types/all.json#/definitions/DV_TEXT"
@@ -957,6 +962,11 @@
             "$comments": "Defined in Data_structures IM, inherits from ITEM_STRUCTURE",
             "type": "object",
             "properties": {
+                "_type": {
+                    "enum": [
+                        "ITEM_LIST"
+                    ]
+                },
                 "name": {
                     "description": "Runtime name of this fragment, used to build runtime paths. This is the term provided via a clinical application or batch process to name this EHR construct: its retention in the EHR faithfully preserves the original label by which this entry was known to end users. \n",
                     "$ref": "https://specifications.openehr.org/releases/ITS-JSON/latest/components/RM/Release-1.0.4/Data_types/all.json#/definitions/DV_TEXT"
@@ -1308,6 +1318,11 @@
             "$comments": "Defined in Data_structures IM, inherits from ITEM",
             "type": "object",
             "properties": {
+                "_type": {
+                    "enum": [
+                        "CLUSTER"
+                    ]
+                },
                 "name": {
                     "description": "Runtime name of this fragment, used to build runtime paths. This is the term provided via a clinical application or batch process to name this EHR construct: its retention in the EHR faithfully preserves the original label by which this entry was known to end users. \n",
                     "$ref": "https://specifications.openehr.org/releases/ITS-JSON/latest/components/RM/Release-1.0.4/Data_types/all.json#/definitions/DV_TEXT"
@@ -1339,9 +1354,16 @@
                     "description": "Ordered list of items - `CLUSTER` or `ELEMENT` objects - under this `CLUSTER`. ",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ITEM"
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/CLUSTER"
+                            },
+                            {
+                                "$ref": "#/definitions/ELEMENT"
+                            }
+                        ]
                     },
-                    "minItems": 1
+                    "minItems": 0
                 }
             },
             "required": [
@@ -1458,6 +1480,11 @@
             "$comments": "Defined in Data_structures IM, inherits from ITEM",
             "type": "object",
             "properties": {
+                "_type": {
+                    "enum": [
+                        "ELEMENT"
+                    ]
+                },
                 "name": {
                     "description": "Runtime name of this fragment, used to build runtime paths. This is the term provided via a clinical application or batch process to name this EHR construct: its retention in the EHR faithfully preserves the original label by which this entry was known to end users. \n",
                     "$ref": "https://specifications.openehr.org/releases/ITS-JSON/latest/components/RM/Release-1.0.4/Data_types/all.json#/definitions/DV_TEXT"
@@ -1824,11 +1851,27 @@
                 },
                 "state": {
                     "description": "Optional state data for this event.",
-                    "$ref": "#/definitions/ITEM_STRUCTURE"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/ITEM_TREE"
+                        },
+                        {
+                            "$ref": "#/definitions/ITEM_LIST"
+                        }
+                    ]
+
                 },
                 "data": {
                     "description": "The data of this event. ",
-                    "$ref": "#/definitions/ITEM_STRUCTURE"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/ITEM_TREE"
+                        },
+                        {
+                            "$ref": "#/definitions/ITEM_LIST"
+                        }
+                    ]
+
                 }
             },
             "required": [
@@ -1953,6 +1996,12 @@
             "$comments": "Defined in Data_structures IM, inherits from HISTORY",
             "type": "object",
             "properties": {
+                "_type": {
+                    "enum": [
+                        "HISTORY",
+                        "HISTORY<ITEM_STRUCTURE>"
+                    ]
+                },
                 "name": {
                     "description": "Runtime name of this fragment, used to build runtime paths. This is the term provided via a clinical application or batch process to name this EHR construct: its retention in the EHR faithfully preserves the original label by which this entry was known to end users. \n",
                     "$ref": "https://specifications.openehr.org/releases/ITS-JSON/latest/components/RM/Release-1.0.4/Data_types/all.json#/definitions/DV_TEXT"
@@ -2000,7 +2049,11 @@
                     "description": "The events in the series. ",
                     "type": "array",
                     "items": {
-                        "$ref": "all.json#/definitions/EVENT"
+                        "anyOf": [
+                            {"$ref": "#/definitions/EVENT"},
+                            {"$ref": "#/definitions/POINT_EVENT"},
+                            {"$ref": "#/definitions/INTERVAL_EVENT"}
+                        ]
                     }
                 }
             },
@@ -2166,11 +2219,27 @@
                 },
                 "state": {
                     "description": "Optional state data for this event.",
-                    "$ref": "#/definitions/ITEM_STRUCTURE"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/ITEM_TREE"
+                        },
+                        {
+                            "$ref": "#/definitions/ITEM_LIST"
+                        }
+                    ]
+
                 },
                 "data": {
                     "description": "The data of this event. ",
-                    "$ref": "#/definitions/ITEM_STRUCTURE"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/ITEM_TREE"
+                        },
+                        {
+                            "$ref": "#/definitions/ITEM_LIST"
+                        }
+                    ]
+
                 },
                 "width": {
                     "description": "Duration of the time interval during which the values recorded under `data` are true and, if set, the values recorded under `state` are true. Void if an instantaneous event.",
