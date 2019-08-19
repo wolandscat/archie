@@ -39,7 +39,8 @@ public class JSONSchemaCreator {
         primitiveTypeMapping.put("iso8601_date", "string");
         primitiveTypeMapping.put("iso8601_date_time", "string");
         primitiveTypeMapping.put("iso8601_time", "string");
-        primitiveTypeMapping.put("ISO8601_duration", "string");
+        primitiveTypeMapping.put("iso8601_duration", "string");
+        primitiveTypeMapping.put("proportion_kind", "integer");//TODO: proper enum support
 
         rootTypes = new ArrayList<>();
         rootTypes.add("COMPOSITION");
@@ -194,18 +195,20 @@ public class JSONSchemaCreator {
             JSONObject def = new JSONObject();
             JSONArray array = new JSONArray();
             for(String descendant:descendants) {
+                JSONObject typePropertyCheck = createConstType(descendant);
+                JSONObject typeCheck = new JSONObject().put("properties", typePropertyCheck);
 
-                JSONArray allOf = new JSONArray();
+                JSONObject typeReference = createReference(descendant);
+                //IF the type matches
+                //THEN check the correct type from the definitions
+                JSONObject ifObject = new JSONObject()
+                        .put("if", typeCheck)
+                        .put("then", typeReference);
+                array.put(ifObject);
 
-                JSONObject ref = createReference(descendant);
-                allOf.put(ref);
-                JSONObject requiredType = createRequiredArray("_type");
-                allOf.put(requiredType);
-                JSONObject allOfContainer = new JSONObject();
-                allOfContainer.put("allOf", allOf);
-                array.put(allOfContainer);
             }
-            def.put("anyOf", array);
+            array.put(createRequiredArray("_type"));
+            def.put("allOf", array);
             return def;
         } else {
             return createReference(BmmDefinitions.typeNameToClassKey(type.getTypeName()));

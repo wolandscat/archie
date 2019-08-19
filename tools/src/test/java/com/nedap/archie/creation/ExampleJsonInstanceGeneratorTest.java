@@ -147,7 +147,7 @@ public class ExampleJsonInstanceGeneratorTest {
         ObjectMapper archieObjectMapper = getArchieObjectMapper();
 
         for(ValidationResult result:repository.getAllValidationResults()) {
-            if(result.passes() && result.getArchetypeId().contains("waist")) {
+            if(result.passes() ) { //&& result.getArchetypeId().contains("waist")) {
                 String json = "";
                 try {
                     Flattener flattener = new Flattener(repository, BuiltinReferenceModels.getMetaModels()).createOperationalTemplate(true);
