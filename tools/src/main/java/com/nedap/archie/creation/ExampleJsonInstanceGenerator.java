@@ -117,15 +117,15 @@ public  class ExampleJsonInstanceGenerator {
                     } else if (child instanceof CPrimitiveObject) {
                         children.add(generateCPrimitive((CPrimitiveObject) child));
                     } else if (child instanceof ArchetypeSlot) {
-                        Map<String, Object> next = new LinkedHashMap<>();
-
-                        String concreteTypeName = getConcreteTypeName(child.getRmTypeName());
-                        BmmClass childClassDefinition = bmm.getClassDefinition(BmmDefinitions.typeNameToClassKey(child.getRmTypeName()));
-                        next.put(typePropertyName, concreteTypeName);
-                        addAdditionalPropertiesAtBegin(classDefinition, next, child);
-                        addRequiredPropertiesFromBmm(next, childClassDefinition);
-                        addAdditionalPropertiesAtEnd(classDefinition, next, child);
-                        children.add(next);
+//                        Map<String, Object> next = new LinkedHashMap<>();
+//
+//                        String concreteTypeName = getConcreteTypeName(child.getRmTypeName());
+//                        BmmClass childClassDefinition = bmm.getClassDefinition(BmmDefinitions.typeNameToClassKey(child.getRmTypeName()));
+//                        next.put(typePropertyName, concreteTypeName);
+//                        addAdditionalPropertiesAtBegin(classDefinition, next, child);
+//                        addRequiredPropertiesFromBmm(next, childClassDefinition);
+//                        addAdditionalPropertiesAtEnd(classDefinition, next, child);
+//                        children.add(next);
                     } else {
                         children.add("unsupported constraint: " + child.getClass().getSimpleName());
                     }

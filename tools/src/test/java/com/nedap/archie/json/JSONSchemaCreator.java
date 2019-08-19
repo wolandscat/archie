@@ -70,7 +70,8 @@ public class JSONSchemaCreator {
         JSONObject definitions = new JSONObject();
         JSONObject schemaRoot = new JSONObject()
                 .put("definitions", definitions)
-                .put("allOf", allOfArray);
+                .put("allOf", allOfArray)
+                .put("$schema", "http://json-schema.org/draft-07/schema");
 
 
         //at the root level, require the type
@@ -110,12 +111,25 @@ public class JSONSchemaCreator {
         JSONObject properties = new JSONObject();
         for (String propertyName : flatBmmClass.getProperties().keySet()) {
             BmmProperty bmmProperty = flatBmmClass.getProperties().get(propertyName);
-            JSONObject propertyDef = createPropertyDef(bmmProperty.getType());
-            extendPropertyDef(propertyDef, bmmProperty);
-            properties.put(propertyName, propertyDef);
+            if((bmmClass.getTypeName().startsWith("POINT_EVENT") || bmmClass.getTypeName().startsWith("INTERVAL_EVENT")) &&
+                    propertyName.equalsIgnoreCase("data")) {
+                //we don't handle generics yet, and it's very tricky with the current BMM indeed. So, just manually hack this
+                JSONObject propertyDef = createPolymorphicReference(bmmModel.getClassDefinition("ITEM_STRUCTURE"));
+                extendPropertyDef(propertyDef, bmmProperty);
+                properties.put(propertyName, propertyDef);
 
-            if (bmmProperty.getMandatory()) {
-                required.put(propertyName);
+                if (bmmProperty.getMandatory()) {
+                    required.put(propertyName);
+                }
+            } else {
+
+                JSONObject propertyDef = createPropertyDef(bmmProperty.getType());
+                extendPropertyDef(propertyDef, bmmProperty);
+                properties.put(propertyName, propertyDef);
+
+                if (bmmProperty.getMandatory()) {
+                    required.put(propertyName);
+                }
             }
         }
         properties.put("_type", new JSONObject().put("const", typeName));
@@ -244,6 +258,6 @@ public class JSONSchemaCreator {
     }
 
     private JSONObject createReference(String rootType) {
-        return new JSONObject().put("$ref", rootType);
+        return new JSONObject().put("$ref", "#/definitions/" + rootType);
     }
 }
