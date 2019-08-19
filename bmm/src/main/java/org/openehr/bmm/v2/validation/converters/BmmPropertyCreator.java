@@ -5,14 +5,21 @@ import com.nedap.archie.base.MultiplicityInterval;
 import org.openehr.bmm.core.BmmClass;
 import org.openehr.bmm.core.BmmContainerProperty;
 import org.openehr.bmm.core.BmmContainerType;
+import org.openehr.bmm.core.BmmGenericProperty;
+import org.openehr.bmm.core.BmmGenericType;
 import org.openehr.bmm.core.BmmModel;
 import org.openehr.bmm.core.BmmProperty;
 import org.openehr.bmm.core.BmmType;
 import org.openehr.bmm.v2.persistence.PBmmContainerProperty;
 import org.openehr.bmm.v2.persistence.PBmmGenericProperty;
+import org.openehr.bmm.v2.persistence.PBmmGenericType;
 import org.openehr.bmm.v2.persistence.PBmmProperty;
 import org.openehr.bmm.v2.persistence.PBmmSingleProperty;
 import org.openehr.bmm.v2.persistence.PBmmSinglePropertyOpen;
+import org.openehr.bmm.v2.persistence.PBmmType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BmmPropertyCreator {
 
@@ -25,7 +32,7 @@ public class BmmPropertyCreator {
         } else if (property instanceof PBmmSingleProperty) {
             return createSimpleProperty(property, type);
         } else if (property instanceof PBmmGenericProperty) {
-            return createSimpleProperty(property, type);
+            return createGenericProperty(schema, (PBmmGenericProperty) property, (BmmGenericType) type, bmmClass);
         } else if (property instanceof PBmmContainerProperty) {
             return createContainerProperty((PBmmContainerProperty) property, (BmmContainerType) type);
         } else {
@@ -50,6 +57,23 @@ public class BmmPropertyCreator {
     private BmmProperty createSimpleProperty(PBmmProperty property, BmmType typeDefinition) {
         BmmProperty bmmProperty = new BmmProperty(property.getName(), typeDefinition);
         setBasics(property, bmmProperty);
+        return bmmProperty;
+    }
+
+    private BmmGenericProperty createGenericProperty(BmmModel schema, PBmmGenericProperty property, BmmGenericType typeDefinition, BmmClass bmmClass) {
+        BmmGenericProperty bmmProperty = new BmmGenericProperty(property.getName(), typeDefinition);
+        setBasics(property, bmmProperty);
+        PBmmGenericType pbmmType = property.getTypeRef();
+        BmmGenericType genericTypeDef = new BmmGenericType();
+        genericTypeDef.setBaseClass(schema.getClassDefinition(pbmmType.getRootType()));
+        List<BmmType> genericParams = new ArrayList<>();
+        TypeCreator typeCreator = new TypeCreator();
+        for(PBmmType genericParamType: pbmmType.getGenericParamaterRefs()) {
+            genericParams.add(typeCreator.createBmmType(genericParamType, schema, bmmClass));
+        }
+        genericTypeDef.setGenericParameters(genericParams);
+        bmmProperty.setGenericTypeDef(genericTypeDef);
+        //bmmProperty.setGenericTypeDef();
         return bmmProperty;
     }
 
