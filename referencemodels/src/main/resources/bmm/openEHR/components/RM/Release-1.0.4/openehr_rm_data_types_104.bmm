@@ -425,7 +425,7 @@ class_definitions = <
 			["property"] = (P_BMM_SINGLE_PROPERTY) <
 				name = <"property">
 				type = <"CODE_PHRASE">
-				is_mandatory = <True>
+				is_mandatory = <False>
 			>
 			["units"] = (P_BMM_SINGLE_PROPERTY) <
 				name = <"units">
