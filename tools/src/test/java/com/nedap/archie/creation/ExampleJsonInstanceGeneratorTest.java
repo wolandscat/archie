@@ -65,8 +65,6 @@ public class ExampleJsonInstanceGeneratorTest {
         assertEquals("POINT_EVENT", ((Map) events.get(1)).get(TYPE_PROPERTY_NAME));
         assertEquals("INTERVAL_EVENT", ((Map) events.get(2)).get(TYPE_PROPERTY_NAME));
 
-
-
     }
 
 
@@ -92,7 +90,7 @@ public class ExampleJsonInstanceGeneratorTest {
         configuration.setTypePropertyName("_type");
         configuration.setAddExtraFieldsInArchetypeId(false);
         configuration.setAddPathProperty(false);
-        configuration.setAlwaysIncludeTypeProperty(false);
+        configuration.setAlwaysIncludeTypeProperty(true);
         configuration.setFailOnUnknownProperties(true);
         configuration.setSerializeEmptyCollections(false);
         return JacksonUtil.getObjectMapper(configuration);
@@ -129,6 +127,11 @@ public class ExampleJsonInstanceGeneratorTest {
     }
 
 
+    /**
+     * Tests all CKM examples with the Archie JSON Schema, that properly handles polymorphism
+     * This probably will go away once we have a proper solution
+     * @throws Exception
+     */
     @Test
     public void generateAllCKMExamples2() throws Exception {
         ExampleJsonInstanceGenerator structureGenerator = createExampleJsonInstanceGenerator();
@@ -140,12 +143,11 @@ public class ExampleJsonInstanceGeneratorTest {
         repository.compile(BuiltinReferenceModels.getMetaModels());
         NewJsonSchemaValidator firstValidator = new NewJsonSchemaValidator(true);
         NewJsonSchemaValidator secondValidator = new NewJsonSchemaValidator(false);
-        //secondValidator.setAllowAdditionalProperties(false);
 
         ObjectMapper archieObjectMapper = getArchieObjectMapper();
 
         for(ValidationResult result:repository.getAllValidationResults()) {
-            if(result.passes() && result.getArchetypeId().contains("waist")) {
+            if(result.passes()) {
                 String json = "";
                 try {
                     Flattener flattener = new Flattener(repository, BuiltinReferenceModels.getMetaModels()).createOperationalTemplate(true);
@@ -199,6 +201,10 @@ public class ExampleJsonInstanceGeneratorTest {
     }
 
 
+    /**
+     * Tests all CKM examples with the official JSON Schema
+     * @throws Exception
+     */
     @Test
     public void generateAllCKMExamples() throws Exception {
         ExampleJsonInstanceGenerator structureGenerator = createExampleJsonInstanceGenerator();
@@ -210,12 +216,12 @@ public class ExampleJsonInstanceGeneratorTest {
         repository.compile(BuiltinReferenceModels.getMetaModels());
         JsonSchemaValidator firstValidator = new JsonSchemaValidator(BuiltinReferenceModels.getBmmRepository().getModel("openehr_rm_1.0.4").getModel());
         JsonSchemaValidator secondValidator = new JsonSchemaValidator(BuiltinReferenceModels.getBmmRepository().getModel("openehr_rm_1.0.4").getModel());
-        secondValidator.setAllowAdditionalProperties(false);
+        //secondValidator.setAllowAdditionalProperties(false);
 
         ObjectMapper archieObjectMapper = getArchieObjectMapper();
 
         for(ValidationResult result:repository.getAllValidationResults()) {
-            if(result.passes() && result.getArchetypeId().contains("waist")) {
+            if(result.passes()) {
                 String json = "";
                 try {
                     Flattener flattener = new Flattener(repository, BuiltinReferenceModels.getMetaModels()).createOperationalTemplate(true);

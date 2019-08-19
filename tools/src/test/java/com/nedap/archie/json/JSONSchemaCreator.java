@@ -1,6 +1,5 @@
 package com.nedap.archie.json;
 
-import com.nedap.archie.aom.utils.AOMUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.openehr.bmm.core.BmmClass;
@@ -43,50 +42,65 @@ public class JSONSchemaCreator {
         primitiveTypeMapping.put("ISO8601_duration", "string");
 
         rootTypes = new ArrayList<>();
-//        rootTypes.add("COMPOSITION");
+        rootTypes.add("COMPOSITION");
         rootTypes.add("OBSERVATION");
-//        rootTypes.add("EVALUATION");
-//        rootTypes.add("ACTIVITY");
-//        rootTypes.add("ACTION");
-//        rootTypes.add("SECTION");
-//        rootTypes.add("INSTRUCTION");
-//        rootTypes.add("INSTRUCTION_DETAILS");
-//        rootTypes.add("ADMIN_ENTRY");
-//        rootTypes.add("CLUSTER");
-//        rootTypes.add("CAPABILITY");
-//        rootTypes.add("PERSON");
-//        rootTypes.add("ADDRESS");
-//        rootTypes.add("ROLE");
-//        rootTypes.add("ORGANISATION");
-//        rootTypes.add("PARTY_IDENTITY");
-//        rootTypes.add("ITEM_TREE");
+        rootTypes.add("EVALUATION");
+        rootTypes.add("ACTIVITY");
+        rootTypes.add("ACTION");
+        rootTypes.add("SECTION");
+        rootTypes.add("INSTRUCTION");
+        rootTypes.add("INSTRUCTION_DETAILS");
+        rootTypes.add("ADMIN_ENTRY");
+        rootTypes.add("CLUSTER");
+        rootTypes.add("CAPABILITY");
+        rootTypes.add("PERSON");
+        rootTypes.add("ADDRESS");
+        rootTypes.add("ROLE");
+        rootTypes.add("ORGANISATION");
+        rootTypes.add("PARTY_IDENTITY");
+        rootTypes.add("ITEM_TREE");
     }
 
     public JSONObject create(BmmModel bmm) {
         this.bmmModel = bmm;
 
-        JSONObject schemaRoot = new JSONObject();
-        JSONArray anyOfArray = new JSONArray();
+        //create the definitions and the root if/else base
 
-
+        JSONArray allOfArray = new JSONArray();
         JSONObject definitions = new JSONObject();
-        schemaRoot.put("definitions", definitions);
-        schemaRoot.put("anyOf", anyOfArray);
+        JSONObject schemaRoot = new JSONObject()
+                .put("definitions", definitions)
+                .put("allOf", allOfArray);
+
+
+        //at the root level, require the type
+        JSONObject typeRequired = createRequiredArray("_type");
+        allOfArray.put(typeRequired);
+
+        //for every root type, if the type is right, check that type
+        //anyof does more or less the same, but this is faster plus it gives MUCH less errors!
         for(String rootType:rootTypes) {
 
-            JSONObject anyOfObject = new JSONObject();
-            addReference(rootType, anyOfObject);
-            anyOfArray.put(anyOfObject);
+            JSONObject typePropertyCheck = createConstType(rootType);
+            JSONObject typeCheck = new JSONObject().put("properties", typePropertyCheck);
+
+            JSONObject typeReference = createReference(rootType);
+            //IF the type matches
+            //THEN check the correct type from the definitions
+            JSONObject ifObject = new JSONObject()
+                    .put("if", typeCheck)
+                    .put("then", typeReference);
+            allOfArray.put(ifObject);
         }
         for(BmmClass bmmClass: bmm.getClassDefinitions().values()) {
             if (!bmmClass.isAbstract() && !primitiveTypeMapping.containsKey(bmmClass.getTypeName().toLowerCase())) {
-                addClass(anyOfArray, definitions, bmmClass);
+                addClass(definitions, bmmClass);
             }
         }
         return schemaRoot;
     }
 
-    private void addClass(JSONArray anyOfArray, JSONObject definitions, BmmClass bmmClass) {
+    private void addClass(JSONObject definitions, BmmClass bmmClass) {
         String typeName = BmmDefinitions.typeNameToClassKey(bmmClass.getTypeName());
 
         JSONObject definition = new JSONObject();
@@ -104,9 +118,7 @@ public class JSONSchemaCreator {
                 required.put(propertyName);
             }
         }
-        JSONObject typeProperty = new JSONObject();
-        typeProperty.put("const", typeName);
-        properties.put("_type", typeProperty);
+        properties.put("_type", new JSONObject().put("const", typeName));
         definition.put("required", required);
         definition.put("properties", properties);
         definitions.put(typeName, definition);
@@ -122,37 +134,36 @@ public class JSONSchemaCreator {
     }
 
     private JSONObject createPropertyDef(BmmType type) {
-        JSONObject def = new JSONObject();
+
 
         if(type instanceof BmmOpenType) {
-            System.out.println("open");
-            def.put("type", "object");
+            return createType("object");
             //nothing more to be done
         } else if (type instanceof BmmSimpleType) {
             if(isJSPrimitive(type)) {
-                def.put("type", getJSPrimitive(type));
+                return createType(getJSPrimitive(type));
             } else {
-                createPolymorphicReference(def, type.getBaseClass());
+                return createPolymorphicReference(type.getBaseClass());
             }
         } else if (type instanceof BmmContainerType) {
+
             BmmContainerType containerType = (BmmContainerType) type;
-            def.put("type", "array");
-            def.put("items", createPropertyDef(containerType.getBaseType()));
-            //System.out.println("container");
+            return new JSONObject()
+                .put("type", "array")
+                .put("items", createPropertyDef(containerType.getBaseType()));
         } else if (type instanceof BmmGenericType) {
 
-            createPolymorphicReference(def, type.getBaseClass());
-            //base class is what we need
-            //it can be hash!
-        }
+            return createPolymorphicReference(type.getBaseClass());
 
-        return def;
+        }
+        throw new IllegalArgumentException("type must be a BmmType, but was " + type.getClass().getSimpleName());
+
     }
 
-    private void createPolymorphicReference(JSONObject def, BmmClass type) {
+    private JSONObject createPolymorphicReference(BmmClass type) {
+
         if(BmmDefinitions.typeNameToClassKey(type.getTypeName()).equalsIgnoreCase("hash")) {
-            def.put("type", "object");
-            return;
+            return createType("object");
         }
 
         List<String> descendants = getAllNonAbstractDescendants( type);
@@ -164,35 +175,30 @@ public class JSONSchemaCreator {
             //this is an object of which only an abstract class exists.
             //it cannot be represented as standard json, one would think. this is mainly access control and authored
             //resource in the RM
-            def.put("type", "object");
+            return createType("object");
         } else if (descendants.size() > 1) {
+            JSONObject def = new JSONObject();
             JSONArray array = new JSONArray();
             for(String descendant:descendants) {
 
                 JSONArray allOf = new JSONArray();
 
-                JSONObject ref = new JSONObject();
-                addReference(descendant, ref);
+                JSONObject ref = createReference(descendant);
                 allOf.put(ref);
-                JSONObject requiredType = new JSONObject();
-                JSONArray requiredArray = new JSONArray();
-                requiredArray.put("_type");
-                requiredType.put("required", requiredArray);
+                JSONObject requiredType = createRequiredArray("_type");
                 allOf.put(requiredType);
                 JSONObject allOfContainer = new JSONObject();
                 allOfContainer.put("allOf", allOf);
                 array.put(allOfContainer);
             }
             def.put("anyOf", array);
+            return def;
         } else {
-            addReference(BmmDefinitions.typeNameToClassKey(type.getTypeName()), def);
+            return createReference(BmmDefinitions.typeNameToClassKey(type.getTypeName()));
         }
 
     }
 
-    private void addReference(String typeName, JSONObject ref) {
-        ref.put("$ref", "#/definitions/" + typeName);
-    }
 
     private List<String> getAllNonAbstractDescendants(BmmClass bmmClass) {
         List<String> result = new ArrayList<>();
@@ -215,5 +221,29 @@ public class JSONSchemaCreator {
 
     private String getJSPrimitive(BmmType bmmType) {
         return primitiveTypeMapping.get(bmmType.getTypeName().toLowerCase());
+    }
+
+    private JSONObject createConstType(String rootType) {
+        JSONObject constTypeObject = new JSONObject().put("const", rootType);
+        return new JSONObject().put("_type", constTypeObject);
+    }
+
+    private JSONObject createRequiredArray(String... requiredFields) {
+        JSONObject requiredType = new JSONObject();
+        JSONArray requiredArray = new JSONArray();
+        for(String requiredProperty: requiredFields) {
+            requiredArray.put(requiredProperty);
+        }
+        requiredType.put("required", requiredArray);
+        return requiredType;
+    }
+
+
+    private JSONObject createType(String jsPrimitive) {
+        return new JSONObject().put("type", jsPrimitive);
+    }
+
+    private JSONObject createReference(String rootType) {
+        return new JSONObject().put("$ref", rootType);
     }
 }
