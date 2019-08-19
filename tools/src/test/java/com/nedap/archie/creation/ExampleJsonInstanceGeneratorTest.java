@@ -94,7 +94,7 @@ public class ExampleJsonInstanceGeneratorTest {
         configuration.setAddPathProperty(false);
         configuration.setAlwaysIncludeTypeProperty(false);
         configuration.setFailOnUnknownProperties(true);
-        //configuration.setSerializeEmptyCollections(false);
+        configuration.setSerializeEmptyCollections(false);
         return JacksonUtil.getObjectMapper(configuration);
     }
 
@@ -130,6 +130,76 @@ public class ExampleJsonInstanceGeneratorTest {
 
 
     @Test
+    public void generateAllCKMExamples2() throws Exception {
+        ExampleJsonInstanceGenerator structureGenerator = createExampleJsonInstanceGenerator();
+        FullArchetypeRepository repository = TestUtil.parseCKM();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        int numberCreated = 0, validationFailed = 0, generatedException = 0, jsonSchemaValidationRan = 0, jsonSchemaValidationFailed = 0;
+        int secondJsonSchemaValidationRan = 0, reserializedJsonSchemaValidationFailed = 0;
+        repository.compile(BuiltinReferenceModels.getMetaModels());
+        NewJsonSchemaValidator firstValidator = new NewJsonSchemaValidator(true);
+        NewJsonSchemaValidator secondValidator = new NewJsonSchemaValidator(false);
+        //secondValidator.setAllowAdditionalProperties(false);
+
+        ObjectMapper archieObjectMapper = getArchieObjectMapper();
+
+        for(ValidationResult result:repository.getAllValidationResults()) {
+            if(result.passes() && result.getArchetypeId().contains("waist")) {
+                String json = "";
+                try {
+                    Flattener flattener = new Flattener(repository, BuiltinReferenceModels.getMetaModels()).createOperationalTemplate(true);
+                    OperationalTemplate template = (OperationalTemplate) flattener.flatten(result.getSourceArchetype());
+                    Map<String, Object> example = structureGenerator.generate(template);
+                    json = mapper.writeValueAsString(example);
+
+                    RMObject parsed = archieObjectMapper.readValue(json, RMObject.class);
+                    numberCreated++;
+                   // if(Sets.newHashSet("COMPOSITION", "OBSERVATION", "EVALUATION", "INSTRUCTION", "SECTION", "ACTION").contains(template.getDefinition().getRmTypeName())) {
+                        jsonSchemaValidationRan++;
+                        firstValidator.validate(template.getDefinition().getRmTypeName(), json);
+                        logger.error("first validation ok for {}", result.getArchetypeId());
+                   // }
+
+                    String serializedAgain = archieObjectMapper.writeValueAsString(parsed);
+                    try {
+                        secondJsonSchemaValidationRan++;
+                        secondValidator.validate(template.getDefinition().getRmTypeName(), serializedAgain);
+                        logger.error("second validation ok for {}", result.getArchetypeId());
+                    } catch (ValidationException ex) {
+                        logger.error("second validation failed for {}", result.getArchetypeId());
+                        logger.error(Joiner.on("\n").join(ex.getAllMessages()));
+                        reserializedJsonSchemaValidationFailed++;
+                    }
+                } catch (ValidationException ex) {
+                    logger.error("validation failed for {}", result.getArchetypeId());
+                    logger.error(Joiner.on("\n").join(ex.getAllMessages()));
+                    jsonSchemaValidationFailed++;
+                } catch (Exception e) {
+                    if(generatedException <= 100) {
+                        logger.error("error generating example for " + result.getArchetypeId(), e);
+                        //logger.error(json);
+                    }
+                    generatedException++;
+                }
+            } else {
+                validationFailed++;
+            }
+
+
+        }
+        logger.info("created " + numberCreated + " examples, " + validationFailed + " failed to validate, " + generatedException + " threw exception in test");
+        logger.info("failed validation " + jsonSchemaValidationFailed + " of " + jsonSchemaValidationRan);
+        logger.info("failed validation of reserialized json " + reserializedJsonSchemaValidationFailed + " of " + secondJsonSchemaValidationRan);
+        assertEquals("Example JSON schema should not fail", 0, jsonSchemaValidationFailed);
+        assertEquals("Example JSON schema serialized from RM implementation should not fail", 0, reserializedJsonSchemaValidationFailed);
+        assertEquals("no exceptions should occur during schema validation", 0, generatedException);
+        assertEquals("example data from all archetypes should be validated", 402, jsonSchemaValidationRan);
+        assertEquals("example data from all archetypes should be validated from the rm", 402, secondJsonSchemaValidationRan);
+    }
+
+
+    @Test
     public void generateAllCKMExamples() throws Exception {
         ExampleJsonInstanceGenerator structureGenerator = createExampleJsonInstanceGenerator();
         FullArchetypeRepository repository = TestUtil.parseCKM();
@@ -155,11 +225,11 @@ public class ExampleJsonInstanceGeneratorTest {
 
                     RMObject parsed = archieObjectMapper.readValue(json, RMObject.class);
                     numberCreated++;
-                   // if(Sets.newHashSet("COMPOSITION", "OBSERVATION", "EVALUATION", "INSTRUCTION", "SECTION", "ACTION").contains(template.getDefinition().getRmTypeName())) {
-                        jsonSchemaValidationRan++;
-                        firstValidator.validate(template.getDefinition().getRmTypeName(), json);
-                        logger.error("first validation ok for {}", result.getArchetypeId());
-                   // }
+                    // if(Sets.newHashSet("COMPOSITION", "OBSERVATION", "EVALUATION", "INSTRUCTION", "SECTION", "ACTION").contains(template.getDefinition().getRmTypeName())) {
+                    jsonSchemaValidationRan++;
+                    firstValidator.validate(template.getDefinition().getRmTypeName(), json);
+                    logger.error("first validation ok for {}", result.getArchetypeId());
+                    // }
 
                     String serializedAgain = archieObjectMapper.writeValueAsString(parsed);
                     try {
