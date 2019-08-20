@@ -87,7 +87,7 @@ public class ExampleJsonInstanceGeneratorTest {
         RMJacksonConfiguration configuration = new RMJacksonConfiguration();
         configuration.setTypePropertyName("_type");
         configuration.setAddExtraFieldsInArchetypeId(false);
-        configuration.setAddPathProperty(true);
+        configuration.setAddPathProperty(false);
         configuration.setAlwaysIncludeTypeProperty(true);
         configuration.setFailOnUnknownProperties(true);
         configuration.setSerializeEmptyCollections(false);

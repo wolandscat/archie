@@ -120,16 +120,16 @@ public class JSONSchemaCreator {
     private void addClass(JsonObjectBuilder definitions, BmmClass bmmClass) {
         String typeName = BmmDefinitions.typeNameToClassKey(bmmClass.getTypeName());
 
-        JsonObjectBuilder definition = jsonFactory.createObjectBuilder()
-                .add("type", "object");
-
         BmmClass flatBmmClass = bmmClass.flattenBmmClass();
         JsonArrayBuilder required = jsonFactory.createArrayBuilder();
         JsonObjectBuilder properties = jsonFactory.createObjectBuilder();
 
+        boolean atLeastOneProperty = false;
         for (String propertyName : flatBmmClass.getProperties().keySet()) {
             BmmProperty bmmProperty = flatBmmClass.getProperties().get(propertyName);
-            if((bmmClass.getTypeName().startsWith("POINT_EVENT") || bmmClass.getTypeName().startsWith("INTERVAL_EVENT")) &&
+            if(bmmProperty.getComputed()) {
+                continue;//don't output this
+            } else if((bmmClass.getTypeName().startsWith("POINT_EVENT") || bmmClass.getTypeName().startsWith("INTERVAL_EVENT")) &&
                     propertyName.equalsIgnoreCase("data")) {
                 //we don't handle generics yet, and it's very tricky with the current BMM indeed. So, just manually hack this
                 JsonObjectBuilder propertyDef = createPolymorphicReference(bmmModel.getClassDefinition("ITEM_STRUCTURE"));
@@ -139,6 +139,7 @@ public class JSONSchemaCreator {
                 if (bmmProperty.getMandatory()) {
                     required.add(propertyName);
                 }
+                atLeastOneProperty = true;
             } else {
 
                 JsonObjectBuilder propertyDef = createPropertyDef(bmmProperty.getType());
@@ -148,11 +149,18 @@ public class JSONSchemaCreator {
                 if (bmmProperty.getMandatory()) {
                     required.add(propertyName);
                 }
+                atLeastOneProperty = true;
             }
         }
         properties.add("_type", jsonFactory.createObjectBuilder().add("const", typeName));
-        definition.add("required", required);
-        definition.add("properties", properties);
+        JsonObjectBuilder definition = jsonFactory.createObjectBuilder()
+                .add("type", "object")
+                .add("required", required)
+                .add("properties", properties);
+
+        if(!allowAdditionalProperties && atLeastOneProperty) {
+            definition.add("additionalProperties", false);
+        }
         definitions.add(typeName, definition);
     }
 
