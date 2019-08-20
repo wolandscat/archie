@@ -83,7 +83,8 @@ subprojects {
     testCompile 'junit:junit:4.12'
     testCompile 'org.slf4j:slf4j-simple:1.7.25'
 
-    testCompile 'com.github.everit-org.json-schema:org.everit.json.schema:1.11.1'
+    testCompile 'org.leadpony.justify:justify:1.1.0'
+    testCompile 'org.glassfish:jakarta.json:1.1.5:module'
 
   }
 
