@@ -3,6 +3,7 @@ package com.nedap.archie.archetypevalidator.validations;
 
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.AuthoredArchetype;
+import com.nedap.archie.aom.OperationalTemplate;
 import com.nedap.archie.aom.ResourceAnnotations;
 import com.nedap.archie.aom.utils.AOMUtils;
 import com.nedap.archie.archetypevalidator.ArchetypeValidationBase;
@@ -30,8 +31,15 @@ public class AnnotationsValidation extends ArchetypeValidationBase {
                     for(String path: annotationsForLanguage.keySet()) {
                         Map<String, String> annotationsForPath = annotationsForLanguage.get(path);
                         boolean isArchetypePath = AOMUtils.isArchetypePath(path) ; //TODO: NO idea what the eiffel code here suggests it does
+                        //we need the operational template to look up paths across included archetypes
+                        //otherwise any path crossing an ARCHETYPE_ROOT will fail to lookup
+                        Archetype operationalTemplate = repository.getOperationalTemplate(archetype.getArchetypeId().toString());
+                        if(operationalTemplate == null) {
+                            //apparently the operational template creation failed. Try to lookup the path anyway in the original archetype
+                            operationalTemplate = archetype;
+                        }
                         if(isArchetypePath) {
-                            if(!(hasPath(path, archetype) || (flatParent != null && hasPath(path, flatParent)))) {
+                            if(!(hasPath(path, operationalTemplate) || (flatParent != null && hasPath(path, flatParent)))) {
                                 addMessage(ErrorType.VRANP, I18n.t("The path {0} referenced in the annotations does not exist in the flat archetype", path));
                             }
                         } else { //TODO: this can also be referencemodel.has_path, but that's not implemented yet
