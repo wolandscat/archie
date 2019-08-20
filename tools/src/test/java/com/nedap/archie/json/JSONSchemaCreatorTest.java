@@ -27,4 +27,17 @@ public class JSONSchemaCreatorTest {
 
         jsonWriterFactory.createWriter(System.out).write(jsonObject);
     }
+
+    @Test
+    public void createSchemaWithoutAdditionalProperties() {
+        BmmModel model = BuiltinReferenceModels.getBmmRepository().getModel("openehr_rm_1.0.4").getModel();
+        JsonObject jsonObject = new JSONSchemaCreator().allowAdditionalProperties(false).create(model);
+
+        Map<String, Object> config = new HashMap();
+        config.put(JsonGenerator.PRETTY_PRINTING, true);
+        JsonWriterFactory jsonWriterFactory = Json.createWriterFactory(config);
+
+
+        jsonWriterFactory.createWriter(System.out).write(jsonObject);
+    }
 }
