@@ -17,30 +17,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class JSONSchemaCreator {
 
-    private Map<String, String> primitiveTypeMapping;
+    private Map<String, Supplier<JSONObject>> primitiveTypeMapping;
     private List<String> rootTypes;
     private BmmModel bmmModel;
 
     public JSONSchemaCreator() {
         primitiveTypeMapping = new HashMap<>();
-        primitiveTypeMapping.put("integer", "integer");
-        primitiveTypeMapping.put("integer64", "integer");
-        primitiveTypeMapping.put("boolean", "boolean");
-        primitiveTypeMapping.put("real", "number");
-        primitiveTypeMapping.put("double", "number");
-        primitiveTypeMapping.put("octet", "string");
-        primitiveTypeMapping.put("byte", "string");
-        primitiveTypeMapping.put("character", "string");
-        primitiveTypeMapping.put("hash", "object");
-        primitiveTypeMapping.put("string", "string");
-        primitiveTypeMapping.put("iso8601_date", "string");
-        primitiveTypeMapping.put("iso8601_date_time", "string");
-        primitiveTypeMapping.put("iso8601_time", "string");
-        primitiveTypeMapping.put("iso8601_duration", "string");
-        primitiveTypeMapping.put("proportion_kind", "integer");//TODO: proper enum support
+        primitiveTypeMapping.put("integer", () -> createType("integer"));
+        primitiveTypeMapping.put("integer64", () -> createType("integer"));
+        primitiveTypeMapping.put("boolean", () -> createType("boolean"));
+        primitiveTypeMapping.put("real", () -> createType("number"));
+        primitiveTypeMapping.put("double", () -> createType("number"));
+        primitiveTypeMapping.put("octet", () -> createType("string"));//well, base64...
+        primitiveTypeMapping.put("byte", () -> createType("string"));
+        primitiveTypeMapping.put("character", () -> createType("string"));
+        primitiveTypeMapping.put("hash", () -> createType("object"));
+        primitiveTypeMapping.put("string", () -> createType("integer"));
+        primitiveTypeMapping.put("iso8601_date", () -> createType("integer").put("format", "date"));
+        primitiveTypeMapping.put("iso8601_date_time", () -> createType("integer").put("format", "date-time"));
+        primitiveTypeMapping.put("iso8601_time", () -> createType("integer").put("format", "time"));
+        primitiveTypeMapping.put("iso8601_duration", () -> createType("string"));
+        primitiveTypeMapping.put("proportion_kind", () -> createType("integer"));//TODO: proper enum support
 
         rootTypes = new ArrayList<>();
         rootTypes.add("COMPOSITION");
@@ -156,7 +157,7 @@ public class JSONSchemaCreator {
             //nothing more to be done
         } else if (type instanceof BmmSimpleType) {
             if(isJSPrimitive(type)) {
-                return createType(getJSPrimitive(type));
+                return getJSPrimitive(type);
             } else {
                 return createPolymorphicReference(type.getBaseClass());
             }
@@ -167,8 +168,11 @@ public class JSONSchemaCreator {
                 .put("type", "array")
                 .put("items", createPropertyDef(containerType.getBaseType()));
         } else if (type instanceof BmmGenericType) {
-
-            return createPolymorphicReference(type.getBaseClass());
+            if(isJSPrimitive(type)) {
+                return getJSPrimitive(type);
+            } else {
+                return createPolymorphicReference(type.getBaseClass());
+            }
 
         }
         throw new IllegalArgumentException("type must be a BmmType, but was " + type.getClass().getSimpleName());
@@ -176,10 +180,6 @@ public class JSONSchemaCreator {
     }
 
     private JSONObject createPolymorphicReference(BmmClass type) {
-
-        if(BmmDefinitions.typeNameToClassKey(type.getTypeName()).equalsIgnoreCase("hash")) {
-            return createType("object");
-        }
 
         List<String> descendants = getAllNonAbstractDescendants( type);
         if(!type.isAbstract()) {
@@ -236,8 +236,8 @@ public class JSONSchemaCreator {
         return primitiveTypeMapping.containsKey(bmmType.getTypeName().toLowerCase());
     }
 
-    private String getJSPrimitive(BmmType bmmType) {
-        return primitiveTypeMapping.get(bmmType.getTypeName().toLowerCase());
+    private JSONObject getJSPrimitive(BmmType bmmType) {
+        return primitiveTypeMapping.get(bmmType.getTypeName().toLowerCase()).get();
     }
 
     private JSONObject createConstType(String rootType) {
