@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Sets;
 import com.nedap.archie.adlparser.ADLParser;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.OperationalTemplate;
@@ -17,12 +16,11 @@ import com.nedap.archie.json.RMJacksonConfiguration;
 import com.nedap.archie.rm.RMObject;
 import com.nedap.archie.rm.composition.Observation;
 import com.nedap.archie.testutil.TestUtil;
-import org.everit.json.schema.ValidationException;
 import org.junit.Test;
+import org.leadpony.justify.api.Problem;
 import org.openehr.referencemodels.BuiltinReferenceModels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,7 +87,7 @@ public class ExampleJsonInstanceGeneratorTest {
         RMJacksonConfiguration configuration = new RMJacksonConfiguration();
         configuration.setTypePropertyName("_type");
         configuration.setAddExtraFieldsInArchetypeId(false);
-        configuration.setAddPathProperty(false);
+        configuration.setAddPathProperty(true);
         configuration.setAlwaysIncludeTypeProperty(true);
         configuration.setFailOnUnknownProperties(true);
         configuration.setSerializeEmptyCollections(false);
@@ -157,100 +155,27 @@ public class ExampleJsonInstanceGeneratorTest {
 
                     RMObject parsed = archieObjectMapper.readValue(json, RMObject.class);
                     numberCreated++;
-                   // if(Sets.newHashSet("COMPOSITION", "OBSERVATION", "EVALUATION", "INSTRUCTION", "SECTION", "ACTION").contains(template.getDefinition().getRmTypeName())) {
-                        jsonSchemaValidationRan++;
-                        firstValidator.validate(template.getDefinition().getRmTypeName(), json);
-                        logger.error("first validation ok for {}", result.getArchetypeId());
-                   // }
 
-                    String serializedAgain = archieObjectMapper.writeValueAsString(parsed);
-                    try {
-                        secondJsonSchemaValidationRan++;
-                        secondValidator.validate(template.getDefinition().getRmTypeName(), serializedAgain);
-                        logger.error("second validation ok for {}", result.getArchetypeId());
-                    } catch (ValidationException ex) {
-                        logger.error("second validation failed for {}", result.getArchetypeId());
-                        logger.error(Joiner.on("\n").join(ex.getAllMessages()));
-                        reserializedJsonSchemaValidationFailed++;
-                    }
-                } catch (ValidationException ex) {
-                    logger.error("validation failed for {}", result.getArchetypeId());
-                    logger.error(Joiner.on("\n").join(ex.getAllMessages()));
-                    jsonSchemaValidationFailed++;
-                } catch (Exception e) {
-                    if(generatedException <= 100) {
-                        logger.error("error generating example for " + result.getArchetypeId(), e);
-                        //logger.error(json);
-                    }
-                    generatedException++;
-                }
-            } else {
-                validationFailed++;
-            }
-
-
-        }
-        logger.info("created " + numberCreated + " examples, " + validationFailed + " failed to validate, " + generatedException + " threw exception in test");
-        logger.info("failed validation " + jsonSchemaValidationFailed + " of " + jsonSchemaValidationRan);
-        logger.info("failed validation of reserialized json " + reserializedJsonSchemaValidationFailed + " of " + secondJsonSchemaValidationRan);
-        assertEquals("Example JSON schema should not fail", 0, jsonSchemaValidationFailed);
-        assertEquals("Example JSON schema serialized from RM implementation should not fail", 0, reserializedJsonSchemaValidationFailed);
-        assertEquals("no exceptions should occur during schema validation", 0, generatedException);
-        assertEquals("example data from all archetypes should be validated", 402, jsonSchemaValidationRan);
-        assertEquals("example data from all archetypes should be validated from the rm", 402, secondJsonSchemaValidationRan);
-    }
-
-
-    /**
-     * Tests all CKM examples with the official JSON Schema
-     * @throws Exception
-     */
-    @Test
-    public void generateAllCKMExamples() throws Exception {
-        ExampleJsonInstanceGenerator structureGenerator = createExampleJsonInstanceGenerator();
-        FullArchetypeRepository repository = TestUtil.parseCKM();
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        int numberCreated = 0, validationFailed = 0, generatedException = 0, jsonSchemaValidationRan = 0, jsonSchemaValidationFailed = 0;
-        int secondJsonSchemaValidationRan = 0, reserializedJsonSchemaValidationFailed = 0;
-        repository.compile(BuiltinReferenceModels.getMetaModels());
-        JsonSchemaValidator firstValidator = new JsonSchemaValidator(BuiltinReferenceModels.getBmmRepository().getModel("openehr_rm_1.0.4").getModel());
-        JsonSchemaValidator secondValidator = new JsonSchemaValidator(BuiltinReferenceModels.getBmmRepository().getModel("openehr_rm_1.0.4").getModel());
-        //secondValidator.setAllowAdditionalProperties(false);
-
-        ObjectMapper archieObjectMapper = getArchieObjectMapper();
-
-        for(ValidationResult result:repository.getAllValidationResults()) {
-            if(result.passes()) {
-                String json = "";
-                try {
-                    Flattener flattener = new Flattener(repository, BuiltinReferenceModels.getMetaModels()).createOperationalTemplate(true);
-                    OperationalTemplate template = (OperationalTemplate) flattener.flatten(result.getSourceArchetype());
-                    Map<String, Object> example = structureGenerator.generate(template);
-                    json = mapper.writeValueAsString(example);
-
-                    RMObject parsed = archieObjectMapper.readValue(json, RMObject.class);
-                    numberCreated++;
-                    // if(Sets.newHashSet("COMPOSITION", "OBSERVATION", "EVALUATION", "INSTRUCTION", "SECTION", "ACTION").contains(template.getDefinition().getRmTypeName())) {
                     jsonSchemaValidationRan++;
-                    firstValidator.validate(template.getDefinition().getRmTypeName(), json);
+                    List<Problem> problems = firstValidator.validate(template.getDefinition().getRmTypeName(), json);
+                    if(problems.size() > 0) {
+                        logger.error("validation failed for {}", result.getArchetypeId());
+                        logger.error(Joiner.on("\n").join(problems));
+                        jsonSchemaValidationFailed++;
+                        continue;
+                    }
                     logger.error("first validation ok for {}", result.getArchetypeId());
-                    // }
 
                     String serializedAgain = archieObjectMapper.writeValueAsString(parsed);
-                    try {
-                        secondJsonSchemaValidationRan++;
-                        secondValidator.validate(template.getDefinition().getRmTypeName(), serializedAgain);
-                        logger.error("second validation ok for {}", result.getArchetypeId());
-                    } catch (ValidationException ex) {
+                    secondJsonSchemaValidationRan++;
+                    List<Problem> secondProblems = secondValidator.validate(template.getDefinition().getRmTypeName(), serializedAgain);
+                    logger.error("second validation ok for {}", result.getArchetypeId());
+                    if(secondProblems.size() > 0) {
                         logger.error("second validation failed for {}", result.getArchetypeId());
-                        logger.error(Joiner.on("\n").join(ex.getAllMessages()));
+                        logger.error(Joiner.on("\n").join(secondProblems));
                         reserializedJsonSchemaValidationFailed++;
                     }
-                } catch (ValidationException ex) {
-                    logger.error("validation failed for {}", result.getArchetypeId());
-                    logger.error(Joiner.on("\n").join(ex.getAllMessages()));
-                    jsonSchemaValidationFailed++;
+
                 } catch (Exception e) {
                     if(generatedException <= 100) {
                         logger.error("error generating example for " + result.getArchetypeId(), e);
@@ -273,6 +198,80 @@ public class ExampleJsonInstanceGeneratorTest {
         assertEquals("example data from all archetypes should be validated", 402, jsonSchemaValidationRan);
         assertEquals("example data from all archetypes should be validated from the rm", 402, secondJsonSchemaValidationRan);
     }
+
+
+//    /**
+//     * Tests all CKM examples with the official JSON Schema
+//     * @throws Exception
+//     */
+//    @Test
+//    public void generateAllCKMExamples() throws Exception {
+//        ExampleJsonInstanceGenerator structureGenerator = createExampleJsonInstanceGenerator();
+//        FullArchetypeRepository repository = TestUtil.parseCKM();
+//        ObjectMapper mapper = new ObjectMapper();
+//        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+//        int numberCreated = 0, validationFailed = 0, generatedException = 0, jsonSchemaValidationRan = 0, jsonSchemaValidationFailed = 0;
+//        int secondJsonSchemaValidationRan = 0, reserializedJsonSchemaValidationFailed = 0;
+//        repository.compile(BuiltinReferenceModels.getMetaModels());
+//        JsonSchemaValidator firstValidator = new JsonSchemaValidator(BuiltinReferenceModels.getBmmRepository().getModel("openehr_rm_1.0.4").getModel());
+//        JsonSchemaValidator secondValidator = new JsonSchemaValidator(BuiltinReferenceModels.getBmmRepository().getModel("openehr_rm_1.0.4").getModel());
+//        //secondValidator.setAllowAdditionalProperties(false);
+//
+//        ObjectMapper archieObjectMapper = getArchieObjectMapper();
+//
+//        for(ValidationResult result:repository.getAllValidationResults()) {
+//            if(result.passes()) {
+//                String json = "";
+//                try {
+//                    Flattener flattener = new Flattener(repository, BuiltinReferenceModels.getMetaModels()).createOperationalTemplate(true);
+//                    OperationalTemplate template = (OperationalTemplate) flattener.flatten(result.getSourceArchetype());
+//                    Map<String, Object> example = structureGenerator.generate(template);
+//                    json = mapper.writeValueAsString(example);
+//
+//                    RMObject parsed = archieObjectMapper.readValue(json, RMObject.class);
+//                    numberCreated++;
+//                    // if(Sets.newHashSet("COMPOSITION", "OBSERVATION", "EVALUATION", "INSTRUCTION", "SECTION", "ACTION").contains(template.getDefinition().getRmTypeName())) {
+//                    jsonSchemaValidationRan++;
+//                    firstValidator.validate(template.getDefinition().getRmTypeName(), json);
+//                    logger.error("first validation ok for {}", result.getArchetypeId());
+//                    // }
+//
+//                    String serializedAgain = archieObjectMapper.writeValueAsString(parsed);
+//                    try {
+//                        secondJsonSchemaValidationRan++;
+//                        secondValidator.validate(template.getDefinition().getRmTypeName(), serializedAgain);
+//                        logger.error("second validation ok for {}", result.getArchetypeId());
+//                    } catch (ValidationException ex) {
+//                        logger.error("second validation failed for {}", result.getArchetypeId());
+//                        logger.error(Joiner.on("\n").join(ex.getAllMessages()));
+//                        reserializedJsonSchemaValidationFailed++;
+//                    }
+//                } catch (ValidationException ex) {
+//                    logger.error("validation failed for {}", result.getArchetypeId());
+//                    logger.error(Joiner.on("\n").join(ex.getAllMessages()));
+//                    jsonSchemaValidationFailed++;
+//                } catch (Exception e) {
+//                    if(generatedException <= 100) {
+//                        logger.error("error generating example for " + result.getArchetypeId(), e);
+//                        //logger.error(json);
+//                    }
+//                    generatedException++;
+//                }
+//            } else {
+//                validationFailed++;
+//            }
+//
+//
+//        }
+//        logger.info("created " + numberCreated + " examples, " + validationFailed + " failed to validate, " + generatedException + " threw exception in test");
+//        logger.info("failed validation " + jsonSchemaValidationFailed + " of " + jsonSchemaValidationRan);
+//        logger.info("failed validation of reserialized json " + reserializedJsonSchemaValidationFailed + " of " + secondJsonSchemaValidationRan);
+//        assertEquals("Example JSON schema should not fail", 0, jsonSchemaValidationFailed);
+//        assertEquals("Example JSON schema serialized from RM implementation should not fail", 0, reserializedJsonSchemaValidationFailed);
+//        assertEquals("no exceptions should occur during schema validation", 0, generatedException);
+//        assertEquals("example data from all archetypes should be validated", 402, jsonSchemaValidationRan);
+//        assertEquals("example data from all archetypes should be validated from the rm", 402, secondJsonSchemaValidationRan);
+//    }
 
     private ExampleJsonInstanceGenerator createExampleJsonInstanceGenerator() {
         ExampleJsonInstanceGenerator structureGenerator = new ExampleJsonInstanceGenerator(BuiltinReferenceModels.getMetaModels(), "en");

@@ -1,7 +1,6 @@
 package com.nedap.archie.json;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+
 import org.openehr.bmm.core.BmmClass;
 import org.openehr.bmm.core.BmmContainerProperty;
 import org.openehr.bmm.core.BmmContainerType;
@@ -13,6 +12,13 @@ import org.openehr.bmm.core.BmmSimpleType;
 import org.openehr.bmm.core.BmmType;
 import org.openehr.bmm.persistence.validation.BmmDefinitions;
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonBuilderFactory;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.stream.JsonGenerator;
+import javax.json.stream.JsonGeneratorFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,9 +27,15 @@ import java.util.function.Supplier;
 
 public class JSONSchemaCreator {
 
-    private Map<String, Supplier<JSONObject>> primitiveTypeMapping;
+
+    private Map<String, Supplier<JsonObjectBuilder>> primitiveTypeMapping;
     private List<String> rootTypes;
     private BmmModel bmmModel;
+    private final JsonBuilderFactory jsonFactory;
+    private final JsonGeneratorFactory jsonGenerator;
+
+    private boolean allowAdditionalProperties;
+
 
     public JSONSchemaCreator() {
         primitiveTypeMapping = new HashMap<>();
@@ -36,10 +48,10 @@ public class JSONSchemaCreator {
         primitiveTypeMapping.put("byte", () -> createType("string"));
         primitiveTypeMapping.put("character", () -> createType("string"));
         primitiveTypeMapping.put("hash", () -> createType("object"));
-        primitiveTypeMapping.put("string", () -> createType("integer"));
-        primitiveTypeMapping.put("iso8601_date", () -> createType("integer").put("format", "date"));
-        primitiveTypeMapping.put("iso8601_date_time", () -> createType("integer").put("format", "date-time"));
-        primitiveTypeMapping.put("iso8601_time", () -> createType("integer").put("format", "time"));
+        primitiveTypeMapping.put("string", () -> createType("string"));
+        primitiveTypeMapping.put("iso8601_date", () -> createType("string").add("format", "date"));
+        primitiveTypeMapping.put("iso8601_date_time", () -> createType("string").add("format", "date-time"));
+        primitiveTypeMapping.put("iso8601_time", () -> createType("string").add("format", "time"));
         primitiveTypeMapping.put("iso8601_duration", () -> createType("string"));
         primitiveTypeMapping.put("proportion_kind", () -> createType("integer"));//TODO: proper enum support
 
@@ -61,95 +73,99 @@ public class JSONSchemaCreator {
         rootTypes.add("ORGANISATION");
         rootTypes.add("PARTY_IDENTITY");
         rootTypes.add("ITEM_TREE");
+        Map<String, Object> config = new HashMap();
+        config.put(JsonGenerator.PRETTY_PRINTING, true);
+        jsonFactory = Json.createBuilderFactory(config);
+        jsonGenerator = Json.createGeneratorFactory(config);
     }
 
-    public JSONObject create(BmmModel bmm) {
+    public JsonObject create(BmmModel bmm) {
         this.bmmModel = bmm;
 
         //create the definitions and the root if/else base
 
-        JSONArray allOfArray = new JSONArray();
-        JSONObject definitions = new JSONObject();
-        JSONObject schemaRoot = new JSONObject()
-                .put("definitions", definitions)
-                .put("allOf", allOfArray)
-                .put("$schema", "http://json-schema.org/draft-07/schema");
+        JsonArrayBuilder allOfArray = jsonFactory.createArrayBuilder();
+        JsonObjectBuilder definitions = jsonFactory.createObjectBuilder();
 
 
-        //at the root level, require the type
-        JSONObject typeRequired = createRequiredArray("_type");
-        allOfArray.put(typeRequired);
+        allOfArray.add(createRequiredArray("_type"));
 
         //for every root type, if the type is right, check that type
         //anyof does more or less the same, but this is faster plus it gives MUCH less errors!
         for(String rootType:rootTypes) {
 
-            JSONObject typePropertyCheck = createConstType(rootType);
-            JSONObject typeCheck = new JSONObject().put("properties", typePropertyCheck);
+            JsonObjectBuilder typePropertyCheck = createConstType(rootType);
+            JsonObjectBuilder typeCheck = jsonFactory.createObjectBuilder().add("properties", typePropertyCheck);
 
-            JSONObject typeReference = createReference(rootType);
+            JsonObjectBuilder typeReference = createReference(rootType);
             //IF the type matches
             //THEN check the correct type from the definitions
-            JSONObject ifObject = new JSONObject()
-                    .put("if", typeCheck)
-                    .put("then", typeReference);
-            allOfArray.put(ifObject);
+            JsonObjectBuilder ifObject = jsonFactory.createObjectBuilder()
+                    .add("if", typeCheck)
+                    .add("then", typeReference);
+            allOfArray.add(ifObject);
         }
         for(BmmClass bmmClass: bmm.getClassDefinitions().values()) {
             if (!bmmClass.isAbstract() && !primitiveTypeMapping.containsKey(bmmClass.getTypeName().toLowerCase())) {
                 addClass(definitions, bmmClass);
             }
         }
-        return schemaRoot;
+        return jsonFactory.createObjectBuilder()
+                .add("$schema", "http://json-schema.org/draft-07/schema")
+                .add("allOf", allOfArray)
+                .add("definitions", definitions)
+                .build();
     }
 
-    private void addClass(JSONObject definitions, BmmClass bmmClass) {
+    private void addClass(JsonObjectBuilder definitions, BmmClass bmmClass) {
         String typeName = BmmDefinitions.typeNameToClassKey(bmmClass.getTypeName());
 
-        JSONObject definition = new JSONObject();
-        definition.put("type", "object");
+        JsonObjectBuilder definition = jsonFactory.createObjectBuilder()
+                .add("type", "object");
+
         BmmClass flatBmmClass = bmmClass.flattenBmmClass();
-        JSONArray required = new JSONArray();
-        JSONObject properties = new JSONObject();
+        JsonArrayBuilder required = jsonFactory.createArrayBuilder();
+        JsonObjectBuilder properties = jsonFactory.createObjectBuilder();
+
         for (String propertyName : flatBmmClass.getProperties().keySet()) {
             BmmProperty bmmProperty = flatBmmClass.getProperties().get(propertyName);
             if((bmmClass.getTypeName().startsWith("POINT_EVENT") || bmmClass.getTypeName().startsWith("INTERVAL_EVENT")) &&
                     propertyName.equalsIgnoreCase("data")) {
                 //we don't handle generics yet, and it's very tricky with the current BMM indeed. So, just manually hack this
-                JSONObject propertyDef = createPolymorphicReference(bmmModel.getClassDefinition("ITEM_STRUCTURE"));
+                JsonObjectBuilder propertyDef = createPolymorphicReference(bmmModel.getClassDefinition("ITEM_STRUCTURE"));
                 extendPropertyDef(propertyDef, bmmProperty);
-                properties.put(propertyName, propertyDef);
+                properties.add(propertyName, propertyDef);
 
                 if (bmmProperty.getMandatory()) {
-                    required.put(propertyName);
+                    required.add(propertyName);
                 }
             } else {
 
-                JSONObject propertyDef = createPropertyDef(bmmProperty.getType());
+                JsonObjectBuilder propertyDef = createPropertyDef(bmmProperty.getType());
                 extendPropertyDef(propertyDef, bmmProperty);
-                properties.put(propertyName, propertyDef);
+                properties.add(propertyName, propertyDef);
 
                 if (bmmProperty.getMandatory()) {
-                    required.put(propertyName);
+                    required.add(propertyName);
                 }
             }
         }
-        properties.put("_type", new JSONObject().put("const", typeName));
-        definition.put("required", required);
-        definition.put("properties", properties);
-        definitions.put(typeName, definition);
+        properties.add("_type", jsonFactory.createObjectBuilder().add("const", typeName));
+        definition.add("required", required);
+        definition.add("properties", properties);
+        definitions.add(typeName, definition);
     }
 
-    private void extendPropertyDef(JSONObject propertyDef, BmmProperty bmmProperty) {
+    private void extendPropertyDef(JsonObjectBuilder propertyDef, BmmProperty bmmProperty) {
         if(bmmProperty instanceof BmmContainerProperty) {
             BmmContainerProperty containerProperty = (BmmContainerProperty) bmmProperty;
             if(containerProperty.getCardinality() != null && containerProperty.getCardinality().getLower() > 0) {
-                propertyDef.put("minItems", containerProperty.getCardinality().getLower());
+                propertyDef.add("minItems", containerProperty.getCardinality().getLower());
             }
         }
     }
 
-    private JSONObject createPropertyDef(BmmType type) {
+    private JsonObjectBuilder createPropertyDef(BmmType type) {
 
 
         if(type instanceof BmmOpenType) {
@@ -164,9 +180,9 @@ public class JSONSchemaCreator {
         } else if (type instanceof BmmContainerType) {
 
             BmmContainerType containerType = (BmmContainerType) type;
-            return new JSONObject()
-                .put("type", "array")
-                .put("items", createPropertyDef(containerType.getBaseType()));
+            return jsonFactory.createObjectBuilder()
+                .add("type", "array")
+                .add("items", createPropertyDef(containerType.getBaseType()));
         } else if (type instanceof BmmGenericType) {
             if(isJSPrimitive(type)) {
                 return getJSPrimitive(type);
@@ -179,7 +195,7 @@ public class JSONSchemaCreator {
 
     }
 
-    private JSONObject createPolymorphicReference(BmmClass type) {
+    private JsonObjectBuilder createPolymorphicReference(BmmClass type) {
 
         List<String> descendants = getAllNonAbstractDescendants( type);
         if(!type.isAbstract()) {
@@ -192,24 +208,24 @@ public class JSONSchemaCreator {
             //resource in the RM
             return createType("object");
         } else if (descendants.size() > 1) {
-            JSONObject def = new JSONObject();
-            JSONArray array = new JSONArray();
+            JsonArrayBuilder array = jsonFactory.createArrayBuilder();
+            array.add(createRequiredArray("_type"));
             for(String descendant:descendants) {
-                JSONObject typePropertyCheck = createConstType(descendant);
-                JSONObject typeCheck = new JSONObject().put("properties", typePropertyCheck);
+                JsonObjectBuilder typePropertyCheck = createConstType(descendant);
+                JsonObjectBuilder typeCheck = jsonFactory.createObjectBuilder().add("properties", typePropertyCheck);
 
-                JSONObject typeReference = createReference(descendant);
+                JsonObjectBuilder typeReference = createReference(descendant);
                 //IF the type matches
                 //THEN check the correct type from the definitions
-                JSONObject ifObject = new JSONObject()
-                        .put("if", typeCheck)
-                        .put("then", typeReference);
-                array.put(ifObject);
+                JsonObjectBuilder ifObject = jsonFactory.createObjectBuilder()
+                        .add("if", typeCheck)
+                        .add("then", typeReference);
+                array.add(ifObject);
 
             }
-            array.put(createRequiredArray("_type"));
-            def.put("allOf", array);
-            return def;
+
+
+            return jsonFactory.createObjectBuilder().add("allOf", array);
         } else {
             return createReference(BmmDefinitions.typeNameToClassKey(type.getTypeName()));
         }
@@ -236,31 +252,37 @@ public class JSONSchemaCreator {
         return primitiveTypeMapping.containsKey(bmmType.getTypeName().toLowerCase());
     }
 
-    private JSONObject getJSPrimitive(BmmType bmmType) {
+    private JsonObjectBuilder getJSPrimitive(BmmType bmmType) {
         return primitiveTypeMapping.get(bmmType.getTypeName().toLowerCase()).get();
     }
 
-    private JSONObject createConstType(String rootType) {
-        JSONObject constTypeObject = new JSONObject().put("const", rootType);
-        return new JSONObject().put("_type", constTypeObject);
+    private JsonObjectBuilder createConstType(String rootType) {
+
+        return jsonFactory.createObjectBuilder()
+                .add("_type", jsonFactory.createObjectBuilder()
+                    .add("const", rootType)
+                );
     }
 
-    private JSONObject createRequiredArray(String... requiredFields) {
-        JSONObject requiredType = new JSONObject();
-        JSONArray requiredArray = new JSONArray();
+    private JsonObjectBuilder createRequiredArray(String... requiredFields) {
+        JsonArrayBuilder requiredArray = jsonFactory.createArrayBuilder();
         for(String requiredProperty: requiredFields) {
-            requiredArray.put(requiredProperty);
+            requiredArray.add(requiredProperty);
         }
-        requiredType.put("required", requiredArray);
-        return requiredType;
+        return jsonFactory.createObjectBuilder().add("required", requiredArray);
     }
 
 
-    private JSONObject createType(String jsPrimitive) {
-        return new JSONObject().put("type", jsPrimitive);
+    private JsonObjectBuilder createType(String jsPrimitive) {
+        return jsonFactory.createObjectBuilder().add("type", jsPrimitive);
     }
 
-    private JSONObject createReference(String rootType) {
-        return new JSONObject().put("$ref", "#/definitions/" + rootType);
+    private JsonObjectBuilder createReference(String rootType) {
+        return jsonFactory.createObjectBuilder().add("$ref", "#/definitions/" + rootType);
+    }
+
+    public JSONSchemaCreator allowAdditionalProperties(boolean allowAdditionalProperties) {
+        this.allowAdditionalProperties = allowAdditionalProperties;
+        return this;
     }
 }
