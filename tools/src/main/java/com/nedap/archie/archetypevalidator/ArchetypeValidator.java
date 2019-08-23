@@ -179,7 +179,9 @@ public class ArchetypeValidator {
                 } catch (Exception e) {
                     //this is probably an error in an included archetype, so ignore it here
                     //the other archetype will not validate
-                    messages.add(new ValidationMessage(ErrorType.OTHER, "Validation failed with exception " + e));
+                    ValidationMessage message = new ValidationMessage(ErrorType.OTHER, "Error during Operational template creation. This does not necessarily mean the current archetype has a problem, but perhaps one that is included with use_archetype: " + e);
+                    message.setWarning(true);
+                    messages.add(message);
                 }
                 result.setFlattened(flattened);
                 if(result.passes()) {
