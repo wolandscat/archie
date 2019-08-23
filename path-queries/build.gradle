@@ -1,8 +1,8 @@
 description = "An implementation of openehr path queries"
 
 dependencies {
-    //only for the xpath grammar. perhaps include it here?
-    compile project(':grammars')
-    compile project(':base')
-    compile project(':aom') //modelInfoLookup is here and should be split and moved
+	//only for the xpath grammar. perhaps include it here?
+	compile project(':grammars')
+	compile project(':base')
+	compile project(':aom') //modelInfoLookup is here and should be split and moved
 }

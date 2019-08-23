@@ -179,7 +179,7 @@ public class ArchetypeValidator {
                 } catch (Exception e) {
                     //this is probably an error in an included archetype, so ignore it here
                     //the other archetype will not validate
-                    messages.add(new ValidationMessage(ErrorType.VUNP, "Validation failed with exception " + e));
+                    messages.add(new ValidationMessage(ErrorType.OTHER, "Validation failed with exception " + e));
                 }
                 result.setFlattened(flattened);
                 if(result.passes()) {
