@@ -4,16 +4,16 @@ apply plugin: 'antlr'
 ext.antlrVersion = '4.7.1'
 
 generateGrammarSource { //antlr4
-  outputDirectory = new File("${project.buildDir}/generated-src/antlr/main/com/nedap/archie/adlparser/antlr".toString())
+    outputDirectory = new File("${project.buildDir}/generated-src/antlr/main/com/nedap/archie/adlparser/antlr".toString())
     arguments = ['-visitor', '-package', 'com.nedap.archie.adlparser.antlr', '-encoding', 'utf-8'] + arguments
 }
 
 classes {
-  dependsOn generateGrammarSource
+    dependsOn generateGrammarSource
 }
 
 
 dependencies {
-  antlr "org.antlr:antlr4:${antlrVersion}"
-  compile 'org.antlr:antlr4-runtime:4.7.1'
+    antlr "org.antlr:antlr4:${antlrVersion}"
+    compile 'org.antlr:antlr4-runtime:4.7.1'
 }

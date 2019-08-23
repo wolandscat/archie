@@ -1,17 +1,17 @@
 buildscript {
-  repositories {
-    jcenter()
-  }
-  dependencies {
-    classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
-    classpath 'org.owasp:dependency-check-gradle:1.4.5.1'
-  }
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
+        classpath 'org.owasp:dependency-check-gradle:1.4.5.1'
+    }
 
 
 }
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 
@@ -20,10 +20,10 @@ wrapper {
 }
 
 allprojects {
-  version = '0.7.2'
-  group = 'com.nedap.healthcare.archie'
-  ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
-  //archivesBaseName = 'archie'
+    version = '0.7.2'
+    group = 'com.nedap.healthcare.archie'
+    ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
+    //archivesBaseName = 'archie'
 
 }
 
@@ -34,85 +34,85 @@ gradle.ext.isParallel = hasProperty('org.gradle.parallel') ? project.property('o
 
 
 subprojects {
-  apply plugin: 'java'
-  apply plugin: 'org.owasp.dependencycheck'
-  apply from: "${gradleScriptDir}/publish-maven.gradle"
+    apply plugin: 'java'
+    apply plugin: 'org.owasp.dependencycheck'
+    apply from: "${gradleScriptDir}/publish-maven.gradle"
 
- // plugins {
-   //   id 'com.github.ben-manes.versions' version '0.13.0'
- // }
+    // plugins {
+    //   id 'com.github.ben-manes.versions' version '0.13.0'
+    // }
 
-  sourceCompatibility = '1.8'
-  targetCompatibility = '1.8'
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
 
-  compileJava.options.encoding = "UTF-8"
-  compileTestJava.options.encoding = "UTF-8"
+    compileJava.options.encoding = "UTF-8"
+    compileTestJava.options.encoding = "UTF-8"
 
-  repositories {
-      mavenCentral()
-      maven { url 'https://jitpack.io' }
-  }
-
-  ext.reflectionsVersion = '0.9.11'
-  ext.jacksonVersion = '2.9.7'
-
-  dependencies {
-    compile 'org.slf4j:slf4j-api:1.7.25'
-
-    compile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
-    compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
-
-    compile 'com.google.guava:guava:25.1-jre'
-
-    compile "org.reflections:reflections:${reflectionsVersion}"
-    compile 'com.esotericsoftware:kryo-shaded:4.0.2' //for easy and relatively fast object cloning
-
-    compile('commons-io:commons-io:2.6'){
-      exclude group: 'commons-logging', module: 'commons-logging'
+    repositories {
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
-    compile 'org.apache.commons:commons-text:1.6'
-    compile 'org.apache.commons:commons-lang3:3.8.1'
 
-    //java 10 no longer has these included by default, so explicit dependency is needed.
-    compile 'javax.xml.bind:jaxb-api:2.3.0'
-    compile 'com.sun.xml.bind:jaxb-core:2.3.0'
-    runtime 'com.sun.xml.bind:jaxb-impl:2.3.0'
-    compile 'javax.activation:activation:1.1.1'
+    ext.reflectionsVersion = '0.9.11'
+    ext.jacksonVersion = '2.9.7'
 
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.slf4j:slf4j-simple:1.7.25'
+    dependencies {
+        compile 'org.slf4j:slf4j-api:1.7.25'
 
-    testCompile 'com.github.everit-org.json-schema:org.everit.json.schema:1.9.2'
+        compile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+        compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+        compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
 
-  }
+        compile 'com.google.guava:guava:25.1-jre'
 
+        compile "org.reflections:reflections:${reflectionsVersion}"
+        compile 'com.esotericsoftware:kryo-shaded:4.0.2' //for easy and relatively fast object cloning
 
-  javadoc {
-      options.encoding = 'UTF-8'
-  }
+        compile('commons-io:commons-io:2.6') {
+            exclude group: 'commons-logging', module: 'commons-logging'
+        }
+        compile 'org.apache.commons:commons-text:1.6'
+        compile 'org.apache.commons:commons-lang3:3.8.1'
 
-  //configure the jar files: sources and javaod
-  task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-  }
+        //java 10 no longer has these included by default, so explicit dependency is needed.
+        compile 'javax.xml.bind:jaxb-api:2.3.0'
+        compile 'com.sun.xml.bind:jaxb-core:2.3.0'
+        runtime 'com.sun.xml.bind:jaxb-impl:2.3.0'
+        compile 'javax.activation:activation:1.1.1'
 
-  task sourcesJar(type: Jar) {
-      classifier = 'sources'
-      from sourceSets.main.allSource
-  }
+        testCompile 'junit:junit:4.12'
+        testCompile 'org.slf4j:slf4j-simple:1.7.25'
 
-  artifacts {
-      archives javadocJar, sourcesJar
-  }
+        testCompile 'com.github.everit-org.json-schema:org.everit.json.schema:1.9.2'
 
-  test {
-   testLogging {
-      events "failed"
-      exceptionFormat "full"
     }
-  }
+
+
+    javadoc {
+        options.encoding = 'UTF-8'
+    }
+
+    //configure the jar files: sources and javaod
+    task javadocJar(type: Jar) {
+        classifier = 'javadoc'
+        from javadoc
+    }
+
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives javadocJar, sourcesJar
+    }
+
+    test {
+        testLogging {
+            events "failed"
+            exceptionFormat "full"
+        }
+    }
 
 }
 
