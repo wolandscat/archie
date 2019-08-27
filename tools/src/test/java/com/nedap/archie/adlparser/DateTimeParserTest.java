@@ -30,6 +30,7 @@ public class DateTimeParserTest {
     public void datetimeCorrect() {
         assertEquals(OffsetDateTime.of(2015, 1, 1, 12, 1, 1, 100000000, ZoneOffset.of("+0100")), DateTimeParsers.parseDateTimeValue("2015-1-1T12:01:01,1+0100"));
         assertEquals(OffsetDateTime.of(2015, 1, 1, 12, 1, 1, 100000000, ZoneOffset.of("+0100")), DateTimeParsers.parseDateTimeValue("2015-1-1T12:01:01,1+0100"));
+        assertEquals(OffsetDateTime.of(2015, 1, 1, 12, 1, 1, 0, ZoneOffset.of("+0100")), DateTimeParsers.parseDateTimeValue("2015-1-1T12:01:01+0100"));
         assertEquals(LocalDateTime.of(2015, 1, 1, 12, 1, 1, 100000000), DateTimeParsers.parseDateTimeValue("2015-1-1T12:01:01,1"));
         assertEquals(LocalDateTime.of(2015, 1, 1, 12, 1, 1, 0), DateTimeParsers.parseDateTimeValue("2015-1-1T12:01:01"));
         assertEquals(LocalDateTime.of(2015, 1, 1, 12, 1, 0, 0), DateTimeParsers.parseDateTimeValue("2015-1-1T12:01"));
