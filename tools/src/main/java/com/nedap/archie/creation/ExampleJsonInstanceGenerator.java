@@ -29,6 +29,7 @@ import com.nedap.archie.base.MultiplicityInterval;
 import com.nedap.archie.rminfo.MetaModels;
 import org.openehr.bmm.core.BmmClass;
 import org.openehr.bmm.core.BmmContainerProperty;
+import org.openehr.bmm.core.BmmContainerType;
 import org.openehr.bmm.core.BmmEnumerationInteger;
 import org.openehr.bmm.core.BmmEnumerationString;
 import org.openehr.bmm.core.BmmModel;
@@ -117,15 +118,19 @@ public  class ExampleJsonInstanceGenerator {
                     } else if (child instanceof CPrimitiveObject) {
                         children.add(generateCPrimitive((CPrimitiveObject) child));
                     } else if (child instanceof ArchetypeSlot) {
-//                        Map<String, Object> next = new LinkedHashMap<>();
-//
-//                        String concreteTypeName = getConcreteTypeName(child.getRmTypeName());
-//                        BmmClass childClassDefinition = bmm.getClassDefinition(BmmDefinitions.typeNameToClassKey(child.getRmTypeName()));
-//                        next.put(typePropertyName, concreteTypeName);
-//                        addAdditionalPropertiesAtBegin(classDefinition, next, child);
-//                        addRequiredPropertiesFromBmm(next, childClassDefinition);
-//                        addAdditionalPropertiesAtEnd(classDefinition, next, child);
-//                        children.add(next);
+                        //TODO: it would be better to actually include an archetype
+                        //however that leads to some tricky situations when this archetype again optionally includes
+                        //the same archetype - you end with with an infinite loop in that case, for example see
+                        //the CKM use of the device archetype, that includes another device...
+                        Map<String, Object> next = new LinkedHashMap<>();
+
+                        String concreteTypeName = getConcreteTypeName(child.getRmTypeName());
+                        BmmClass childClassDefinition = bmm.getClassDefinition(BmmDefinitions.typeNameToClassKey(child.getRmTypeName()));
+                        next.put(typePropertyName, concreteTypeName);
+                        addAdditionalPropertiesAtBegin(classDefinition, next, child);
+                        addRequiredPropertiesFromBmm(next, childClassDefinition);
+                        addAdditionalPropertiesAtEnd(classDefinition, next, child);
+                        children.add(next);
                     } else {
                         children.add("unsupported constraint: " + child.getClass().getSimpleName());
                     }
@@ -147,10 +152,13 @@ public  class ExampleJsonInstanceGenerator {
     }
 
     protected String getConcreteTypeName(String rmTypeName) {
-
         String classKey = BmmDefinitions.typeNameToClassKey(rmTypeName);
         BmmClass classDefinition = bmm.getClassDefinition(classKey);
         if(classDefinition.isAbstract()) {
+            String customConcreteType = getConcreteTypeOverride(rmTypeName);
+            if(customConcreteType != null) {
+                return customConcreteType;
+            }
             List<String> allDescendants = classDefinition.findAllDescendants();
             for(String descendant: allDescendants) {
                 BmmClass descendantClassDefinition = bmm.getClassDefinition(descendant);
@@ -179,7 +187,15 @@ public  class ExampleJsonInstanceGenerator {
         BmmType type = property.getType();
         BmmClass propertyClass = type.getBaseClass();
         if (property instanceof BmmContainerProperty) {
-            List<Map<String, Object>> children = new ArrayList<>();
+            List<Object> children = new ArrayList<>();
+            MultiplicityInterval cardinality = ((BmmContainerProperty) property).getCardinality();
+            if(cardinality.isMandatory() ) {
+                //if mandatory attribute, create at least one child type
+                //this won't be from an actual archetype, but at least it is valid RM data
+                String actualType = ((BmmContainerType) type).getBaseType().getTypeName();
+                children.add(createExampleFromTypeName(actualType));
+            }
+
             result.put(property.getName(), children);
         } else if (propertyClass instanceof BmmEnumerationInteger) {
             result.put(property.getName(), 0);
@@ -187,15 +203,20 @@ public  class ExampleJsonInstanceGenerator {
             result.put(property.getName(), "string");
         } else {
             String actualType = type.getTypeName();
-            BmmClass classDefinition1 = bmm.getClassDefinition(BmmDefinitions.typeNameToClassKey(actualType));
-            if(classDefinition1 != null && classDefinition1.isPrimitiveType()) {
-                if (aomProfile.getRmPrimitiveTypeEquivalences().get(type.getTypeName()) != null) {
-                    actualType = aomProfile.getRmPrimitiveTypeEquivalences().get(type.getTypeName());
-                }
-                result.put(property.getName(), generatePrimitiveTypeExample(actualType));
-            } else {
-                result.put(property.getName(), constructExampleType(actualType));
+            result.put(property.getName(), createExampleFromTypeName(actualType));
+        }
+    }
+
+    private Object createExampleFromTypeName(String typeName) {
+        String actualType = getConcreteTypeName(typeName);
+        BmmClass classDefinition1 = bmm.getClassDefinition(BmmDefinitions.typeNameToClassKey(actualType));
+        if(classDefinition1 != null && classDefinition1.isPrimitiveType()) {
+            if (aomProfile.getRmPrimitiveTypeEquivalences().get(actualType) != null) {
+                actualType = aomProfile.getRmPrimitiveTypeEquivalences().get(actualType);
             }
+            return generatePrimitiveTypeExample(actualType);
+        } else {
+            return constructExampleType(actualType);
         }
     }
 
@@ -382,6 +403,16 @@ public  class ExampleJsonInstanceGenerator {
 
 
     ///// BEGIN OPENEHR RM SPECIFIC CODE TO BE EXTRACTED /////
+
+    private String getConcreteTypeOverride(String rmTypeName) {
+        if(rmTypeName.equalsIgnoreCase("ITEM")) {
+            return "ELEMENT";
+        } else if (rmTypeName.equalsIgnoreCase("EVENT")) {
+            return "POINT_EVENT";
+        }
+
+        return null;
+    }
 
     /**
      * Generate a custom JSON mapping if required by the given CPrimitiveObject at the given place in the tree.
