@@ -5,11 +5,7 @@ import com.nedap.archie.rm.datavalues.encapsulated.DvParsable;
 import com.nedap.archie.rm.datavalues.quantity.datetime.DvDateTime;
 
 import javax.annotation.Nullable;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +29,6 @@ public class Instruction extends CareEntry {
     @XmlElement(name = "wf_definition")
     private DvParsable wfDefinition;
     @Nullable
-    @XmlElement(name = "activities")
     private List<Activity> activities = new ArrayList<>();
 
     public DvText getNarrative() {
