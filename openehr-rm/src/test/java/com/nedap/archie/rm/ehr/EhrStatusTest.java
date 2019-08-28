@@ -1,12 +1,15 @@
 package com.nedap.archie.rm.ehr;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nedap.archie.json.JacksonUtil;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class EhrStatusTest {
 
@@ -14,18 +17,13 @@ public class EhrStatusTest {
     public void testBooleanSerialization() throws IOException {
         EhrStatus status = new EhrStatus();
         StringWriter stringWriter = new StringWriter();
-        JacksonUtil.getObjectMapper().writeValue(stringWriter, status);
-        String expected = "{\n" +
-                "  \"@type\" : \"EHR_STATUS\",\n" +
-                "  \"links\" : [ ],\n" +
-                "  \"path\" : \"/\",\n" +
-                "  \"is_modifiable\" : false,\n" +
-                "  \"is_queryable\" : false\n" +
-                "}";
-        assertEquals(removeWhiteSpaces(expected), removeWhiteSpaces(stringWriter.toString()));
-    }
+        ObjectMapper objectMapper = JacksonUtil.getObjectMapper();
+        objectMapper.writeValue(stringWriter, status);
 
-    private String removeWhiteSpaces(String input) {
-        return input.replaceAll("\\s+", "");
+        Map actual = objectMapper.readValue(stringWriter.toString(), Map.class);
+        assertTrue(actual.containsKey("is_queryable"));
+        assertFalse(actual.containsKey("queryable"));
+        assertTrue(actual.containsKey("is_modifiable"));
+        assertFalse(actual.containsKey("modifiable"));
     }
 }
