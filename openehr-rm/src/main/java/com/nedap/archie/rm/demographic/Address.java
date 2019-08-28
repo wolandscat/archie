@@ -1,11 +1,14 @@
 package com.nedap.archie.rm.demographic;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nedap.archie.rm.archetyped.Locatable;
 import com.nedap.archie.rm.datastructures.ItemStructure;
 import com.nedap.archie.rm.datavalues.DvText;
+import com.nedap.archie.rminfo.RMPropertyIgnore;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -16,6 +19,8 @@ import javax.xml.bind.annotation.XmlType;
 public class Address extends Locatable {
     private ItemStructure details;
 
+    @JsonIgnore
+    @XmlTransient
     public DvText getType() {
         return getName();
     }

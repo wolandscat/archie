@@ -125,7 +125,7 @@ public  class ExampleJsonInstanceGenerator {
                         Map<String, Object> next = new LinkedHashMap<>();
 
                         String concreteTypeName = getConcreteTypeName(child.getRmTypeName());
-                        BmmClass childClassDefinition = bmm.getClassDefinition(BmmDefinitions.typeNameToClassKey(child.getRmTypeName()));
+                        BmmClass childClassDefinition = bmm.getClassDefinition(BmmDefinitions.typeNameToClassKey(concreteTypeName));
                         next.put(typePropertyName, concreteTypeName);
                         addAdditionalPropertiesAtBegin(classDefinition, next, child);
                         addRequiredPropertiesFromBmm(next, childClassDefinition);
@@ -252,7 +252,7 @@ public  class ExampleJsonInstanceGenerator {
             case "duration":
                 return "PT10M";
             case "boolean":
-                return "true";
+                return true;
         }
         return "unknown primitive type " + typeName;
     }

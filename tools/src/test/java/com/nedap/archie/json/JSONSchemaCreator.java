@@ -152,7 +152,8 @@ public class JSONSchemaCreator {
                 atLeastOneProperty = true;
             }
         }
-        properties.add("_type", jsonFactory.createObjectBuilder().add("const", typeName));
+
+        properties.add("_type", jsonFactory.createObjectBuilder().add("type", "string").add("pattern", "^" + typeName + "(<.*>)?$"));
         JsonObjectBuilder definition = jsonFactory.createObjectBuilder()
                 .add("type", "object")
                 .add("required", required)
@@ -268,7 +269,8 @@ public class JSONSchemaCreator {
 
         return jsonFactory.createObjectBuilder()
                 .add("_type", jsonFactory.createObjectBuilder()
-                    .add("const", rootType)
+                    .add("type", "string").add("pattern", "^" + rootType + "(<.*>)?$")
+                    //.add("const", rootType)
                 );
     }
 

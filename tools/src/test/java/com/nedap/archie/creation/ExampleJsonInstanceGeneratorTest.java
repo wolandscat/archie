@@ -145,7 +145,8 @@ public class ExampleJsonInstanceGeneratorTest {
         ObjectMapper archieObjectMapper = getArchieObjectMapper();
 
         for(ValidationResult result:repository.getAllValidationResults()) {
-            if(result.passes() ) { //&& result.getArchetypeId().contains("waist")) {
+            if(result.passes()
+                ) {
                 String json = "";
                 try {
                     Flattener flattener = new Flattener(repository, BuiltinReferenceModels.getMetaModels()).createOperationalTemplate(true);
@@ -169,11 +170,13 @@ public class ExampleJsonInstanceGeneratorTest {
                     String serializedAgain = archieObjectMapper.writeValueAsString(parsed);
                     secondJsonSchemaValidationRan++;
                     List<Problem> secondProblems = secondValidator.validate(template.getDefinition().getRmTypeName(), serializedAgain);
-                    logger.error("second validation ok for {}", result.getArchetypeId());
+
                     if(secondProblems.size() > 0) {
                         logger.error("second validation failed for {}", result.getArchetypeId());
                         logger.error(Joiner.on("\n").join(secondProblems));
                         reserializedJsonSchemaValidationFailed++;
+                    } else {
+                        logger.error("second validation ok for {}", result.getArchetypeId());
                     }
 
                 } catch (Exception e) {

@@ -1,14 +1,17 @@
 package com.nedap.archie.rm.demographic;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nedap.archie.rm.archetyped.Locatable;
 import com.nedap.archie.rm.datastructures.ItemStructure;
 import com.nedap.archie.rm.datavalues.DvText;
 import com.nedap.archie.rm.support.identification.LocatableRef;
+import com.nedap.archie.rminfo.RMPropertyIgnore;
 
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,6 +109,8 @@ public abstract class Party extends Locatable {
     /**
      * Type of party, such as PERSON, ORGANISATION, etc. Role name, e.g. general practitioner , nurse , private citizen . Taken from inherited name attribute.
      */
+    @JsonIgnore
+    @XmlTransient
     public DvText getType() {
         return getName();
     }

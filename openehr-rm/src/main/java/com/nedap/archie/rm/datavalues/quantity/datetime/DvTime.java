@@ -1,5 +1,6 @@
 package com.nedap.archie.rm.datavalues.quantity.datetime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.nedap.archie.json.TimeDeserializer;
 import com.nedap.archie.rm.datavalues.SingleValuedDataValue;
@@ -7,6 +8,7 @@ import com.nedap.archie.xml.adapters.TimeXmlAdapter;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.LocalTime;
@@ -46,6 +48,8 @@ public class DvTime extends DvTemporal<Double> implements SingleValuedDataValue<
     }
 
     @Override
+    @JsonIgnore
+    @XmlTransient
     public Double getMagnitude() {
         return value == null ? null : (double) LocalTime.from(value).toSecondOfDay();
     }
