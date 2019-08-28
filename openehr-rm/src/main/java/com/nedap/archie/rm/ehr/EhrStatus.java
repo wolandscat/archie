@@ -23,11 +23,9 @@ public class EhrStatus extends Locatable {
     private PartySelf subject;
     @XmlElement(name="is_queryable")
     @RMProperty("is_queryable")
-    @JsonProperty(value = "is_queryable")
     private boolean isQueryable;
     @XmlElement(name="is_modifiable")
     @RMProperty("is_modifiable")
-    @JsonProperty(value = "is_modifiable")
     private boolean isModifiable;
     @Nullable
     @XmlElement(name="other_details")
@@ -41,6 +39,7 @@ public class EhrStatus extends Locatable {
         this.subject = subject;
     }
 
+    @JsonProperty(value = "is_queryable")
     public boolean isQueryable() {
         return isQueryable;
     }
@@ -49,6 +48,7 @@ public class EhrStatus extends Locatable {
         isQueryable = queryable;
     }
 
+    @JsonProperty(value = "is_modifiable")
     public boolean isModifiable() {
         return isModifiable;
     }
