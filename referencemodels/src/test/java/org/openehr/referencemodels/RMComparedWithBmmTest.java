@@ -86,8 +86,6 @@ public class RMComparedWithBmmTest {
         knownDifferences.add(new ModelDifference(ModelDifferenceType.ANCESTOR_DIFFERENCE, "", "DV_ORDERED", null));
         //same for interval
         knownDifferences.add(new ModelDifference(ModelDifferenceType.ANCESTOR_DIFFERENCE, "", "DV_INTERVAL", null));
-        //property in quantity is a fake field, not really in model, but mandatory in BMM. NOT going to fix that!
-        knownDifferences.add(new ModelDifference(ModelDifferenceType.EXISTENCE_DIFFERENCE, "", "DV_QUANTITY", "property"));
 
         //TODO: not sure, looks the same to me
         knownDifferences.add(new ModelDifference(ModelDifferenceType.EXISTENCE_DIFFERENCE, "", "EHR", "contributions"));
