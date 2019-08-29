@@ -22,7 +22,6 @@ public class PartyIdentity extends Locatable {
 
     @JsonIgnore
     @XmlTransient
-    @RMPropertyIgnore
     public DvText getPurpose() {
         return getName();
     }
