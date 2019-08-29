@@ -1,4 +1,4 @@
-package com.nedap.archie.rm;
+package com.nedap.archie.rm.composition;
 
 import com.nedap.archie.rm.archetyped.Pathable;
 import com.nedap.archie.rm.datavalues.DvCodedText;

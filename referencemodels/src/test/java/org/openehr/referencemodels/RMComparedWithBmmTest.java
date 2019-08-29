@@ -51,7 +51,6 @@ public class RMComparedWithBmmTest {
         BmmRepository bmmRepository = BuiltinReferenceModels.getBmmRepository();
         BmmModel model = bmmRepository.getModel("openehr_rm_1.0.4").getModel();
 
-
         List<ModelDifference> compared = new BmmComparison(extraParams, typeMap, typeNamesOverride).compare(model, ArchieRMInfoLookup.getInstance());
 
         compared.sort(Comparator.comparing((a) -> a.getClassName() + "." + a.getType().toString()));
