@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 /**
  * TODO: templateId should be the class TemplateId. but that's not really well defined in the specs, so for now
@@ -78,17 +79,14 @@ public class Archetyped extends RMObject {
 
         Archetyped that = (Archetyped) o;
 
-        if (archetypeId != null ? !archetypeId.equals(that.archetypeId) : that.archetypeId != null) return false;
-        if (templateId != null ? !templateId.equals(that.templateId) : that.templateId != null) return false;
-        return rmVersion != null ? rmVersion.equals(that.rmVersion) : that.rmVersion == null;
+        return Objects.equals(archetypeId, that.archetypeId) &&
+                Objects.equals(templateId, that.templateId) &&
+                Objects.equals(rmVersion, that.rmVersion);
 
     }
 
     @Override
     public int hashCode() {
-        int result = archetypeId != null ? archetypeId.hashCode() : 0;
-        result = 31 * result + (templateId != null ? templateId.hashCode() : 0);
-        result = 31 * result + (rmVersion != null ? rmVersion.hashCode() : 0);
-        return result;
+        return Objects.hash(archetypeId, templateId, rmVersion);
     }
 }

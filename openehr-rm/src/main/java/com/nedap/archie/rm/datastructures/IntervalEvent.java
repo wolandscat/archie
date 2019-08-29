@@ -16,6 +16,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -76,21 +77,14 @@ public class IntervalEvent<Type extends ItemStructure> extends Event<Type> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         IntervalEvent<?> that = (IntervalEvent<?>) o;
-
-        if (width != null ? !width.equals(that.width) : that.width != null) return false;
-        if (sampleCount != null ? !sampleCount.equals(that.sampleCount) : that.sampleCount != null) return false;
-        return mathFunction != null ? mathFunction.equals(that.mathFunction) : that.mathFunction == null;
-
+        return Objects.equals(width, that.width) &&
+                Objects.equals(sampleCount, that.sampleCount) &&
+                Objects.equals(mathFunction, that.mathFunction);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (width != null ? width.hashCode() : 0);
-        result = 31 * result + (sampleCount != null ? sampleCount.hashCode() : 0);
-        result = 31 * result + (mathFunction != null ? mathFunction.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), width, sampleCount, mathFunction);
     }
 }

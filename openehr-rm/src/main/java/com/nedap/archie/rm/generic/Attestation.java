@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 08/07/16.
@@ -94,25 +95,16 @@ public class Attestation extends AuditDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         Attestation that = (Attestation) o;
-
-        if (isPending != that.isPending) return false;
-        if (attestedView != null ? !attestedView.equals(that.attestedView) : that.attestedView != null) return false;
-        if (proof != null ? !proof.equals(that.proof) : that.proof != null) return false;
-        if (items != null ? !items.equals(that.items) : that.items != null) return false;
-        return reason != null ? reason.equals(that.reason) : that.reason == null;
-
+        return isPending == that.isPending &&
+                Objects.equals(attestedView, that.attestedView) &&
+                Objects.equals(proof, that.proof) &&
+                Objects.equals(items, that.items) &&
+                Objects.equals(reason, that.reason);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (attestedView != null ? attestedView.hashCode() : 0);
-        result = 31 * result + (proof != null ? proof.hashCode() : 0);
-        result = 31 * result + (items != null ? items.hashCode() : 0);
-        result = 31 * result + (reason != null ? reason.hashCode() : 0);
-        result = 31 * result + (isPending ? 1 : 0);
-        return result;
+        return Objects.hash(super.hashCode(), attestedView, proof, items, reason, isPending);
     }
 }

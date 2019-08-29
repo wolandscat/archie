@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 08/07/16.
@@ -48,17 +49,12 @@ public class EhrAccess extends Locatable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         EhrAccess ehrAccess = (EhrAccess) o;
-
-        return settings != null ? settings.equals(ehrAccess.settings) : ehrAccess.settings == null;
-
+        return Objects.equals(settings, ehrAccess.settings);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (settings != null ? settings.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), settings);
     }
 }

@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -42,15 +43,12 @@ public abstract class PartyProxy extends RMObject {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         PartyProxy that = (PartyProxy) o;
-
-        return externalRef != null ? externalRef.equals(that.externalRef) : that.externalRef == null;
-
+        return Objects.equals(externalRef, that.externalRef);
     }
 
     @Override
     public int hashCode() {
-        return externalRef != null ? externalRef.hashCode() : 0;
+        return Objects.hash(externalRef);
     }
 }

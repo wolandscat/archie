@@ -20,6 +20,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name="EHR_STATUS")
@@ -97,23 +98,15 @@ public class EhrStatus extends Locatable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         EhrStatus ehrStatus = (EhrStatus) o;
-
-        if (isQueryable != ehrStatus.isQueryable) return false;
-        if (isModifiable != ehrStatus.isModifiable) return false;
-        if (subject != null ? !subject.equals(ehrStatus.subject) : ehrStatus.subject != null) return false;
-        return otherDetails != null ? otherDetails.equals(ehrStatus.otherDetails) : ehrStatus.otherDetails == null;
-
+        return isQueryable == ehrStatus.isQueryable &&
+                isModifiable == ehrStatus.isModifiable &&
+                Objects.equals(subject, ehrStatus.subject) &&
+                Objects.equals(otherDetails, ehrStatus.otherDetails);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (subject != null ? subject.hashCode() : 0);
-        result = 31 * result + (isQueryable ? 1 : 0);
-        result = 31 * result + (isModifiable ? 1 : 0);
-        result = 31 * result + (otherDetails != null ? otherDetails.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), subject, isQueryable, isModifiable, otherDetails);
     }
 }

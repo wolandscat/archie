@@ -16,6 +16,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 03/11/15.
@@ -150,27 +151,17 @@ public class Composition extends Locatable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         Composition that = (Composition) o;
-
-        if (language != null ? !language.equals(that.language) : that.language != null) return false;
-        if (territory != null ? !territory.equals(that.territory) : that.territory != null) return false;
-        if (category != null ? !category.equals(that.category) : that.category != null) return false;
-        if (composer != null ? !composer.equals(that.composer) : that.composer != null) return false;
-        if (context != null ? !context.equals(that.context) : that.context != null) return false;
-        return content != null ? content.equals(that.content) : that.content == null;
-
+        return Objects.equals(language, that.language) &&
+                Objects.equals(territory, that.territory) &&
+                Objects.equals(category, that.category) &&
+                Objects.equals(composer, that.composer) &&
+                Objects.equals(context, that.context) &&
+                Objects.equals(content, that.content);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (language != null ? language.hashCode() : 0);
-        result = 31 * result + (territory != null ? territory.hashCode() : 0);
-        result = 31 * result + (category != null ? category.hashCode() : 0);
-        result = 31 * result + (composer != null ? composer.hashCode() : 0);
-        result = 31 * result + (context != null ? context.hashCode() : 0);
-        result = 31 * result + (content != null ? content.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), language, territory, category, composer, context, content);
     }
 }

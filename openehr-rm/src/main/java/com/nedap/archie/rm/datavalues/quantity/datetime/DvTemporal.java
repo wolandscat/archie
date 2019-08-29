@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 01/03/16.
@@ -50,14 +51,12 @@ public abstract class DvTemporal<MagnitudeType extends Comparable> extends DvAbs
 
         DvTemporal<?> that = (DvTemporal<?>) o;
 
-        return accuracy != null ? accuracy.equals(that.accuracy) : that.accuracy == null;
+        return Objects.equals(accuracy, that.accuracy);
 
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (accuracy != null ? accuracy.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), accuracy);
     }
 }

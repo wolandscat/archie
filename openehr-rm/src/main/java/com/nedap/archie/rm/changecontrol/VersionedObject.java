@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 /**
  * Version control object. To use this other than in data exchange purposed, you will need to create a subclass
@@ -65,20 +66,14 @@ public class VersionedObject<Type> extends RMObject {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         VersionedObject<?> that = (VersionedObject<?>) o;
-
-        if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
-        if (ownerId != null ? !ownerId.equals(that.ownerId) : that.ownerId != null) return false;
-        return timeCreated != null ? timeCreated.equals(that.timeCreated) : that.timeCreated == null;
-
+        return Objects.equals(uid, that.uid) &&
+                Objects.equals(ownerId, that.ownerId) &&
+                Objects.equals(timeCreated, that.timeCreated);
     }
 
     @Override
     public int hashCode() {
-        int result = uid != null ? uid.hashCode() : 0;
-        result = 31 * result + (ownerId != null ? ownerId.hashCode() : 0);
-        result = 31 * result + (timeCreated != null ? timeCreated.hashCode() : 0);
-        return result;
+        return Objects.hash(uid, ownerId, timeCreated);
     }
 }

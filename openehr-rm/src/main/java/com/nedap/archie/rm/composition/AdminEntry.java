@@ -18,6 +18,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -50,17 +51,12 @@ public class AdminEntry extends Entry {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         AdminEntry that = (AdminEntry) o;
-
-        return data != null ? data.equals(that.data) : that.data == null;
-
+        return Objects.equals(data, that.data);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (data != null ? data.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), data);
     }
 }

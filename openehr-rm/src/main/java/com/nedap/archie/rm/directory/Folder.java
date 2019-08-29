@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 21/06/16.
@@ -93,22 +94,14 @@ public class Folder extends Locatable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         Folder folder = (Folder) o;
-
-        return
-            (items != null ? items.equals(folder.items) : folder.items == null) &&
-                (folders != null ? folders.equals(folder.folders) : folder.folders == null) &&
-                    (details != null ? details.equals(folder.details) : folder.details == null);
-
+        return Objects.equals(items, folder.items) &&
+                Objects.equals(folders, folder.folders) &&
+                Objects.equals(details, folder.details);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (items != null ? items.hashCode() : 0);
-        result = 31 * result + (folders != null ? folders.hashCode() : 0);
-        result = 31 * result + (details != null ? details.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), items, folders, details);
     }
 }

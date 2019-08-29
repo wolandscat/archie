@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -96,21 +97,15 @@ public class DvQuantity extends DvAmount<Double> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         DvQuantity that = (DvQuantity) o;
-
-        if (precision != null ? !precision.equals(that.precision) : that.precision != null) return false;
-        if (units != null ? !units.equals(that.units) : that.units != null) return false;
-        return magnitude != null ? magnitude.equals(that.magnitude) : that.magnitude == null;
-
+        return Objects.equals(precision, that.precision) &&
+                Objects.equals(units, that.units) &&
+                Objects.equals(magnitude, that.magnitude) &&
+                Objects.equals(property, that.property);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (precision != null ? precision.hashCode() : 0);
-        result = 31 * result + (units != null ? units.hashCode() : 0);
-        result = 31 * result + (magnitude != null ? magnitude.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), precision, units, magnitude, property);
     }
 }

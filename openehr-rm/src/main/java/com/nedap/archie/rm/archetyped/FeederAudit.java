@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 08/07/16.
@@ -93,25 +94,16 @@ public class FeederAudit extends RMObject {
 
         FeederAudit that = (FeederAudit) o;
 
-        if (originatingSystemItemIds != null ? !originatingSystemItemIds.equals(that.originatingSystemItemIds) : that.originatingSystemItemIds != null)
-            return false;
-        if (feederSystemItemIds != null ? !feederSystemItemIds.equals(that.feederSystemItemIds) : that.feederSystemItemIds != null)
-            return false;
-        if (originalContent != null ? !originalContent.equals(that.originalContent) : that.originalContent != null)
-            return false;
-        if (originatingSystemAudit != null ? !originatingSystemAudit.equals(that.originatingSystemAudit) : that.originatingSystemAudit != null)
-            return false;
-        return feederSystemAudit != null ? feederSystemAudit.equals(that.feederSystemAudit) : that.feederSystemAudit == null;
+        return Objects.equals(originatingSystemItemIds, that.originatingSystemItemIds) &&
+                Objects.equals(feederSystemItemIds, that.feederSystemItemIds) &&
+                Objects.equals(originalContent, that.originalContent) &&
+                Objects.equals(originatingSystemAudit, that.originatingSystemAudit) &&
+                Objects.equals(feederSystemAudit, that.feederSystemAudit);
 
     }
 
     @Override
     public int hashCode() {
-        int result = originatingSystemItemIds != null ? originatingSystemItemIds.hashCode() : 0;
-        result = 31 * result + (feederSystemItemIds != null ? feederSystemItemIds.hashCode() : 0);
-        result = 31 * result + (originalContent != null ? originalContent.hashCode() : 0);
-        result = 31 * result + (originatingSystemAudit != null ? originatingSystemAudit.hashCode() : 0);
-        result = 31 * result + (feederSystemAudit != null ? feederSystemAudit.hashCode() : 0);
-        return result;
+        return Objects.hash(originatingSystemItemIds, feederSystemItemIds, originalContent, originatingSystemAudit, feederSystemAudit);
     }
 }

@@ -6,6 +6,7 @@ import com.nedap.archie.rm.datavalues.quantity.datetime.DvDuration;
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.*;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -60,19 +61,13 @@ public abstract class DvAmount<MagnitudeType extends Comparable> extends DvQuant
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         DvAmount<?> dvAmount = (DvAmount<?>) o;
-
-        if (accuracy != null ? !accuracy.equals(dvAmount.accuracy) : dvAmount.accuracy != null) return false;
-        return accuracyIsPercent != null ? accuracyIsPercent.equals(dvAmount.accuracyIsPercent) : dvAmount.accuracyIsPercent == null;
-
+        return Objects.equals(accuracy, dvAmount.accuracy) &&
+                Objects.equals(accuracyIsPercent, dvAmount.accuracyIsPercent);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (accuracy != null ? accuracy.hashCode() : 0);
-        result = 31 * result + (accuracyIsPercent != null ? accuracyIsPercent.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), accuracy, accuracyIsPercent);
     }
 }

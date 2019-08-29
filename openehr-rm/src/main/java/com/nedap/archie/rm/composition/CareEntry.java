@@ -18,6 +18,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -68,19 +69,13 @@ public abstract class CareEntry extends Entry {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         CareEntry careEntry = (CareEntry) o;
-
-        if (protocol != null ? !protocol.equals(careEntry.protocol) : careEntry.protocol != null) return false;
-        return guidelineId != null ? guidelineId.equals(careEntry.guidelineId) : careEntry.guidelineId == null;
-
+        return Objects.equals(protocol, careEntry.protocol) &&
+                Objects.equals(guidelineId, careEntry.guidelineId);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (protocol != null ? protocol.hashCode() : 0);
-        result = 31 * result + (guidelineId != null ? guidelineId.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), protocol, guidelineId);
     }
 }

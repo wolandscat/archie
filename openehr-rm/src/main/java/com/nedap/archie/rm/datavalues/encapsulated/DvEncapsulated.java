@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -51,18 +52,13 @@ public abstract class DvEncapsulated extends DataValue {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         DvEncapsulated that = (DvEncapsulated) o;
-
-        if (charset != null ? !charset.equals(that.charset) : that.charset != null) return false;
-        return language != null ? language.equals(that.language) : that.language == null;
-
+        return Objects.equals(charset, that.charset) &&
+                Objects.equals(language, that.language);
     }
 
     @Override
     public int hashCode() {
-        int result = charset != null ? charset.hashCode() : 0;
-        result = 31 * result + (language != null ? language.hashCode() : 0);
-        return result;
+        return Objects.hash(charset, language);
     }
 }

@@ -12,6 +12,7 @@ import com.nedap.archie.rm.support.identification.UIDBasedId;
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 21/06/16.
@@ -21,6 +22,7 @@ import java.util.List;
 })
 
 public class GenericEntry extends ContentItem {
+
     private ItemTree data;
 
     public GenericEntry() {
@@ -50,17 +52,12 @@ public class GenericEntry extends ContentItem {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         GenericEntry that = (GenericEntry) o;
-
-        return data != null ? data.equals(that.data) : that.data == null;
-
+        return Objects.equals(data, that.data);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (data != null ? data.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), data);
     }
 }

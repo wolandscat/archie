@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 08/07/16.
@@ -130,27 +131,18 @@ public class OriginalVersion<Type> extends Version<Type> {
 
         OriginalVersion<?> that = (OriginalVersion<?>) o;
 
-        if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
-        if (precedingVersionUid != null ? !precedingVersionUid.equals(that.precedingVersionUid) : that.precedingVersionUid != null)
-            return false;
-        if (otherInputVersionUids != null ? !otherInputVersionUids.equals(that.otherInputVersionUids) : that.otherInputVersionUids != null)
-            return false;
-        if (lifecycleState != null ? !lifecycleState.equals(that.lifecycleState) : that.lifecycleState != null)
-            return false;
-        if (attestations != null ? !attestations.equals(that.attestations) : that.attestations != null) return false;
-        return data != null ? data.equals(that.data) : that.data == null;
+        return Objects.equals(uid, that.uid) &&
+                Objects.equals(precedingVersionUid, that.precedingVersionUid) &&
+                Objects.equals(otherInputVersionUids, that.otherInputVersionUids) &&
+                Objects.equals(otherInputVersionUids, that.otherInputVersionUids) &&
+                Objects.equals(lifecycleState, that.lifecycleState) &&
+                Objects.equals(attestations, that.attestations) &&
+                Objects.equals(data, that.data);
 
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (uid != null ? uid.hashCode() : 0);
-        result = 31 * result + (precedingVersionUid != null ? precedingVersionUid.hashCode() : 0);
-        result = 31 * result + (otherInputVersionUids != null ? otherInputVersionUids.hashCode() : 0);
-        result = 31 * result + (lifecycleState != null ? lifecycleState.hashCode() : 0);
-        result = 31 * result + (attestations != null ? attestations.hashCode() : 0);
-        result = 31 * result + (data != null ? data.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), uid, precedingVersionUid, otherInputVersionUids, lifecycleState, attestations, data);
     }
 }

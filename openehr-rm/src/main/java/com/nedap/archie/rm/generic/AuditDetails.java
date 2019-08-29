@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 08/07/16.
@@ -93,25 +94,16 @@ public class AuditDetails extends RMObject {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         AuditDetails that = (AuditDetails) o;
-
-        if (systemId != null ? !systemId.equals(that.systemId) : that.systemId != null) return false;
-        if (timeCommitted != null ? !timeCommitted.equals(that.timeCommitted) : that.timeCommitted != null)
-            return false;
-        if (changeType != null ? !changeType.equals(that.changeType) : that.changeType != null) return false;
-        if (description != null ? !description.equals(that.description) : that.description != null) return false;
-        return committer != null ? committer.equals(that.committer) : that.committer == null;
-
+        return Objects.equals(systemId, that.systemId) &&
+                Objects.equals(timeCommitted, that.timeCommitted) &&
+                Objects.equals(changeType, that.changeType) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(committer, that.committer);
     }
 
     @Override
     public int hashCode() {
-        int result = systemId != null ? systemId.hashCode() : 0;
-        result = 31 * result + (timeCommitted != null ? timeCommitted.hashCode() : 0);
-        result = 31 * result + (changeType != null ? changeType.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (committer != null ? committer.hashCode() : 0);
-        return result;
+        return Objects.hash(systemId, timeCommitted, changeType, description, committer);
     }
 }

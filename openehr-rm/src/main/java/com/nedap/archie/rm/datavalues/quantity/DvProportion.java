@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * TODO: This does not implement PROPORTION KIND, because multiple inheritance - won't work.
@@ -102,23 +103,15 @@ public class DvProportion extends DvAmount<Double> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         DvProportion that = (DvProportion) o;
-
-        if (numerator != null ? !numerator.equals(that.numerator) : that.numerator != null) return false;
-        if (denominator != null ? !denominator.equals(that.denominator) : that.denominator != null) return false;
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
-        return precision != null ? precision.equals(that.precision) : that.precision == null;
-
+        return Objects.equals(numerator, that.numerator) &&
+                Objects.equals(denominator, that.denominator) &&
+                Objects.equals(type, that.type) &&
+                Objects.equals(precision, that.precision);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (numerator != null ? numerator.hashCode() : 0);
-        result = 31 * result + (denominator != null ? denominator.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        result = 31 * result + (precision != null ? precision.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), numerator, denominator, type, precision);
     }
 }

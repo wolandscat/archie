@@ -7,6 +7,7 @@ import com.nedap.archie.rm.support.identification.ObjectVersionId;
 
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 08/07/16.
@@ -66,14 +67,12 @@ public class ImportedVersion<T> extends Version<T> {
 
         ImportedVersion<?> that = (ImportedVersion<?>) o;
 
-        return item != null ? item.equals(that.item) : that.item == null;
+        return Objects.equals(item, that.item);
 
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (item != null ? item.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), item);
     }
 }

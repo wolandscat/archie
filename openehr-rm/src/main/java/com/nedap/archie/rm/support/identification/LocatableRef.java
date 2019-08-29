@@ -3,6 +3,7 @@ package com.nedap.archie.rm.support.identification;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 /**
  * TODO: id should be redefined as UID_BASED_ID. Not sure how
@@ -37,17 +38,12 @@ public class LocatableRef extends ObjectRef<UIDBasedId> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         LocatableRef that = (LocatableRef) o;
-
-        return path != null ? path.equals(that.path) : that.path == null;
-
+        return Objects.equals(path, that.path);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (path != null ? path.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), path);
     }
 }

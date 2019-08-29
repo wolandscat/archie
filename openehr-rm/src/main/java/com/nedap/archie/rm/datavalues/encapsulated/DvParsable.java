@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -59,19 +60,13 @@ public class DvParsable extends DvEncapsulated implements SingleValuedDataValue<
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         DvParsable that = (DvParsable) o;
-
-        if (value != null ? !value.equals(that.value) : that.value != null) return false;
-        return formalism != null ? formalism.equals(that.formalism) : that.formalism == null;
-
+        return Objects.equals(value, that.value) &&
+                Objects.equals(formalism, that.formalism);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (value != null ? value.hashCode() : 0);
-        result = 31 * result + (formalism != null ? formalism.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), value, formalism);
     }
 }

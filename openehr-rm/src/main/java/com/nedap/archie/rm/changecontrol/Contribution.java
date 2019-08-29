@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 08/07/16.
@@ -66,17 +67,14 @@ public class Contribution extends RMObject {
 
         Contribution that = (Contribution) o;
 
-        if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
-        if (versions != null ? !versions.equals(that.versions) : that.versions != null) return false;
-        return audit != null ? audit.equals(that.audit) : that.audit == null;
+        return Objects.equals(uid, that.uid) &&
+                Objects.equals(versions, that.versions) &&
+                Objects.equals(audit, that.audit);
 
     }
 
     @Override
     public int hashCode() {
-        int result = uid != null ? uid.hashCode() : 0;
-        result = 31 * result + (versions != null ? versions.hashCode() : 0);
-        result = 31 * result + (audit != null ? audit.hashCode() : 0);
-        return result;
+        return Objects.hash(uid, versions, audit);
     }
 }

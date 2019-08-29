@@ -17,6 +17,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAccessor;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * TODO: implement java.time.Temporal for this object?
@@ -94,14 +95,12 @@ public class DvTime extends DvTemporal<Double> implements SingleValuedDataValue<
 
         DvTime dvTime = (DvTime) o;
 
-        return value != null ? value.equals(dvTime.value) : dvTime.value == null;
+        return Objects.equals(value, dvTime.value);
 
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (value != null ? value.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), value);
     }
 }

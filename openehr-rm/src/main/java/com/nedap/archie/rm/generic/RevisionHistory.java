@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 08/07/16.
@@ -41,15 +42,12 @@ public class RevisionHistory extends RMObject {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         RevisionHistory that = (RevisionHistory) o;
-
-        return items != null ? items.equals(that.items) : that.items == null;
-
+        return Objects.equals(items, that.items);
     }
 
     @Override
     public int hashCode() {
-        return items != null ? items.hashCode() : 0;
+        return Objects.hash(items);
     }
 }

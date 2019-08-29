@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -137,36 +138,23 @@ public class DvMultimedia extends DvEncapsulated {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         DvMultimedia that = (DvMultimedia) o;
-
-        if (alternateText != null ? !alternateText.equals(that.alternateText) : that.alternateText != null)
-            return false;
-        if (uri != null ? !uri.equals(that.uri) : that.uri != null) return false;
-        if (!Arrays.equals(data, that.data)) return false;
-        if (mediaType != null ? !mediaType.equals(that.mediaType) : that.mediaType != null) return false;
-        if (compressionAlgorithm != null ? !compressionAlgorithm.equals(that.compressionAlgorithm) : that.compressionAlgorithm != null)
-            return false;
-        if (!Arrays.equals(integrityCheck, that.integrityCheck)) return false;
-        if (integrityCheckAlgorithm != null ? !integrityCheckAlgorithm.equals(that.integrityCheckAlgorithm) : that.integrityCheckAlgorithm != null)
-            return false;
-        if (size != null ? !size.equals(that.size) : that.size != null) return false;
-        return thumbnail != null ? thumbnail.equals(that.thumbnail) : that.thumbnail == null;
-
+        return Objects.equals(alternateText, that.alternateText) &&
+                Objects.equals(uri, that.uri) &&
+                Arrays.equals(data, that.data) &&
+                Objects.equals(mediaType, that.mediaType) &&
+                Objects.equals(compressionAlgorithm, that.compressionAlgorithm) &&
+                Arrays.equals(integrityCheck, that.integrityCheck) &&
+                Objects.equals(integrityCheckAlgorithm, that.integrityCheckAlgorithm) &&
+                Objects.equals(size, that.size) &&
+                Objects.equals(thumbnail, that.thumbnail);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (alternateText != null ? alternateText.hashCode() : 0);
-        result = 31 * result + (uri != null ? uri.hashCode() : 0);
+        int result = Objects.hash(super.hashCode(), alternateText, uri, mediaType, compressionAlgorithm, integrityCheckAlgorithm, size, thumbnail);
         result = 31 * result + Arrays.hashCode(data);
-        result = 31 * result + (mediaType != null ? mediaType.hashCode() : 0);
-        result = 31 * result + (compressionAlgorithm != null ? compressionAlgorithm.hashCode() : 0);
         result = 31 * result + Arrays.hashCode(integrityCheck);
-        result = 31 * result + (integrityCheckAlgorithm != null ? integrityCheckAlgorithm.hashCode() : 0);
-        result = 31 * result + (size != null ? size.hashCode() : 0);
-        result = 31 * result + (thumbnail != null ? thumbnail.hashCode() : 0);
         return result;
     }
 }

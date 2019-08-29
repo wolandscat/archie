@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -71,19 +72,13 @@ public class InstructionDetails extends Pathable {
 
         InstructionDetails that = (InstructionDetails) o;
 
-        if (instructionId != null ? !instructionId.equals(that.instructionId) : that.instructionId != null)
-            return false;
-        if (activityId != null ? !activityId.equals(that.activityId) : that.activityId != null) return false;
-        return wfDetails != null ? wfDetails.equals(that.wfDetails) : that.wfDetails == null;
-
+        return Objects.equals(instructionId, that.instructionId) &&
+                Objects.equals(activityId, that.activityId) &&
+                Objects.equals(wfDetails, that.wfDetails);
     }
 
     @Override
     public int hashCode() {
-        int result = 0;
-        result = 31 * result + (instructionId != null ? instructionId.hashCode() : 0);
-        result = 31 * result + (activityId != null ? activityId.hashCode() : 0);
-        result = 31 * result + (wfDetails != null ? wfDetails.hashCode() : 0);
-        return result;
+        return Objects.hash(instructionId, activityId, wfDetails);
     }
 }

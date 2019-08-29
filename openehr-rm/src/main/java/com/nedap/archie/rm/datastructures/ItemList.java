@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -24,6 +25,10 @@ import java.util.List;
 })
 @XmlRootElement(name = "item_list")
 public class ItemList extends ItemStructure<Element> {
+
+
+    @Nullable
+    private List<Element> items = new ArrayList<>();
 
     public ItemList() {
     }
@@ -37,9 +42,6 @@ public class ItemList extends ItemStructure<Element> {
         super(uid, archetypeNodeId, name, archetypeDetails, feederAudit, links, parent, parentAttributeName);
         setItems(items);
     }
-
-    @Nullable
-    private List<Element> items = new ArrayList<>();
 
     public List<Element> getItems() {
         return items;
@@ -60,21 +62,12 @@ public class ItemList extends ItemStructure<Element> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         ItemList itemList = (ItemList) o;
-
-        if (items != null && itemList.items == null) return false;
-        if (items == null && itemList.items != null) return false;
-
-        // Compering elements ignoring order
-        return items.equals(itemList.items);
-
+        return Objects.equals(items, itemList.items);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (items != null ? items.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), items);
     }
 }

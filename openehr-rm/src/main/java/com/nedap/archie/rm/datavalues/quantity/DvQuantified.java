@@ -7,6 +7,7 @@ import com.nedap.archie.rm.datavalues.quantity.datetime.DvTemporal;
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.*;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -56,15 +57,13 @@ public abstract class DvQuantified<AccuracyType, MagnitudeType extends Comparabl
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
+        if (!super.equals(o)) return false;
         DvQuantified<?, ?> that = (DvQuantified<?, ?>) o;
-
-        return magnitudeStatus != null ? magnitudeStatus.equals(that.magnitudeStatus) : that.magnitudeStatus == null;
-
+        return Objects.equals(magnitudeStatus, that.magnitudeStatus);
     }
 
     @Override
     public int hashCode() {
-        return magnitudeStatus != null ? magnitudeStatus.hashCode() : 0;
+        return Objects.hash(super.hashCode(), magnitudeStatus);
     }
 }

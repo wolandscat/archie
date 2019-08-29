@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 08/07/16.
@@ -53,18 +54,13 @@ public class RevisionHistoryItem extends RMObject {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         RevisionHistoryItem that = (RevisionHistoryItem) o;
-
-        if (versionId != null ? !versionId.equals(that.versionId) : that.versionId != null) return false;
-        return audits != null ? audits.equals(that.audits) : that.audits == null;
-
+        return Objects.equals(versionId, that.versionId) &&
+                Objects.equals(audits, that.audits);
     }
 
     @Override
     public int hashCode() {
-        int result = versionId != null ? versionId.hashCode() : 0;
-        result = 31 * result + (audits != null ? audits.hashCode() : 0);
-        return result;
+        return Objects.hash(versionId, audits);
     }
 }

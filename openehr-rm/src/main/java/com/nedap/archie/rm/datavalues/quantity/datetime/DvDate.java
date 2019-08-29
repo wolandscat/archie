@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * TODO: implement java.time.Temporal for this
@@ -98,15 +99,11 @@ public class DvDate extends DvTemporal<Long> implements SingleValuedDataValue<Te
         if (!super.equals(o)) return false;
 
         DvDate dvDate = (DvDate) o;
-
-        return value != null ? value.equals(dvDate.value) : dvDate.value == null;
-
+        return Objects.equals(value, dvDate.value);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (value != null ? value.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), value);
     }
 }

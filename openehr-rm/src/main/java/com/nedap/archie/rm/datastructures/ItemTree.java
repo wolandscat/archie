@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -59,20 +60,12 @@ public class ItemTree extends ItemStructure<Item> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         ItemTree itemTree = (ItemTree) o;
-
-        if (items != null && itemTree.items == null) return false;
-        if (items == null && itemTree.items != null) return false;
-
-        return items.equals(items);
-
+        return Objects.equals(items, itemTree.items);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (items != null ? items.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), items);
     }
 }

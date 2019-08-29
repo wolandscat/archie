@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * added constraint is that this contains only one item
@@ -60,17 +61,12 @@ public class ItemSingle extends ItemStructure<Element> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         ItemSingle that = (ItemSingle) o;
-
-        return item != null ? item.equals(that.item) : that.item == null;
-
+        return Objects.equals(item, that.item);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (item != null ? item.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), item);
     }
 }

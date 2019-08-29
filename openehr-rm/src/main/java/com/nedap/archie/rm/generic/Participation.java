@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 08/07/16.
@@ -78,22 +79,15 @@ public class Participation extends RMObject {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Participation that = (Participation) o;
-
-        if (function != null ? !function.equals(that.function) : that.function != null) return false;
-        if (mode != null ? !mode.equals(that.mode) : that.mode != null) return false;
-        if (time != null ? !time.equals(that.time) : that.time != null) return false;
-        return performer != null ? performer.equals(that.performer) : that.performer == null;
-
+        return Objects.equals(function, that.function) &&
+                Objects.equals(mode, that.mode) &&
+                Objects.equals(time, that.time) &&
+                Objects.equals(performer, that.performer);
     }
 
     @Override
     public int hashCode() {
-        int result = function != null ? function.hashCode() : 0;
-        result = 31 * result + (mode != null ? mode.hashCode() : 0);
-        result = 31 * result + (time != null ? time.hashCode() : 0);
-        result = 31 * result + (performer != null ? performer.hashCode() : 0);
-        return result;
+        return Objects.hash(function, mode, time, performer);
     }
 }

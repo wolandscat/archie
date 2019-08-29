@@ -24,6 +24,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalQueries;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -106,14 +107,12 @@ public class DvDateTime extends DvTemporal<Long> implements SingleValuedDataValu
 
 		DvDateTime that = (DvDateTime) o;
 
-		return value != null ? value.equals(that.value) : that.value == null;
+		return Objects.equals(value, that.value);
 
 	}
 
 	@Override
 	public int hashCode() {
-		int result = super.hashCode();
-		result = 31 * result + (value != null ? value.hashCode() : 0);
-		return result;
+		return Objects.hash(super.hashCode(), value);
 	}
 }

@@ -13,6 +13,7 @@ import com.nedap.archie.rm.support.identification.UIDBasedId;
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.*;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -70,19 +71,13 @@ public class Element extends Item implements SingleValuedDataValue<DataValue> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         Element element = (Element) o;
-
-        if (value != null ? !value.equals(element.value) : element.value != null) return false;
-        return nullFlavour != null ? nullFlavour.equals(element.nullFlavour) : element.nullFlavour == null;
-
+        return Objects.equals(value, element.value) &&
+                Objects.equals(nullFlavour, element.nullFlavour);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (value != null ? value.hashCode() : 0);
-        result = 31 * result + (nullFlavour != null ? nullFlavour.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), value, nullFlavour);
     }
 }

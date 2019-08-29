@@ -19,6 +19,7 @@ import com.nedap.archie.rm.support.identification.UIDBasedId;
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.*;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -86,29 +87,21 @@ public class Action extends CareEntry {
         this.instructionDetails = instructionDetails;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         Action action = (Action) o;
-
-        if (time != null ? !time.equals(action.time) : action.time != null) return false;
-        if (description != null ? !description.equals(action.description) : action.description != null) return false;
-        if (ismTransition != null ? !ismTransition.equals(action.ismTransition) : action.ismTransition != null)
-            return false;
-        return instructionDetails != null ? instructionDetails.equals(action.instructionDetails) : action.instructionDetails == null;
-
+        return Objects.equals(time, action.time) &&
+                Objects.equals(description, action.description) &&
+                Objects.equals(ismTransition, action.ismTransition) &&
+                Objects.equals(instructionDetails, action.instructionDetails);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (time != null ? time.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (ismTransition != null ? ismTransition.hashCode() : 0);
-        result = 31 * result + (instructionDetails != null ? instructionDetails.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), time, description, ismTransition, instructionDetails);
     }
 }

@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -58,17 +59,12 @@ public class Section extends ContentItem {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         Section section = (Section) o;
-
-        return items != null ? items.equals(section.items) : section.items == null;
-
+        return Objects.equals(items, section.items);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (items != null ? items.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), items);
     }
 }

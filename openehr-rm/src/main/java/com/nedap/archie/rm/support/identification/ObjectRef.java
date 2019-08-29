@@ -5,6 +5,7 @@ import com.nedap.archie.rm.RMObject;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -16,6 +17,7 @@ import javax.xml.bind.annotation.XmlType;
         "type"
 })
 public class ObjectRef<Idtype extends ObjectId> extends RMObject {
+
     private String namespace;
     private String type;
     private Idtype id;
@@ -57,20 +59,14 @@ public class ObjectRef<Idtype extends ObjectId> extends RMObject {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         ObjectRef<?> objectRef = (ObjectRef<?>) o;
-
-        if (namespace != null ? !namespace.equals(objectRef.namespace) : objectRef.namespace != null) return false;
-        if (type != null ? !type.equals(objectRef.type) : objectRef.type != null) return false;
-        return id != null ? id.equals(objectRef.id) : objectRef.id == null;
-
+        return Objects.equals(namespace, objectRef.namespace) &&
+                Objects.equals(type, objectRef.type) &&
+                Objects.equals(id, objectRef.id);
     }
 
     @Override
     public int hashCode() {
-        int result = namespace != null ? namespace.hashCode() : 0;
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        result = 31 * result + (id != null ? id.hashCode() : 0);
-        return result;
+        return Objects.hash(namespace, type, id);
     }
 }

@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 08/07/16.
@@ -39,17 +40,12 @@ public class PartyRelated extends PartyIdentified {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         PartyRelated that = (PartyRelated) o;
-
-        return relationship != null ? relationship.equals(that.relationship) : that.relationship == null;
-
+        return Objects.equals(relationship, that.relationship);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (relationship != null ? relationship.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), relationship);
     }
 }

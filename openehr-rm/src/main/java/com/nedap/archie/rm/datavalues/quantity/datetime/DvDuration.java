@@ -18,6 +18,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.temporal.TemporalAmount;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * TODO: magnitude of duration is not defined properly
@@ -83,14 +84,12 @@ public class DvDuration extends DvAmount<Long> implements SingleValuedDataValue<
 
 		DvDuration that = (DvDuration) o;
 
-		return value != null ? value.equals(that.value) : that.value == null;
+		return Objects.equals(value, that.value);
 
 	}
 
 	@Override
 	public int hashCode() {
-		int result = super.hashCode();
-		result = 31 * result + (value != null ? value.hashCode() : 0);
-		return result;
+		return Objects.hash(super.hashCode(), value);
 	}
 }

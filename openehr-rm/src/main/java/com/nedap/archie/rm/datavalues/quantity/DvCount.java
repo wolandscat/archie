@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -43,17 +44,12 @@ public class DvCount extends DvAmount<Long> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         DvCount dvCount = (DvCount) o;
-
-        return magnitude != null ? magnitude.equals(dvCount.magnitude) : dvCount.magnitude == null;
-
+        return Objects.equals(magnitude, dvCount.magnitude);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (magnitude != null ? magnitude.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), magnitude);
     }
 }

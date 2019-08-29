@@ -19,6 +19,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 03/11/15.
@@ -69,19 +70,13 @@ public class Observation extends CareEntry {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         Observation that = (Observation) o;
-
-        if (state != null ? !state.equals(that.state) : that.state != null) return false;
-        return data != null ? data.equals(that.data) : that.data == null;
-
+        return Objects.equals(state, that.state) &&
+                Objects.equals(data, that.data);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (state != null ? state.hashCode() : 0);
-        result = 31 * result + (data != null ? data.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), state, data);
     }
 }

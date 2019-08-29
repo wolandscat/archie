@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -83,19 +84,13 @@ public class CodePhrase extends RMObject {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         CodePhrase that = (CodePhrase) o;
-
-        if (terminologyId != null ? !terminologyId.equals(that.terminologyId) : that.terminologyId != null)
-            return false;
-        return codeString != null ? codeString.equals(that.codeString) : that.codeString == null;
-
+        return Objects.equals(terminologyId, that.terminologyId) &&
+                Objects.equals(codeString, that.codeString);
     }
 
     @Override
     public int hashCode() {
-        int result = terminologyId != null ? terminologyId.hashCode() : 0;
-        result = 31 * result + (codeString != null ? codeString.hashCode() : 0);
-        return result;
+        return Objects.hash(terminologyId, codeString);
     }
 }

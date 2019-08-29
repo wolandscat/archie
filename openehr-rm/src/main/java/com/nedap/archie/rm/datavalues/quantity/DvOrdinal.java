@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -64,18 +65,14 @@ public class DvOrdinal extends DvOrdered<DvOrdinal> implements SingleValuedDataV
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
+        if (!super.equals(o)) return false;
         DvOrdinal dvOrdinal = (DvOrdinal) o;
-
-        if (symbol != null ? !symbol.equals(dvOrdinal.symbol) : dvOrdinal.symbol != null) return false;
-        return value != null ? value.equals(dvOrdinal.value) : dvOrdinal.value == null;
-
+        return Objects.equals(symbol, dvOrdinal.symbol) &&
+                Objects.equals(value, dvOrdinal.value);
     }
 
     @Override
     public int hashCode() {
-        int result = symbol != null ? symbol.hashCode() : 0;
-        result = 31 * result + (value != null ? value.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), symbol, value);
     }
 }

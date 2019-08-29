@@ -2,6 +2,8 @@ package com.nedap.archie.rm.support.identification;
 
 import com.nedap.archie.rm.RMObject;
 
+import java.util.Objects;
+
 /**
  * Created by pieter.bos on 08/07/16.
  */
@@ -28,15 +30,12 @@ public abstract class UID extends RMObject {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         UID uid = (UID) o;
-
-        return value != null ? value.equals(uid.value) : uid.value == null;
-
+        return Objects.equals(value, uid.value);
     }
 
     @Override
     public int hashCode() {
-        return value != null ? value.hashCode() : 0;
+        return Objects.hash(value);
     }
 }

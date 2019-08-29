@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -108,5 +109,23 @@ public final class History<Type extends ItemStructure> extends DataStructure {
     public void setSummary(@Nullable Type summary) {
         this.summary = summary;
         setThisAsParent(summary, "summary");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        History<?> history = (History<?>) o;
+        return Objects.equals(origin, history.origin) &&
+                Objects.equals(period, history.period) &&
+                Objects.equals(duration, history.duration) &&
+                Objects.equals(summary, history.summary) &&
+                Objects.equals(events, history.events);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), origin, period, duration, summary, events);
     }
 }

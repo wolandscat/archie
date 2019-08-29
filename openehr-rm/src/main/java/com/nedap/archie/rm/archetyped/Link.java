@@ -7,6 +7,7 @@ import com.nedap.archie.rm.datavalues.DvText;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -59,17 +60,13 @@ public class Link extends RMObject {
 
         Link link = (Link) o;
 
-        if (meaning != null ? !meaning.equals(link.meaning) : link.meaning != null) return false;
-        if (type != null ? !type.equals(link.type) : link.type != null) return false;
-        return target != null ? target.equals(link.target) : link.target == null;
-
+        return Objects.equals(meaning, link.meaning) &&
+                Objects.equals(type, link.type) &&
+                Objects.equals(target, link.target);
     }
 
     @Override
     public int hashCode() {
-        int result = meaning != null ? meaning.hashCode() : 0;
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        result = 31 * result + (target != null ? target.hashCode() : 0);
-        return result;
+        return Objects.hash(meaning, type, target);
     }
 }

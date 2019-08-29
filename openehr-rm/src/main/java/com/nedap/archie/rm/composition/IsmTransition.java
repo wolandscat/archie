@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -86,23 +87,15 @@ public class IsmTransition extends Pathable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         IsmTransition that = (IsmTransition) o;
-
-        if (currentState != null ? !currentState.equals(that.currentState) : that.currentState != null) return false;
-        if (transition != null ? !transition.equals(that.transition) : that.transition != null) return false;
-        if (careflowStep != null ? !careflowStep.equals(that.careflowStep) : that.careflowStep != null) return false;
-        return reason != null ? reason.equals(that.reason) : that.reason == null;
-
+        return Objects.equals(currentState, that.currentState) &&
+                Objects.equals(transition, that.transition) &&
+                Objects.equals(careflowStep, that.careflowStep) &&
+                Objects.equals(reason, that.reason);
     }
 
     @Override
     public int hashCode() {
-        int result = 0;
-        result = 31 * result + (currentState != null ? currentState.hashCode() : 0);
-        result = 31 * result + (transition != null ? transition.hashCode() : 0);
-        result = 31 * result + (careflowStep != null ? careflowStep.hashCode() : 0);
-        result = 31 * result + (reason != null ? reason.hashCode() : 0);
-        return result;
+        return Objects.hash(currentState, transition, careflowStep, reason);
     }
 }

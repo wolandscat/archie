@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -86,22 +87,14 @@ public class Activity extends Locatable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         Activity activity = (Activity) o;
-
-        if (description != null ? !description.equals(activity.description) : activity.description != null)
-            return false;
-        if (timing != null ? !timing.equals(activity.timing) : activity.timing != null) return false;
-        return actionArchetypeId != null ? actionArchetypeId.equals(activity.actionArchetypeId) : activity.actionArchetypeId == null;
-
+        return Objects.equals(description, activity.description) &&
+                Objects.equals(timing, activity.timing) &&
+                Objects.equals(actionArchetypeId, activity.actionArchetypeId);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (timing != null ? timing.hashCode() : 0);
-        result = 31 * result + (actionArchetypeId != null ? actionArchetypeId.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), description, timing, actionArchetypeId);
     }
 }

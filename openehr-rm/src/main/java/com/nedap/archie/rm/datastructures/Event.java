@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlType;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 03/11/15.
@@ -93,21 +94,14 @@ public abstract class Event<Type extends ItemStructure> extends Locatable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         Event<?> event = (Event<?>) o;
-
-        if (time != null ? !time.equals(event.time) : event.time != null) return false;
-        if (state != null ? !state.equals(event.state) : event.state != null) return false;
-        return data != null ? data.equals(event.data) : event.data == null;
-
+        return Objects.equals(time, event.time) &&
+                Objects.equals(state, event.state) &&
+                Objects.equals(data, event.data);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (time != null ? time.hashCode() : 0);
-        result = 31 * result + (state != null ? state.hashCode() : 0);
-        result = 31 * result + (data != null ? data.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), time, state, data);
     }
 }

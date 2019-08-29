@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URI;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -47,15 +48,12 @@ public class DvURI extends DataValue implements SingleValuedDataValue<URI> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         DvURI dvURI = (DvURI) o;
-
-        return value != null ? value.equals(dvURI.value) : dvURI.value == null;
-
+        return Objects.equals(value, dvURI.value);
     }
 
     @Override
     public int hashCode() {
-        return value != null ? value.hashCode() : 0;
+        return Objects.hash(value);
     }
 }

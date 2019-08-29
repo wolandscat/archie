@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -136,27 +137,17 @@ public class EventContext extends Pathable {
 
         EventContext that = (EventContext) o;
 
-        if (startTime != null ? !startTime.equals(that.startTime) : that.startTime != null) return false;
-        if (endTime != null ? !endTime.equals(that.endTime) : that.endTime != null) return false;
-        if (location != null ? !location.equals(that.location) : that.location != null) return false;
-        if (setting != null ? !setting.equals(that.setting) : that.setting != null) return false;
-        if (otherContext != null ? !otherContext.equals(that.otherContext) : that.otherContext != null) return false;
-        if (healthCareFacility != null ? !healthCareFacility.equals(that.healthCareFacility) : that.healthCareFacility != null)
-            return false;
-        return participations != null ? participations.equals(that.participations) : that.participations == null;
-
+        return Objects.equals(startTime, that.startTime) &&
+                Objects.equals(endTime, that.endTime) &&
+                Objects.equals(location, that.location) &&
+                Objects.equals(setting, that.setting) &&
+                Objects.equals(otherContext, that.otherContext) &&
+                Objects.equals(healthCareFacility, that.healthCareFacility) &&
+                Objects.equals(participations, that.participations);
     }
 
     @Override
     public int hashCode() {
-        int result = 0;
-        result = 31 * result + (startTime != null ? startTime.hashCode() : 0);
-        result = 31 * result + (endTime != null ? endTime.hashCode() : 0);
-        result = 31 * result + (location != null ? location.hashCode() : 0);
-        result = 31 * result + (setting != null ? setting.hashCode() : 0);
-        result = 31 * result + (otherContext != null ? otherContext.hashCode() : 0);
-        result = 31 * result + (healthCareFacility != null ? healthCareFacility.hashCode() : 0);
-        result = 31 * result + (participations != null ? participations.hashCode() : 0);
-        return result;
+        return Objects.hash(startTime, endTime, location, setting, otherContext, healthCareFacility, participations);
     }
 }

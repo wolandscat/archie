@@ -23,6 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 03/11/15.
@@ -107,20 +108,14 @@ public class Instruction extends CareEntry {
 
         Instruction that = (Instruction) o;
 
-        if (narrative != null ? !narrative.equals(that.narrative) : that.narrative != null) return false;
-        if (expiryTime != null ? !expiryTime.equals(that.expiryTime) : that.expiryTime != null) return false;
-        if (wfDefinition != null ? !wfDefinition.equals(that.wfDefinition) : that.wfDefinition != null) return false;
-        return activities != null ? activities.equals(that.activities) : that.activities == null;
-
+        return Objects.equals(narrative, that.narrative) &&
+                Objects.equals(expiryTime, that.expiryTime) &&
+                Objects.equals(wfDefinition, that.wfDefinition) &&
+                Objects.equals(activities, that.activities);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (narrative != null ? narrative.hashCode() : 0);
-        result = 31 * result + (expiryTime != null ? expiryTime.hashCode() : 0);
-        result = 31 * result + (wfDefinition != null ? wfDefinition.hashCode() : 0);
-        result = 31 * result + (activities != null ? activities.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), narrative, expiryTime, wfDefinition, activities);
     }
 }

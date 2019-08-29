@@ -19,6 +19,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 04/11/15.
@@ -121,27 +122,17 @@ public abstract class Entry extends ContentItem {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         Entry entry = (Entry) o;
-
-        if (language != null ? !language.equals(entry.language) : entry.language != null) return false;
-        if (encoding != null ? !encoding.equals(entry.encoding) : entry.encoding != null) return false;
-        if (workflowId != null ? !workflowId.equals(entry.workflowId) : entry.workflowId != null) return false;
-        if (subject != null ? !subject.equals(entry.subject) : entry.subject != null) return false;
-        if (provider != null ? !provider.equals(entry.provider) : entry.provider != null) return false;
-        return otherParticipations != null ? otherParticipations.equals(entry.otherParticipations) : entry.otherParticipations == null;
-
+        return Objects.equals(language, entry.language) &&
+                Objects.equals(encoding, entry.encoding) &&
+                Objects.equals(workflowId, entry.workflowId) &&
+                Objects.equals(subject, entry.subject) &&
+                Objects.equals(provider, entry.provider) &&
+                Objects.equals(otherParticipations, entry.otherParticipations);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (language != null ? language.hashCode() : 0);
-        result = 31 * result + (encoding != null ? encoding.hashCode() : 0);
-        result = 31 * result + (workflowId != null ? workflowId.hashCode() : 0);
-        result = 31 * result + (subject != null ? subject.hashCode() : 0);
-        result = 31 * result + (provider != null ? provider.hashCode() : 0);
-        result = 31 * result + (otherParticipations != null ? otherParticipations.hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), language, encoding, workflowId, subject, provider, otherParticipations);
     }
 }
