@@ -69,23 +69,23 @@ public class Interval<T> extends OpenEHRBase {
 
 		if (upper == null) {
 			this.upperUnbounded = true;
-			this.upperIncluded = true;
+			this.upperIncluded = false;
 		}
 		if (lower == null) {
 			this.lowerUnbounded = true;
-			this.lowerIncluded = true;
+			this.lowerIncluded = false;
 		}
 
     }
 
     public static <T> Interval<T> lowerUnbounded(T upper, boolean upperIncluded) {
-        Interval<T> result = new Interval<>(null, upper, true, upperIncluded);
+        Interval<T> result = new Interval<>(null, upper, false, upperIncluded);
         result.setLowerUnbounded(true);
         return result;
     }
 
     public static <T> Interval<T> upperUnbounded(T lower, boolean lowerIncluded) {
-        Interval<T> result = new Interval<>(lower, null, lowerIncluded, true);
+        Interval<T> result = new Interval<>(lower, null, lowerIncluded, false);
         result.setUpperUnbounded(true);
         return result;
     }
@@ -305,5 +305,14 @@ public class Interval<T> extends OpenEHRBase {
         result.append(upper);
         result.append("|");
         return result.toString();
+    }
+
+    public void fixUnboundedIncluded() {
+        if (upperUnbounded) {
+            this.upperIncluded = false;
+        }
+        if (lowerUnbounded) {
+            this.lowerIncluded = false;
+        }
     }
 }
