@@ -68,7 +68,6 @@ public class InstructionDetails extends Pathable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
 
         InstructionDetails that = (InstructionDetails) o;
 
@@ -81,7 +80,7 @@ public class InstructionDetails extends Pathable {
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
+        int result = 0;
         result = 31 * result + (instructionId != null ? instructionId.hashCode() : 0);
         result = 31 * result + (activityId != null ? activityId.hashCode() : 0);
         result = 31 * result + (wfDetails != null ? wfDetails.hashCode() : 0);

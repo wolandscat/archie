@@ -133,7 +133,6 @@ public class EventContext extends Pathable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
 
         EventContext that = (EventContext) o;
 
@@ -150,7 +149,7 @@ public class EventContext extends Pathable {
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
+        int result = 0;
         result = 31 * result + (startTime != null ? startTime.hashCode() : 0);
         result = 31 * result + (endTime != null ? endTime.hashCode() : 0);
         result = 31 * result + (location != null ? location.hashCode() : 0);

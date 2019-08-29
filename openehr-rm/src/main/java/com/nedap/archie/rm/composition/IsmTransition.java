@@ -61,7 +61,7 @@ public class IsmTransition extends Pathable {
     public void setTransition(DvCodedText transition) {
         this.transition = transition;
     }
-    
+
     public DvCodedText getCareflowStep() {
         return careflowStep;
     }
@@ -86,7 +86,6 @@ public class IsmTransition extends Pathable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
 
         IsmTransition that = (IsmTransition) o;
 
@@ -99,7 +98,7 @@ public class IsmTransition extends Pathable {
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
+        int result = 0;
         result = 31 * result + (currentState != null ? currentState.hashCode() : 0);
         result = 31 * result + (transition != null ? transition.hashCode() : 0);
         result = 31 * result + (careflowStep != null ? careflowStep.hashCode() : 0);

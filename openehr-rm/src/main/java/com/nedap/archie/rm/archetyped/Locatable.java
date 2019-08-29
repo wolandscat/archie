@@ -147,7 +147,7 @@ public abstract class Locatable extends Pathable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+
         Locatable locatable = (Locatable) o;
         return Objects.equals(name, locatable.name) &&
                 Objects.equals(archetypeNodeId, locatable.archetypeNodeId) &&
@@ -159,7 +159,6 @@ public abstract class Locatable extends Pathable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), name, archetypeNodeId, uid, archetypeDetails, feederAudit, links);
+        return Objects.hash(name, archetypeNodeId, uid, archetypeDetails, feederAudit, links);
     }
 }
-

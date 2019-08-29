@@ -121,15 +121,4 @@ public abstract class Pathable extends RMObject {
         return PathUtil.getPath(getPathSegments());
     }
 
-
-    //equals depends on subclass
-    @Override
-    public boolean equals(Object obj) {
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return 0;
-    }
 }
