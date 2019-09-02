@@ -113,7 +113,7 @@ public class ArchetypeValidator {
         }
         repository = extraRepository;
         if(archetype instanceof Template) {
-            //in the case of a template, add a repository that can store the overlays separate from the rest of the archetypes
+            //in the case of a template store the overlays in the extraRepository separate from the rest of the archetypes
             //later they can be retrieved and handled as extra archetypes, that are not top level archetypes usable in other
             //archetypes that are not templates
             //TODO: can we specialize templates? In that case we need more work to get any template overlays defined in
