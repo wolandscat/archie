@@ -13,9 +13,10 @@ public class CodePhraseTest {
         CodePhrase codePhraseTwo = new CodePhrase("hl7::gender");
         CodePhrase codePhraseThree = new CodePhrase("hl2::gender");
         CodePhrase codePhraseFour = new CodePhrase("hl7::color");
-        Assert.assertEquals(codePhraseOne,codePhraseTwo);
 
+        Assert.assertEquals(codePhraseOne, codePhraseTwo);
 
-        Assert.assertNotEquals(codePhraseOne,codePhraseThree);
+        Assert.assertNotEquals(codePhraseOne, codePhraseThree);
+        Assert.assertNotEquals(codePhraseOne, codePhraseFour);
     }
 }
