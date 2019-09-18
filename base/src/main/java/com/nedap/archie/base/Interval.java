@@ -263,20 +263,21 @@ public class Interval<T> extends OpenEHRBase {
 
         return (lowerUnbounded == interval.lowerUnbounded) &&
             (upperUnbounded == interval.upperUnbounded) &&
-            (lowerIncluded == interval.lowerIncluded) &&
-            (upperIncluded == interval.upperIncluded) &&
+            (lowerUnbounded || lowerIncluded == interval.lowerIncluded) &&
+            (upperUnbounded || upperIncluded == interval.upperIncluded) &&
                 (lowerUnbounded || Objects.equals(lower, interval.lower)) &&
                 (upperUnbounded || Objects.equals(upper, interval.upper));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lower,
-                upper,
+        return Objects.hash(
                 lowerUnbounded,
                 upperUnbounded,
-                lowerIncluded,
-                upperIncluded);
+                lowerUnbounded? false: lowerIncluded,
+                upperUnbounded? false: upperIncluded,
+                lowerUnbounded? null : lower,
+                upperUnbounded? null : upper);
     }
 
     @Override
