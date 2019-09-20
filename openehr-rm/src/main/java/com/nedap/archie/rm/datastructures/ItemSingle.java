@@ -1,5 +1,6 @@
 package com.nedap.archie.rm.datastructures;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 import com.nedap.archie.rm.archetyped.Archetyped;
 import com.nedap.archie.rm.archetyped.FeederAudit;
@@ -12,6 +13,7 @@ import com.nedap.archie.rminfo.RMPropertyIgnore;
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
 import java.util.Objects;
@@ -52,6 +54,8 @@ public class ItemSingle extends ItemStructure<Element> {
 
     @Override
     @RMPropertyIgnore
+    @JsonIgnore
+    @XmlTransient
     public List<Element> getItems() {
         return Lists.newArrayList(item);
     }

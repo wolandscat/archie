@@ -1,5 +1,6 @@
 package com.nedap.archie.rm.demographic;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nedap.archie.rm.archetyped.Locatable;
 import com.nedap.archie.rm.datavalues.DvText;
 import com.nedap.archie.rm.datavalues.quantity.DvInterval;
@@ -9,6 +10,7 @@ import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,8 @@ public class Contact extends Locatable {
     @XmlElement(name="time_validity")
     private DvInterval<DvDate> timeValidity;
 
+    @JsonIgnore
+    @XmlTransient
     public DvText getPurpose() {
         return getName();
     }

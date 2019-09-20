@@ -13,11 +13,35 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.nedap.archie.aom.ResourceDescription;
+import com.nedap.archie.aom.terminology.ArchetypeTerm;
+import com.nedap.archie.aom.terminology.ArchetypeTerminology;
 import com.nedap.archie.base.OpenEHRBase;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.nedap.archie.rm.archetyped.Pathable;
+import com.nedap.archie.rm.datastructures.History;
+import com.nedap.archie.rm.datatypes.CodePhrase;
+import com.nedap.archie.rm.datavalues.DvCodedText;
+import com.nedap.archie.rm.datavalues.encapsulated.DvMultimedia;
+import com.nedap.archie.rm.datavalues.quantity.DvCount;
+import com.nedap.archie.rm.datavalues.quantity.DvProportion;
+import com.nedap.archie.rm.datavalues.quantity.DvQuantity;
+import com.nedap.archie.rm.datavalues.quantity.datetime.DvDate;
+import com.nedap.archie.rm.datavalues.quantity.datetime.DvDateTime;
 import com.nedap.archie.rm.support.identification.ArchetypeID;
+import com.nedap.archie.rm.support.identification.TerminologyId;
+import com.nedap.archie.rminfo.ArchieRMInfoLookup;
+import com.nedap.archie.rminfo.RMTypeInfo;
+import com.nedap.archie.serializer.adl.jackson.ArchetypeTermOdinSerializer;
+import com.nedap.archie.serializer.adl.jackson.ArchetypeTerminologyMixin;
+import com.nedap.archie.serializer.adl.jackson.ResourceDescriptionMixin;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Class to obtain an ObjectMapper that works with both archie RM and AOM objects, serializing into
@@ -30,7 +54,9 @@ import java.io.IOException;
 public class JacksonUtil {
 
     //threadsafe, can be cached
-    private volatile static ObjectMapper objectMapper;
+    private static final ConcurrentHashMap<RMJacksonConfiguration, ObjectMapper> objectMapperByTypePropertyName = new ConcurrentHashMap<>();
+
+    private static final String DEFAULT_TYPE_PARAMETER = "@type";
 
     /**
      * Get an object mapper that works with Archie RM and AOM objects. It will be cached in a static variable for
@@ -38,9 +64,15 @@ public class JacksonUtil {
      * @return
      */
     public static ObjectMapper getObjectMapper() {
+        return getObjectMapper(new RMJacksonConfiguration());
+    }
+
+    public static ObjectMapper getObjectMapper(RMJacksonConfiguration configuration) {
+        ObjectMapper objectMapper = objectMapperByTypePropertyName.get(configuration);
         if(objectMapper == null) {
             objectMapper = new ObjectMapper();
-            configureObjectMapper(objectMapper);
+            configureObjectMapper(objectMapper, configuration);
+            objectMapperByTypePropertyName.put(configuration, objectMapper);
 
         }
         return objectMapper;
@@ -52,6 +84,10 @@ public class JacksonUtil {
      * @param objectMapper
      */
     public static void configureObjectMapper(ObjectMapper objectMapper) {
+        configureObjectMapper(objectMapper, new RMJacksonConfiguration());
+    }
+
+    public static void configureObjectMapper(ObjectMapper objectMapper, RMJacksonConfiguration configuration) {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         objectMapper.enable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE);
         objectMapper.disable(SerializationFeature.WRITE_NULL_MAP_VALUES);
@@ -61,16 +97,34 @@ public class JacksonUtil {
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         objectMapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
         objectMapper.enable(DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS);
-        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        //objectMapper.
+        if(!configuration.isSerializeEmptyCollections()) {
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        }
+        if(configuration.isFailOnUnknownProperties()) {
+            objectMapper.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        } else {
+            objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        }
 
         objectMapper.registerModule(new JavaTimeModule());
 
+        SimpleModule module = new SimpleModule();
+        if(!configuration.isAddExtraFieldsInArchetypeId()) {
+            module.setMixInAnnotation(ArchetypeID.class, FixArchetypeIDMixin.class);
+        }
+
+        if(!configuration.isAddPathProperty()) {
+            module.setMixInAnnotation(Pathable.class, DontSerializePathMixin.class);
+        }
+        if(!configuration.isAddPathProperty() || !configuration.isAddExtraFieldsInArchetypeId()) {
+            objectMapper.registerModule(module);
+        }
+
         objectMapper.enable(MapperFeature.USE_BASE_TYPE_AS_DEFAULT_IMPL);
 
-        TypeResolverBuilder typeResolverBuilder = new ArchieTypeResolverBuilder()
+        TypeResolverBuilder typeResolverBuilder = new ArchieTypeResolverBuilder(configuration)
                 .init(JsonTypeInfo.Id.NAME, new OpenEHRTypeNaming())
-                .typeProperty("@type")
+                .typeProperty(configuration.getTypePropertyName())
                 .typeIdVisibility(true)
                 .inclusion(JsonTypeInfo.As.PROPERTY);
 
@@ -78,7 +132,7 @@ public class JacksonUtil {
         objectMapper.addHandler(new DeserializationProblemHandler() {
             @Override
             public boolean handleUnknownProperty(DeserializationContext ctxt, JsonParser p, JsonDeserializer<?> deserializer, Object beanOrClass, String propertyName) throws IOException {
-                if (propertyName.equalsIgnoreCase("@type")) {
+                if (propertyName.equalsIgnoreCase(configuration.getTypePropertyName())) {
                     return true;
                 }
                 return super.handleUnknownProperty(ctxt, p, deserializer, beanOrClass, propertyName);
@@ -95,15 +149,26 @@ public class JacksonUtil {
      */
     static class ArchieTypeResolverBuilder extends ObjectMapper.DefaultTypeResolverBuilder
     {
-        public ArchieTypeResolverBuilder()
+
+        private Set<Class> classesToNotAddTypeProperty;
+        public ArchieTypeResolverBuilder(RMJacksonConfiguration configuration)
         {
             super(ObjectMapper.DefaultTyping.NON_FINAL);
+            classesToNotAddTypeProperty = new HashSet<>();
+            if(!configuration.isAlwaysIncludeTypeProperty()) {
+                List<RMTypeInfo> allTypes = ArchieRMInfoLookup.getInstance().getAllTypes();
+                for(RMTypeInfo type:allTypes) {
+                    if(type.getDirectDescendantClasses().isEmpty()) {
+                        classesToNotAddTypeProperty.add(type.getJavaClass());
+                    }
+                }
+            }
         }
 
         @Override
         public boolean useForType(JavaType t)
         {
-            return (OpenEHRBase.class.isAssignableFrom(t.getRawClass()));
+            return (OpenEHRBase.class.isAssignableFrom(t.getRawClass()) && !classesToNotAddTypeProperty.contains(t.getRawClass()));
         }
     }
 }

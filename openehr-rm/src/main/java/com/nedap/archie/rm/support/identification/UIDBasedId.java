@@ -1,8 +1,11 @@
 package com.nedap.archie.rm.support.identification;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -21,6 +24,8 @@ public abstract class UIDBasedId extends ObjectId {
         super(value);
     }
 
+    @JsonIgnore
+    @XmlTransient
     public UID getRoot() {
         String value = getValue();
         if (value == null) {
@@ -49,6 +54,8 @@ public abstract class UIDBasedId extends ObjectId {
     }
 
     @Nullable
+    @JsonIgnore
+    @XmlTransient
     public String getExtension() {
         String value = getValue();
         if (value == null) {

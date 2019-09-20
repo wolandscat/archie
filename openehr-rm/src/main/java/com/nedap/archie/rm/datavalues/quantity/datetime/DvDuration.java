@@ -1,5 +1,6 @@
 package com.nedap.archie.rm.datavalues.quantity.datetime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.nedap.archie.datetime.DateTimeParsers;
 import com.nedap.archie.json.DurationDeserializer;
@@ -59,21 +60,22 @@ public class DvDuration extends DvAmount<Long> implements SingleValuedDataValue<
 //            @XmlElement(type=Period.class),
 //            @XmlElement(type=Duration.class)
 //    })    
-	@JsonDeserialize(using = DurationDeserializer.class)
-	public TemporalAmount getValue() {
-		return value;
-	}
+    @JsonDeserialize(using=DurationDeserializer.class)
+    public TemporalAmount getValue() {
+        return value;
+    }
 
-	@Override
-	public void setValue(TemporalAmount value) {
-		this.value = value;
-	}
+    @Override
+    public void setValue(TemporalAmount value) {
+        this.value = value;
+    }
 
-	@XmlTransient
-	@Override
-	public Long getMagnitude() {
-		return null; //no magnitude defined in spec
-	}
+    @XmlTransient
+    @Override
+    @JsonIgnore
+    public Long getMagnitude() {
+        return null; //no magnitude defined in spec
+    }
 
 
 	@Override
