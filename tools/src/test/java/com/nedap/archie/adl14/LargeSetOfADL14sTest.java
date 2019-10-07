@@ -1,6 +1,7 @@
 package com.nedap.archie.adl14;
 
 import com.nedap.archie.adl14.log.ADL2ConversionLog;
+import com.nedap.archie.adlparser.antlr.Adl14Lexer;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.archetypevalidator.ValidationResult;
@@ -9,6 +10,8 @@ import com.nedap.archie.flattener.Flattener;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 import com.nedap.archie.json.JacksonUtil;
 import com.nedap.archie.serializer.adl.ADLArchetypeSerializer;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CodePointCharStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.openehr.referencemodels.BuiltinReferenceModels;
@@ -24,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -40,6 +44,14 @@ public class LargeSetOfADL14sTest {
     }
 
     @Test
+    public void parseUri() {
+//        CodePointCharStream codePointCharStream = CharStreams.fromString("terminology://SNOMED-CT.com/408733002?subset=Diabetic");//%20Retinopathy%20Study%20field");
+        CodePointCharStream codePointCharStream = CharStreams.fromString("http://test.com/bla?test=green");
+        Adl14Lexer adl14Lexer = new Adl14Lexer(codePointCharStream);
+        assertEquals(1, adl14Lexer.getAllTokens().size());
+    }
+
+    @Test
     public void parseLots() throws Exception {
         Reflections reflections = new Reflections("adl14", new ResourcesScanner());
         List<String> adlFiles = new ArrayList(reflections.getResources(Pattern.compile(".*\\.adl")));
@@ -51,7 +63,7 @@ public class LargeSetOfADL14sTest {
 
         List<Archetype> archetypes = new ArrayList<>();
         for(String file:adlFiles) {
-//            if(!file.contains("pressure")) {
+//            if(!file.contains("uri-test")) {
 //                continue;
 //            }
             Archetype archetype = parse(exceptions, parseErrors, file);

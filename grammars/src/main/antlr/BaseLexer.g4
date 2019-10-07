@@ -92,16 +92,14 @@ TERM_CODE_REF : '[' NAME_CHAR+ ( '(' NAME_CHAR+ ')' )? '::' NAME_CHAR+ ']' ;  //
 // http://www.w3.org/Addressing/URL/5_URI_BNF.html
 // URIs - simple recogniser based on https://tools.ietf.org/html/rfc3986 and
 // http://www.w3.org/Addressing/URL/5_URI_BNF.html
-URI : URI_SCHEME SYM_COLON URI_HIER_PART ( '?' URI_QUERY+ )? ;
-fragment URI_HIER_PART : ( ('//')? URI_AUTHORITY ) URI_PATH? ;
+URI : URI_SCHEME SYM_COLON URI_HIER_PART ( '?' URI_QUERY )? ;
+fragment URI_HIER_PART : ( '//' URI_AUTHORITY ) URI_PATH? ;
 fragment URI_AUTHORITY : ( URI_USER '@' )? URI_HOST ( SYM_COLON NATURAL )? ;
 fragment URI_HOST : IP_LITERAL | NAMESPACE ;
-fragment URI_USER : (URI_XALPHA| URI_RESERVED ) + ;
+fragment URI_USER : URI_RESERVED+ ;
 fragment URI_SCHEME : ALPHANUM_CHAR URI_XALPHA* ;
 fragment URI_PATH   : '/' | ( '/' URI_XPALPHA+ )+ ('/')?;
-fragment URI_QUERY : URI_QUERY_PARAM ('&' URI_QUERY_PARAM) ?;
-fragment URI_QUERY_PARAM : URI_QUERY_FRAGMENT ('=' URI_QUERY_FRAGMENT)?;
-fragment URI_QUERY_FRAGMENT  : URI_XALPHA+ ( '+' URI_XALPHA+ )* ;
+fragment URI_QUERY  : URI_XALPHA+ ( '+' URI_XALPHA+ )* ;
 
 fragment IP_LITERAL   : IPV4_LITERAL | IPV6_LITERAL ;
 fragment IPV4_LITERAL : NATURAL '.' NATURAL '.' NATURAL '.' NATURAL ;
@@ -109,17 +107,15 @@ fragment IPV6_LITERAL : HEX_QUAD (SYM_COLON HEX_QUAD )* SYM_COLON SYM_COLON HEX_
 
 fragment URI_XPALPHA : URI_XALPHA | '+' ;
 fragment URI_XALPHA : ALPHANUM_CHAR | URI_SAFE | URI_EXTRA | URI_ESCAPE ;
-fragment URI_SAFE   : [$@._-] ;
+fragment URI_SAFE   : [$@.&_-] ;
 fragment URI_EXTRA  : [!*"'()] ;
 fragment URI_ESCAPE : '%' HEX_DIGIT HEX_DIGIT ;
 fragment URI_RESERVED : [=;/#?: ] ;
-
 fragment NATURAL  : [1-9][0-9]* ;
 fragment HEX_QUAD : HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT ;
-
 // According to IETF http://tools.ietf.org/html/rfc1034[RFC 1034] and http://tools.ietf.org/html/rfc1035[RFC 1035],
 // as clarified by http://tools.ietf.org/html/rfc2181[RFC 2181] (section 11)
-fragment NAMESPACE : LABEL ('.' LABEL)* ;
+fragment NAMESPACE : LABEL ('.' LABEL)+ ;
 fragment LABEL : ALPHA_CHAR ( NAME_CHAR* ALPHANUM_CHAR )? ;
 
 GUID : HEX_DIGIT+ '-' HEX_DIGIT+ '-' HEX_DIGIT+ '-' HEX_DIGIT+ '-' HEX_DIGIT+ ;
