@@ -139,7 +139,7 @@ public class LargeSetOfADL14sTest {
         //6 errors in annotations section caused by some property called 'items'
         //some errors due to test cases for wrong syntax
         //some errors due to incompatible ADL 1.5-syntax
-        assertTrue(exceptions.size() <= 21);
+        assertTrue(exceptions.size() <= 2);
 
 
     }
