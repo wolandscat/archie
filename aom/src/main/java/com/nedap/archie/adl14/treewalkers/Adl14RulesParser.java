@@ -1,7 +1,6 @@
 package com.nedap.archie.adl14.treewalkers;
 
 import com.nedap.archie.adlparser.antlr.Adl14Parser.*;
-import com.nedap.archie.adlparser.antlr.AdlParser;
 import com.nedap.archie.adlparser.treewalkers.BaseTreeWalker;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
 import com.nedap.archie.aom.CPrimitiveObject;
@@ -52,7 +51,7 @@ public class Adl14RulesParser extends BaseTreeWalker {
 
     }
 
-    private void setVariableNameAndType(AdlParser.VariableDeclarationContext context, ExpressionVariable result) {
+    private void setVariableNameAndType(VariableDeclarationContext context, ExpressionVariable result) {
         Matcher matcher = VARIABLE_ASSIGNMENT_PATTERN.matcher(context.VARIABLE_DECLARATION().getText());
 
         if(matcher.matches()) {

@@ -54,7 +54,7 @@ archetype_slot:
 
 c_archetype_slot_head: c_archetype_slot_id c_occurrences? ;
 
-c_archetype_slot_id: SYM_ALLOW_ARCHETYPE type_id '[' AT_CODE ']' SYM_CLOSED? ;
+c_archetype_slot_id: SYM_ALLOW_ARCHETYPE type_id ('[' AT_CODE ']')? SYM_CLOSED? ;
 
 c_attribute_def:
       c_attribute

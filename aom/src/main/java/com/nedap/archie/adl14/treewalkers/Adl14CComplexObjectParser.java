@@ -371,7 +371,9 @@ public class Adl14CComplexObjectParser extends BaseTreeWalker {
     private ArchetypeSlot parseArchetypeSlot(Archetype_slotContext slotContext) {
         ArchetypeSlot slot = new ArchetypeSlot();
         C_archetype_slot_headContext headContext = slotContext.c_archetype_slot_head();
-        slot.setNodeId(headContext.c_archetype_slot_id().AT_CODE().getText());
+        if(headContext.c_archetype_slot_id().AT_CODE() != null) {
+            slot.setNodeId(headContext.c_archetype_slot_id().AT_CODE().getText());
+        }
         slot.setRmTypeName(headContext.c_archetype_slot_id().type_id().getText());
         if(headContext.c_archetype_slot_id().SYM_CLOSED() != null) {
             slot.setClosed(true);
