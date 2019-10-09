@@ -76,17 +76,18 @@ public class Adl14TerminologyParser extends BaseTreeWalker {
             for(Map.Entry<String, TermBindingsList> termBinding:ontology.getTermBindings().entrySet()) {
                 ensureTermBindingKeyExists(terminology, termBinding.getKey());
                 Map<String, URI> newBindings = terminology.getTermBindings().get(termBinding.getKey());
-
-                for(Map.Entry<String, TerminologyCode> oldBinding:termBinding.getValue().getItems().entrySet()) {
-                    try {
-                        URI newBindingValue = conversionUtil.convertToUri(oldBinding.getValue());
-                        newBindings.put(oldBinding.getKey(), newBindingValue);
-                        //So this is an old path, will be converted later
-                        //not inside te parser, obviously
-                        //URIs need to be converted to even fit into the new model
-                    } catch (URISyntaxException e) {
-                        //TODO: add to conversion notes/messages/warnings
-                        logger.warn("error converting term binding to URI", e);
+                if(termBinding.getValue() != null) {
+                    for (Map.Entry<String, TerminologyCode> oldBinding : termBinding.getValue().getItems().entrySet()) {
+                        try {
+                            URI newBindingValue = conversionUtil.convertToUri(oldBinding.getValue());
+                            newBindings.put(oldBinding.getKey(), newBindingValue);
+                            //So this is an old path, will be converted later
+                            //not inside te parser, obviously
+                            //URIs need to be converted to even fit into the new model
+                        } catch (URISyntaxException e) {
+                            //TODO: add to conversion notes/messages/warnings
+                            logger.warn("error converting term binding to URI", e);
+                        }
                     }
                 }
             }
