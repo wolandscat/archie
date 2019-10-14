@@ -65,7 +65,6 @@ public class Adl14TerminologyParser extends BaseTreeWalker {
     private void convertConstraintBindings(ArchetypeOntology ontology, ArchetypeTerminology terminology) {
         if(ontology.getConstraintBindings() != null) {
             for(Map.Entry<String, ConstraintBindingsList> constraintBinding:ontology.getConstraintBindings().entrySet()) {
-                Map<String, URI> newBindings = new LinkedHashMap<>();
                 ensureTermBindingKeyExists(terminology, constraintBinding.getKey());
                 terminology.getTermBindings().get(constraintBinding.getKey()).putAll(new LinkedHashMap<>(constraintBinding.getValue().getItems()));
             }
@@ -77,7 +76,7 @@ public class Adl14TerminologyParser extends BaseTreeWalker {
             for(Map.Entry<String, TermBindingsList> termBinding:ontology.getTermBindings().entrySet()) {
                 ensureTermBindingKeyExists(terminology, termBinding.getKey());
                 Map<String, URI> newBindings = terminology.getTermBindings().get(termBinding.getKey());
-                if(termBinding.getValue() != null) {
+                if(termBinding.getValue() != null && termBinding.getValue().getItems() != null) {
                     for (Map.Entry<String, TerminologyCode> oldBinding : termBinding.getValue().getItems().entrySet()) {
                         try {
                             URI newBindingValue = conversionUtil.convertToUri(oldBinding.getValue());
