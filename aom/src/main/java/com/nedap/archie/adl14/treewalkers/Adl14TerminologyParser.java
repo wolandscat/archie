@@ -11,7 +11,6 @@ import com.nedap.archie.adlparser.treewalkers.BaseTreeWalker;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
 import com.nedap.archie.aom.terminology.ArchetypeTerminology;
 import com.nedap.archie.base.terminology.TerminologyCode;
-import com.nedap.archie.serializer.odin.OdinObjectParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,16 +27,18 @@ import java.util.Map;
 public class Adl14TerminologyParser extends BaseTreeWalker {
 
     private static final Logger logger = LoggerFactory.getLogger(Adl14TerminologyParser.class);
+    private final Odin14ValueParser odinParser;
 
     private ADL14ConversionUtil conversionUtil;
 
-    public Adl14TerminologyParser(ANTLRParserErrors errors, ADL14ConversionConfiguration configuration) {
+    public Adl14TerminologyParser(ANTLRParserErrors errors, ADL14ConversionConfiguration configuration, Odin14ValueParser odinParser) {
         super(errors);
         conversionUtil = new ADL14ConversionUtil(configuration);
+        this.odinParser = odinParser;
     }
 
     public ArchetypeTerminology parseTerminology(Terminology_sectionContext context) {
-        ArchetypeOntology ontology = OdinObjectParser.convert(context.odin_text().getText(), ArchetypeOntology.class);
+        ArchetypeOntology ontology = odinParser.convert(context.odin_text().getText(), ArchetypeOntology.class);
         ArchetypeTerminology terminology = new ArchetypeTerminology();
         for(String language:ontology.getTermDefinitions().keySet()) {
             terminology.getTermDefinitions().put(language, ontology.getTermDefinitions().get(language).getItems());

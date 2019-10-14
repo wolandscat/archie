@@ -2,10 +2,21 @@ package com.nedap.archie.adl14.treewalkers;
 
 import com.nedap.archie.adl14.ADL14ConversionConfiguration;
 import com.nedap.archie.adlparser.antlr.Adl14BaseListener;
-import com.nedap.archie.adlparser.antlr.Adl14Parser.*;
+import com.nedap.archie.adlparser.antlr.Adl14Parser.ArchetypeContext;
+import com.nedap.archie.adlparser.antlr.Adl14Parser.Definition_sectionContext;
+import com.nedap.archie.adlparser.antlr.Adl14Parser.Description_sectionContext;
+import com.nedap.archie.adlparser.antlr.Adl14Parser.Language_sectionContext;
+import com.nedap.archie.adlparser.antlr.Adl14Parser.Meta_data_itemContext;
+import com.nedap.archie.adlparser.antlr.Adl14Parser.Rules_sectionContext;
+import com.nedap.archie.adlparser.antlr.Adl14Parser.Specialization_sectionContext;
+import com.nedap.archie.adlparser.antlr.Adl14Parser.Terminology_sectionContext;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
-import com.nedap.archie.aom.*;
-import com.nedap.archie.serializer.odin.OdinObjectParser;
+import com.nedap.archie.aom.Archetype;
+import com.nedap.archie.aom.ArchetypeHRID;
+import com.nedap.archie.aom.AuthoredArchetype;
+import com.nedap.archie.aom.CComplexObject;
+import com.nedap.archie.aom.LanguageSection;
+import com.nedap.archie.aom.ResourceDescription;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 /**
@@ -24,10 +35,14 @@ public class ADL14Listener extends Adl14BaseListener {
     private Adl14CComplexObjectParser subTreeWalker;
     private Adl14TerminologyParser terminologyParser;
 
+    private Odin14ValueParser odinParser;
+
     public ADL14Listener(ANTLRParserErrors errors, ADL14ConversionConfiguration configuration) {
         this.errors = errors;
-        subTreeWalker = new Adl14CComplexObjectParser(errors);
-        terminologyParser = new Adl14TerminologyParser(errors, configuration);
+        odinParser = new Odin14ValueParser(configuration);
+        subTreeWalker = new Adl14CComplexObjectParser(errors, odinParser);
+        terminologyParser = new Adl14TerminologyParser(errors, configuration, odinParser);
+
     }
 
     /** top-level constructs */
@@ -104,7 +119,7 @@ public class ADL14Listener extends Adl14BaseListener {
 
     @Override
     public void enterLanguage_section(Language_sectionContext ctx) {
-        archetype.setAuthoredResourceContent(OdinObjectParser.convert(ctx.odin_text().getText(), LanguageSection.class));
+        archetype.setAuthoredResourceContent(odinParser.convert(ctx.odin_text().getText(), LanguageSection.class));
     }
 
     @Override
@@ -114,7 +129,7 @@ public class ADL14Listener extends Adl14BaseListener {
 
     @Override
     public void enterDescription_section(Description_sectionContext ctx) {
-        archetype.setDescription(OdinObjectParser.convert(ctx.odin_text().getText(), ResourceDescription.class));
+        archetype.setDescription(odinParser.convert(ctx.odin_text().getText(), ResourceDescription.class));
     }
 
     @Override
@@ -136,6 +151,7 @@ public class ADL14Listener extends Adl14BaseListener {
     public ANTLRParserErrors getErrors() {
         return errors;
     }
+
 
 
 }

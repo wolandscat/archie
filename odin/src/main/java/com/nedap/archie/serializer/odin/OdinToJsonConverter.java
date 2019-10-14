@@ -13,7 +13,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import java.util.List;
 
 /**
- * A simple Odin to JSON-converter TO BE USED WITHIN THE CONTEXT OF ADL!. This allows us to use standard tooling to bind to objects.
+ * A simple Odin to JSON-converter, not bound to ADL syntax and lexer rules.
  *
  * We need different lexer modes, but this is very hard to do in the current version of ADL!
  *

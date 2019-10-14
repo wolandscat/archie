@@ -19,7 +19,7 @@ import com.nedap.archie.base.Interval;
 import com.nedap.archie.base.MultiplicityInterval;
 import com.nedap.archie.base.terminology.TerminologyCode;
 import com.nedap.archie.rules.Assertion;
-import com.nedap.archie.serializer.odin.OdinObjectParser;
+
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
@@ -33,10 +33,12 @@ import java.util.List;
 public class Adl14CComplexObjectParser extends BaseTreeWalker {
 
     private final Adl14PrimitivesConstraintParser primitivesConstraintParser;
+    private Odin14ValueParser odinParser;
 
-    public Adl14CComplexObjectParser(ANTLRParserErrors errors) {
+    public Adl14CComplexObjectParser(ANTLRParserErrors errors, Odin14ValueParser odinParser) {
         super(errors);
         primitivesConstraintParser = new Adl14PrimitivesConstraintParser(errors);
+        this.odinParser = odinParser;
     }
 
     public RulesSection parseRules(Rules_sectionContext context) {
@@ -209,7 +211,7 @@ public class Adl14CComplexObjectParser extends BaseTreeWalker {
     private void parseCDVOrdinal(C_non_primitive_objectContext objectContext, CComplexObject result) {
         result.setRmTypeName("DV_ORDINAL");
         if(objectContext.domainSpecificExtension().odin_text() != null) {
-            CDVOrdinal cdvOrdinal = OdinObjectParser.convert(objectContext.domainSpecificExtension().odin_text().getText(), CDVOrdinal.class);
+            CDVOrdinal cdvOrdinal = odinParser.convert(objectContext.domainSpecificExtension().odin_text().getText(), CDVOrdinal.class);
             if (cdvOrdinal.getList() != null && !cdvOrdinal.getList().isEmpty()) {
                 CAttributeTuple tuple = new CAttributeTuple();
                 boolean hasValue = cdvOrdinal.getList().values().stream().anyMatch(i -> i.getValue() != null);
@@ -249,7 +251,7 @@ public class Adl14CComplexObjectParser extends BaseTreeWalker {
     private void parseCDVQuantity(C_non_primitive_objectContext objectContext, CComplexObject result) {
         result.setRmTypeName("DV_QUANTITY");
         if(objectContext.domainSpecificExtension().odin_text() != null) {
-            CDVQuantity cdvQuantity = OdinObjectParser.convert(objectContext.domainSpecificExtension().odin_text().getText(), CDVQuantity.class);
+            CDVQuantity cdvQuantity = odinParser.convert(objectContext.domainSpecificExtension().odin_text().getText(), CDVQuantity.class);
             if(cdvQuantity.getProperty() != null) {
                 CAttribute property = new CAttribute("property");
                 CTerminologyCode code = new CTerminologyCode();
