@@ -53,6 +53,12 @@ public class ADLAuthoredArchetypeSerializer<T extends AuthoredArchetype> extends
         if (Boolean.TRUE.equals(archetype.getGenerated())) {
             attributes.put("generated", null);
         }
+        if(archetype.getUid() != null) {
+            attributes.put("uid", archetype.getUid());
+        }
+        if(archetype.getBuildUid() != null) {
+            attributes.put("build_uid", archetype.getBuildUid());
+        }
 
         if (!attributes.isEmpty()) {
             List<String> elements = attributes.entrySet().stream()

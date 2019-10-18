@@ -42,8 +42,8 @@ meta_data: '(' meta_data_item  (';' meta_data_item )* ')' ;
 
 meta_data_item:
       meta_data_tag_adl_version '=' (REAL|VERSION_ID)
-    | meta_data_tag_uid '=' GUID
-    | meta_data_tag_build_uid '=' GUID
+    | meta_data_tag_uid '=' guid_or_oid
+    | meta_data_tag_build_uid '=' guid_or_oid
     | meta_data_tag_rm_release '=' (REAL|VERSION_ID)
     | meta_data_tag_is_controlled
     | meta_data_tag_is_generated
@@ -52,9 +52,11 @@ meta_data_item:
 
 meta_data_value:
       primitive_value
-    | GUID
+    | guid_or_oid
     | (REAL|VERSION_ID)
     ;
+
+guid_or_oid: (GUID | OID | VERSION_ID); //VERSION_ID is the same as a OID with one or two dots
 
 meta_data_tag_adl_version   : 'adl_version' ;
 meta_data_tag_uid           : 'uid' ;

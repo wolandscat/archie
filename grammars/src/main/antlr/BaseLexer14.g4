@@ -160,9 +160,10 @@ fragment HEX_QUAD : HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT ;
 // According to IETF http://tools.ietf.org/html/rfc1034[RFC 1034] and http://tools.ietf.org/html/rfc1035[RFC 1035],
 // as clarified by http://tools.ietf.org/html/rfc2181[RFC 2181] (section 11)
 fragment NAMESPACE : LABEL ('.' LABEL)* ;
-fragment LABEL : ALPHA_CHAR ( NAME_CHAR* ALPHANUM_CHAR )? ;
+fragment LABEL : ALPHA_CHAR ( (NAME_CHAR|'%')* (ALPHANUM_CHAR|'%') )? ;
 
 GUID : HEX_DIGIT+ '-' HEX_DIGIT+ '-' HEX_DIGIT+ '-' HEX_DIGIT+ '-' HEX_DIGIT+ ;
+OID : DIGIT+ '.' DIGIT+ '.' DIGIT+ ('.' DIGIT+)+;
 
 ALPHA_UC_ID : ALPHA_UCHAR WORD_CHAR* ;           // used for type ids
 ALPHA_LC_ID : ALPHA_LCHAR WORD_CHAR* ;           // used for attribute / method ids

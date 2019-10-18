@@ -68,8 +68,8 @@ public class ADL14Listener extends Adl14BaseListener {
     public void enterMeta_data_item(Meta_data_itemContext ctx) {
         /*
          SYM_ADL_VERSION '=' VERSION_ID
-        | SYM_UID '=' GUID
-        | SYM_BUILD_UID '=' GUID
+        | SYM_UID '=' (GUID | OID)
+        | SYM_BUILD_UID '=' (GUID | OID)
         | SYM_RM_RELEASE '=' VERSION_ID
         | SYM_IS_CONTROLLED
         | SYM_IS_GENERATED
@@ -87,7 +87,7 @@ public class ADL14Listener extends Adl14BaseListener {
                 }
             }
             if(ctx.meta_data_tag_build_uid() != null) {
-                authoredArchetype.setBuildUid(ctx.GUID().getText());
+                authoredArchetype.setBuildUid(ctx.guid_or_oid().getText());
             }
             if(ctx.meta_data_tag_rm_release() != null) {
                 authoredArchetype.setRmRelease(ctx.VERSION_ID().getText());
@@ -99,7 +99,7 @@ public class ADL14Listener extends Adl14BaseListener {
                 authoredArchetype.setGenerated(true);
             }
             if(ctx.meta_data_tag_uid() != null) {
-                authoredArchetype.setUid(ctx.GUID().getText());
+                authoredArchetype.setUid(ctx.guid_or_oid().getText());
             }
             else if(ctx.identifier() != null) {
                 authoredArchetype.addOtherMetadata(ctx.identifier().getText(), ctx.meta_data_value() == null ? null : ctx.meta_data_value().getText());

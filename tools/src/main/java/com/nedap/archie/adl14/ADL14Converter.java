@@ -4,6 +4,7 @@ import com.nedap.archie.adl14.log.ADL2ConversionLog;
 import com.nedap.archie.adl14.log.ADL2ConversionRunLog;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.ArchetypeHRID;
+import com.nedap.archie.aom.ResourceDescription;
 import com.nedap.archie.aom.utils.ArchetypeParsePostProcesser;
 import com.nedap.archie.diff.Differentiator;
 import com.nedap.archie.flattener.Flattener;
@@ -85,6 +86,7 @@ public class ADL14Converter {
         Archetype convertedArchetype = archetype.clone();
         new ADL14DescriptionConverter().convert(convertedArchetype);
         setCorrectVersions(convertedArchetype);
+        convertHeader(convertedArchetype);
 
 
         ADL2ConversionResult result = new ADL2ConversionResult(convertedArchetype);
@@ -102,6 +104,31 @@ public class ADL14Converter {
 
     }
 
+    private void convertHeader(Archetype convertedArchetype) {
+        if(convertedArchetype.getUid() != null) {
+            //if UID is in OID syntax, move it to the description
+            if(convertedArchetype.getUid().matches("[0-9]+(\\.[0-9]+)+")) {
+                moveOidToMetadata(convertedArchetype, convertedArchetype.getUid(), "oid");
+                convertedArchetype.setUid(null);
+            }
+        }
+        if(convertedArchetype.getBuildUid() != null) {
+            if(convertedArchetype.getBuildUid().matches("[0-9]+\\.([0-9]+)+")) {
+                moveOidToMetadata(convertedArchetype, convertedArchetype.getBuildUid(), "build_oid");
+                convertedArchetype.setBuildUid(null);
+            }
+        }
+    }
+
+    private void moveOidToMetadata(Archetype convertedArchetype, String oid, String oidFieldName) {
+        if(convertedArchetype.getDescription() == null) {
+            convertedArchetype.setDescription(new ResourceDescription());
+        }
+        if(convertedArchetype.getDescription().getOtherDetails() == null) {
+            convertedArchetype.getDescription().setOtherDetails(new LinkedHashMap<>());
+        }
+        convertedArchetype.getDescription().getOtherDetails().put(oidFieldName, oid);
+    }
 
 
     private void setCorrectVersions(Archetype result) {
