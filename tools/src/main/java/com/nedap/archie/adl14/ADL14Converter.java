@@ -96,7 +96,7 @@ public class ADL14Converter {
 
         //ADL 1.4 has cardinality, existence and occurrences always present, in ADL 2 they can be removed if same as default.
         //so remove them
-        new DefaultMultiplicityRemover(metaModels).removeDefaultMultiplicity(convertedArchetype);
+        new DefaultMultiplicityRemover(metaModels, true).removeDefaultMultiplicity(convertedArchetype);
         //set some values that are not directly in ODIN or ADL
         ArchetypeParsePostProcesser.fixArchetype(convertedArchetype);
 

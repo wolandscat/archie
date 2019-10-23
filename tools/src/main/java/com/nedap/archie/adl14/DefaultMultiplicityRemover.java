@@ -3,6 +3,7 @@ package com.nedap.archie.adl14;
 import com.nedap.archie.adlparser.modelconstraints.BMMConstraintImposer;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.CAttribute;
+import com.nedap.archie.aom.CAttributeTuple;
 import com.nedap.archie.aom.CComplexObject;
 import com.nedap.archie.aom.CObject;
 import com.nedap.archie.base.MultiplicityInterval;
@@ -17,12 +18,22 @@ import java.util.List;
  */
 public class DefaultMultiplicityRemover {
 
-
     private final MetaModels metaModels;
     private BMMConstraintImposer constraintImposer;
 
+    private boolean removeEmptyAttributes = false;
+
     public DefaultMultiplicityRemover(MetaModels metaModels) {
+        this(metaModels, false);
+    }
+
+    public DefaultMultiplicityRemover(MetaModels metaModels, boolean removeEmptyAttributes) {
         this.metaModels = metaModels;
+        this.removeEmptyAttributes = removeEmptyAttributes;
+    }
+
+    public void setRemoveEmptyAttributes(boolean removeEmptyAttributes) {
+        this.removeEmptyAttributes = removeEmptyAttributes;
     }
 
     public void removeDefaultMultiplicity(Archetype archetype) {
@@ -42,20 +53,39 @@ public class DefaultMultiplicityRemover {
                 object.setOccurrences(null);
             }
         }
-        List<CAttribute> attributesToRemove = new ArrayList<>();
-        for(CAttribute attribute:object.getAttributes()) {
-            removeMultiplicities(attribute);
-            //remove all empty attributes. They are 'attribute matches {*}' in ADL 1.4, and should not be present in ADL 2
-            if(attribute.getCardinality() == null && attribute.getExistence() == null && (attribute.getChildren() == null || attribute.getChildren().isEmpty())) {
-                attributesToRemove.add(attribute);
+        if(object instanceof CComplexObject) {
+            CComplexObject complexObject = (CComplexObject) object;
+
+            List<CAttribute> attributesToRemove = new ArrayList<>();
+            for (CAttribute attribute : object.getAttributes()) {
+                removeMultiplicities(attribute);
+                if(removeEmptyAttributes) {
+                    //remove all empty attributes. They are 'attribute matches {*}' in ADL 1.4, and should not be present in ADL 2
+                    if (attribute.getCardinality() == null && attribute.getExistence() == null && (attribute.getChildren() == null || attribute.getChildren().isEmpty())) {
+                        if (!isInTuple(complexObject, attribute)) {
+                            attributesToRemove.add(attribute);
+                        }
+                    }
+                }
+            }
+
+            for (CAttribute attributeToRemove : attributesToRemove) {
+                complexObject.removeAttribute(attributeToRemove);
             }
         }
 
-        for(CAttribute attributeToRemove:attributesToRemove) {
-            CComplexObject complexObject = (CComplexObject) object;
-            complexObject.removeAttribute(attributeToRemove);
-        }
+    }
 
+    private boolean isInTuple(CComplexObject complexObject, CAttribute attribute) {
+        if(complexObject.getAttributeTuples() == null) {
+            return false;
+        }
+        for(CAttributeTuple tuple:complexObject.getAttributeTuples()) {
+            if(tuple.getMember(attribute.getRmAttributeName()) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void removeMultiplicities(CAttribute attribute) {
