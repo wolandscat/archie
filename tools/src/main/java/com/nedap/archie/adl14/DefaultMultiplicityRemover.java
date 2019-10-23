@@ -91,12 +91,12 @@ public class DefaultMultiplicityRemover {
     private void removeMultiplicities(CAttribute attribute) {
         CAttribute defaultAttribute = constraintImposer.getDefaultAttribute(attribute.getParent().getRmTypeName(), attribute.getRmAttributeName());
         if(attribute.getExistence() != null) {
-            if(defaultAttribute.getExistence() != null && defaultAttribute.getExistence().equals(attribute.getExistence())) {
+            if(defaultAttribute != null && defaultAttribute.getExistence() != null && defaultAttribute.getExistence().equals(attribute.getExistence())) {
                 attribute.setExistence(null);
             }
         }
         if(attribute.getCardinality() != null) {
-            if(defaultAttribute.getCardinality() != null) {
+            if(defaultAttribute != null && defaultAttribute.getCardinality() != null) {
                 if(defaultAttribute.getCardinality().equals(attribute.getCardinality())) {
                     attribute.setCardinality(null);
                 }

@@ -63,7 +63,7 @@ public class LargeSetOfADL14sTest {
 
         List<Archetype> archetypes = new ArrayList<>();
         for(String file:adlFiles) {
-//            if(!file.contains("oid")) {
+//            if(!file.contains("-dash")) {
 //                continue;
 //            }
             Archetype archetype = parse(exceptions, parseErrors, file);
