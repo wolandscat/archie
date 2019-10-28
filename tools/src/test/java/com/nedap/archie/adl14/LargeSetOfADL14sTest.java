@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,45 @@ public class LargeSetOfADL14sTest {
     }
 
     @Test
+    public void testRiskFamilyhistory() throws Exception {
+
+        ADL14Parser parser = new ADL14Parser(BuiltinReferenceModels.getMetaModels());
+
+        Archetype riskParent = parser.parse(getClass().getResourceAsStream("/adl14/risk_parent.adl"), conversionConfiguration);
+        Archetype riskFamilyHistory = parser.parse(getClass().getResourceAsStream("/adl14/risk_history.adl"), conversionConfiguration);
+
+        List<Archetype> archetypes = Arrays.asList(riskParent, riskFamilyHistory);
+
+        ADL2ConversionResultList converted = new ADL14Converter(BuiltinReferenceModels.getMetaModels(), conversionConfiguration)
+                .convert(archetypes);
+
+        for(ADL2ConversionResult conversionResult:converted.getConversionResults()) {
+            if(conversionResult.getException() != null) {
+                logger.error("exception in converter for archetype id " + conversionResult.getArchetypeId(), conversionResult.getException());
+            }
+            if (conversionResult.getArchetype() != null) {
+                System.out.println(ADLArchetypeSerializer.serialize(conversionResult.getArchetype()));
+            } else {
+                logger.warn("archetype null: " + conversionResult.getArchetypeId());
+            }
+        }
+
+        InMemoryFullArchetypeRepository adl2Repository = new InMemoryFullArchetypeRepository();
+        for(ADL2ConversionResult conversionResult:converted.getConversionResults()) {
+            if(conversionResult.getException() == null && conversionResult.getArchetype() != null) {
+                adl2Repository.addArchetype(conversionResult.getArchetype());
+            }
+        }
+        adl2Repository.compile(BuiltinReferenceModels.getMetaModels());
+
+        for(ValidationResult validationResult:adl2Repository.getAllValidationResults()) {
+            if(!validationResult.passes()) {
+                logger.error("error validating {}: {}", validationResult.getArchetypeId(), validationResult.getErrors());
+            }
+        }
+    }
+
+    @Test
     public void parseLots() throws Exception {
         Reflections reflections = new Reflections("adl14", new ResourcesScanner());
         List<String> adlFiles = new ArrayList(reflections.getResources(Pattern.compile(".*\\.adl")));
@@ -59,11 +99,9 @@ public class LargeSetOfADL14sTest {
         Map<String, Exception> exceptions = new LinkedHashMap<>();
         Map<String, ANTLRParserErrors> parseErrors = new LinkedHashMap<>();
 
-        InMemoryFullArchetypeRepository repository = new InMemoryFullArchetypeRepository();
-
         List<Archetype> archetypes = new ArrayList<>();
         for(String file:adlFiles) {
-//            if(!file.contains("-dash")) {
+//            if(!file.contains("risk_")) {
 //                continue;
 //            }
             Archetype archetype = parse(exceptions, parseErrors, file);
