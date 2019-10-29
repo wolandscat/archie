@@ -21,13 +21,13 @@ public class DateTimeParsers {
 
     public static TemporalAccessor parseDateTimeValue(String text) {
         try {
-            return DateTimeFormatters.ISO_8601_DATE_TIME_WITH_OPTIONAL_MICROS.parseBest(text, OffsetDateTime::from, LocalDateTime::from);
+            return DateTimeFormatters.ISO_8601_DATE_TIME.parseBest(text, OffsetDateTime::from, LocalDateTime::from);
         } catch (DateTimeParseException e) {
             try {
                 //Not parseable as a standard public object from datetime. We do not implement our own yet (we could!)
                 //so fallback to the Parsed object. The Parsed object is package-private, so cannot be added as a reference
                 //to the parseBest query, unfortunately.
-                return DateTimeFormatters.ISO_8601_DATE_TIME_WITH_OPTIONAL_MICROS.parse(text);
+                return DateTimeFormatters.ISO_8601_DATE_TIME.parse(text);
             } catch (DateTimeParseException e1) {
                 try {
                     //some more interesting date_time expression without hyphens...
