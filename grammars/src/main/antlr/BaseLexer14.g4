@@ -132,7 +132,17 @@ fragment RULE_IDENTIFIER: ALPHA_UC_ID | ALPHA_LC_ID;
 
 // URIs - simple recogniser based on https://tools.ietf.org/html/rfc3986 and
 // http://www.w3.org/Addressing/URL/5_URI_BNF.html
-URI : URI_SCHEME SYM_COLON URI_HIER_PART ( '?' URI_QUERY+ )? ;
+URI :  URN | URI_SCHEME SYM_COLON URI_HIER_PART ( '?' URI_QUERY+ )? ;
+
+fragment URN: ASSIGNED_NAME RQ_COMPONENTS ('#' F_COMPONENT)?;
+fragment ASSIGNED_NAME: 'urn:' NID ':' NSS;
+fragment NID: ALPHANUM_CHAR (ALPHANUM_CHAR | '_')* ALPHANUM_CHAR;
+fragment NSS: URI_XPALPHA (URI_XPALPHA | '/')*;
+fragment RQ_COMPONENTS: ('?+' R_COMPONENT)? ('?=' Q_COMPONENT)?;
+fragment R_COMPONENT: URI_XPALPHA (URI_XPALPHA | '/' | '?')*;
+fragment Q_COMPONENT: URI_XPALPHA (URI_XPALPHA | '/' | '?')*;
+fragment F_COMPONENT: URI_QUERY_FRAGMENT;
+
 fragment URI_HIER_PART : ( ('//')? URI_AUTHORITY ) URI_PATH? ;
 fragment URI_AUTHORITY : ( URI_USER '@' )? URI_HOST ( SYM_COLON NATURAL )? ;
 fragment URI_HOST : IP_LITERAL | NAMESPACE ;
@@ -149,7 +159,7 @@ fragment IPV6_LITERAL : HEX_QUAD (SYM_COLON HEX_QUAD )* SYM_COLON SYM_COLON HEX_
 
 fragment URI_XPALPHA : URI_XALPHA | '+' ;
 fragment URI_XALPHA : ALPHANUM_CHAR | URI_SAFE | URI_EXTRA | URI_ESCAPE ;
-fragment URI_SAFE   : [$@._-] ;
+fragment URI_SAFE   : [$@\\._-] ;
 fragment URI_EXTRA  : [!*"'()] ;
 fragment URI_ESCAPE : '%' HEX_DIGIT HEX_DIGIT ;
 //fragment URI_RESERVED : [=;/#?: ] ;
@@ -160,7 +170,7 @@ fragment HEX_QUAD : HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT ;
 // According to IETF http://tools.ietf.org/html/rfc1034[RFC 1034] and http://tools.ietf.org/html/rfc1035[RFC 1035],
 // as clarified by http://tools.ietf.org/html/rfc2181[RFC 2181] (section 11)
 fragment NAMESPACE : LABEL ('.' LABEL)* ;
-fragment LABEL : ALPHA_CHAR ( (NAME_CHAR|'%')* (ALPHANUM_CHAR|'%') )? ;
+fragment LABEL : ALPHA_CHAR (NAME_CHAR|URI_ESCAPE)* ;
 
 GUID : HEX_DIGIT+ '-' HEX_DIGIT+ '-' HEX_DIGIT+ '-' HEX_DIGIT+ '-' HEX_DIGIT+ ;
 OID : DIGIT+ '.' DIGIT+ '.' DIGIT+ ('.' DIGIT+)+;

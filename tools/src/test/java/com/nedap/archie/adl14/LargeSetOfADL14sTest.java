@@ -101,9 +101,9 @@ public class LargeSetOfADL14sTest {
 
         List<Archetype> archetypes = new ArrayList<>();
         for(String file:adlFiles) {
-//            if(!file.contains("risk_")) {
-//                continue;
-//            }
+            if(!file.contains("diagnosekat")) {
+                continue;
+            }
             Archetype archetype = parse(exceptions, parseErrors, file);
             if(archetype != null) {
                 archetypes.add(archetype);
