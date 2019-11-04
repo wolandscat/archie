@@ -53,6 +53,14 @@ public class LargeSetOfADL14sTest {
     }
 
     @Test
+    public void parseUrn() {
+//        CodePointCharStream codePointCharStream = CharStreams.fromString("terminology://SNOMED-CT.com/408733002?subset=Diabetic");//%20Retinopathy%20Study%20field");
+        CodePointCharStream codePointCharStream = CharStreams.fromString("urn:oin:2.3.1.4.4545.22.23");
+        Adl14Lexer adl14Lexer = new Adl14Lexer(codePointCharStream);
+        assertEquals(1, adl14Lexer.getAllTokens().size());
+    }
+
+    @Test
     public void testRiskFamilyhistory() throws Exception {
 
         ADL14Parser parser = new ADL14Parser(BuiltinReferenceModels.getMetaModels());
