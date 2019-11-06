@@ -78,7 +78,7 @@ public class RulesFlattener {
             }
             if (!(assertion.getExpression() instanceof ForAllStatement)) {
                 setVariableReferencePrefix(assertion.getExpression(),"item");
-                assertion.setExpression(new ForAllStatement("item",new ModelReference(),assertion.getExpression()));
+                assertion.setExpression(new ForAllStatement("item",new ModelReference(""),assertion.getExpression()));
             }
             addVariableAndTagPrefixToExpression(assertion.getExpression(), variablePrefix, pathPrefix);
         } else if (clonedStatement instanceof ExpressionVariable) {
