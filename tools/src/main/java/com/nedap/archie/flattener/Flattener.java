@@ -169,7 +169,7 @@ public class Flattener implements IAttributeFlattenerSupport {
             prohibitZeroOccurrencesConstraints(result);
         }
 
-        rulesFlattener.combineRules(child, result, "prefix", "", "", true /* override statements with same tag */);//TODO: actually set a unique prefix
+        rulesFlattener.combineRules(child, result, "", "", "", true /* override statements with same tag */);//TODO: actually set a unique prefix
         if(createOperationalTemplate) {
             optCreator.fillSlots((OperationalTemplate) result);
 
