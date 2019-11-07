@@ -1,0 +1,71 @@
+archetype (adl_version=2.0.5; rm_release=1.0.4)
+    openEHR-EHR-OBSERVATION.VCORMT_rm_non_conforming_type_use_node.v1.0.0
+
+language
+    original_language = <[ISO_639-1::en]>
+
+description
+    original_author = <
+        ["name"] = <"Pieter Bos">
+    >
+    lifecycle_state = <"DRAFT">
+    details = <
+        ["en"] = <
+            language = <[ISO-639_1::en]>
+            purpose = <"purpose">
+        >
+    >
+    other_details = <
+        ["regression"] = <"VCORMT">
+    >
+
+definition
+    OBSERVATION[id1] matches {    -- descr
+        data matches {
+            HISTORY[id2] matches {
+                events matches {
+                    POINT_EVENT[id3] matches {    -- Point event
+                        data matches {
+                            ITEM_TREE[id4] matches {
+                                items matches {
+                                    use_node POINT_EVENT[id15] /data[id2]/events[id3]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+terminology
+    term_definitions = <
+        ["en"] = <
+            ["id1"] = <
+                text = <"non conforming use node type">
+                description = <"non conforming use node type">
+            >
+            ["id3"] = <
+                text = <"Point event">
+                description = <"Point event">
+            >
+            ["ac7"] = <
+                text = <"sdfds">
+                description = <"dsfds">
+            >
+            ["at8"] = <
+                text = <"sdfds">
+                description = <"dsfdsfds">
+            >
+            ["id15"] = <
+                text = <"wrong type">
+                description = <"use node with wrong type">
+            >
+        >
+    >
+    value_sets = <
+        ["ac7"] = <
+            id = <"ac7">
+            members = <"at8", ...>
+        >
+    >
