@@ -43,7 +43,7 @@ public class FlatFormValidation extends ValidatingVisitor {
                 String cObjectTypeName = cObject instanceof CComplexObjectProxy ?
                         "use_node (C_COMPLEX_OBJECT)" :
                         cObject.getClass().getSimpleName();
-                addMessageWithPath(ErrorType.VUNP, cObject.path(), I18n.t("Use_node (C_COMPLEX_OBJECT_PROXY) must point to a C_COMPLEX_OBJECT, but points to a {0}", cObjectTypeName);
+                addMessageWithPath(ErrorType.VUNP, cObject.path(), I18n.t("Use_node (C_COMPLEX_OBJECT_PROXY) must point to a C_COMPLEX_OBJECT, but points to a {0}", cObjectTypeName));
             }
         }
     }
