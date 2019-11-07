@@ -30,10 +30,8 @@ public class FlatFormValidation extends ValidatingVisitor {
             addMessageWithPath(ErrorType.VUNP, cObject.path(), I18n.t("Use_node (C_COMPLEX_OBJECT_PROXY) points to a path that resolves to more than one object"));
         } else {
             ArchetypeModelObject replacement = replacements.get(0);
-            if(replacement instanceof CComplexObjectProxy) {
-                addMessageWithPath(ErrorType.VUNP, cObject.path(), I18n.t("Use_node (C_COMPLEX_OBJECT_PROXY) points to a use_node (C_COMPLEX_OBJECT_PROXY). That is not allowed"));
-            } else if (replacement instanceof CComplexObject) {
 
+            if (replacement instanceof CComplexObject) {
                 ComplexObjectProxyReplacement complexObjectProxyReplacement = ComplexObjectProxyReplacement.getComplexObjectProxyReplacement(cObject);
 
                 CComplexObject replacementComplexObject = complexObjectProxyReplacement.getReplacement();
@@ -42,7 +40,10 @@ public class FlatFormValidation extends ValidatingVisitor {
                     addMessageWithPath(ErrorType.VUNT, cObject.path(), I18n.t("Use_node (C_COMPLEX_OBJECT_PROXY) points to type {0}, which does not conform to type {1}", replacementComplexObject.getRmTypeName(), cObject.getRmTypeName()));
                 }
             } else {
-                addMessageWithPath(ErrorType.VUNP, cObject.path(), I18n.t("Use_node (C_COMPLEX_OBJECT_PROXY) must point to a C_COMPLEX_OBJECT, but points to a {0}", cObject.getClass().getSimpleName()));
+                String cObjectTypeName = cObject instanceof CComplexObjectProxy ?
+                        "use_node (C_COMPLEX_OBJECT)" :
+                        cObject.getClass().getSimpleName();
+                addMessageWithPath(ErrorType.VUNP, cObject.path(), I18n.t("Use_node (C_COMPLEX_OBJECT_PROXY) must point to a C_COMPLEX_OBJECT, but points to a {0}", cObjectTypeName);
             }
         }
     }
