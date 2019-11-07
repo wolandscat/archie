@@ -46,7 +46,7 @@ public class ComplexObjectProxyReplacement {
      * Get the archetype root that is the most near parent. Either returns a C_ARCHETYPE_ROOT or the complex_object at archetype.getDefinition()
      * @return
      */
-    private static CComplexObject getNearestArchetypeRoot(CObject object) {
+    public static CComplexObject getNearestArchetypeRoot(CObject object) {
         //find a C_ARCHETYPE_ROOT
         CAttribute parentAttribute = object.getParent();
         while(parentAttribute != null) {
