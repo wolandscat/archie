@@ -162,9 +162,8 @@ public class TestUtil {
         Reflections reflections = new Reflections("ckm-mirror", new ResourcesScanner());
         List<String> adlFiles = new ArrayList(reflections.getResources(Pattern.compile(".*\\.adls")));
         for(String file:adlFiles) {
-            Archetype archetype = null;
-            Exception exception = null;
-            ANTLRParserErrors errors = null;
+            Archetype archetype;
+            ANTLRParserErrors errors;
             try (InputStream stream = TestUtil.class.getResourceAsStream("/" + file)) {
                 ADLParser parser = new ADLParser();
                 parser.setLogEnabled(false);
@@ -176,7 +175,6 @@ public class TestUtil {
                     logger.warn("error parsing archetype: {}", errors);
                 }
             } catch (Exception e) {
-                exception = e;
                 logger.warn("exception parsing archetype {}", file, e);
             }
         }
