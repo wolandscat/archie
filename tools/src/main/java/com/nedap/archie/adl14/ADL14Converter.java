@@ -3,7 +3,6 @@ package com.nedap.archie.adl14;
 import com.nedap.archie.adl14.log.ADL2ConversionLog;
 import com.nedap.archie.adl14.log.ADL2ConversionRunLog;
 import com.nedap.archie.aom.Archetype;
-import com.nedap.archie.aom.ArchetypeHRID;
 import com.nedap.archie.aom.ResourceDescription;
 import com.nedap.archie.aom.utils.ArchetypeParsePostProcesser;
 import com.nedap.archie.diff.Differentiator;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ADL14Converter {
 
@@ -96,7 +94,7 @@ public class ADL14Converter {
 
         //ADL 1.4 has cardinality, existence and occurrences always present, in ADL 2 they can be removed if same as default.
         //so remove them
-        new DefaultMultiplicityRemover(metaModels, true).removeDefaultMultiplicity(convertedArchetype);
+        new DefaultRmStructureRemover(metaModels, true).removeRMDefaults(convertedArchetype);
         //set some values that are not directly in ODIN or ADL
         ArchetypeParsePostProcesser.fixArchetype(convertedArchetype);
 

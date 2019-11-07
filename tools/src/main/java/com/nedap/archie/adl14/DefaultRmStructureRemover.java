@@ -13,21 +13,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Removes any non-default cardinality or existence. Useful in ADL 1.4 to ADL 2 conversion, but could also
- * be used in archetype modeling tools.
+ * Removes anything in an archetype that is exactly the default of the reference model. That includes:
+ * <ul>
+ *  <li>attribute cardinality and existence that is exactly the attribute default</li>
+ *  <li>C_OBJECT occurrences that are exactly the default of the C_OBJECT</li>
+ *  <li>Optionally removed attributes that are empty (without existence, cardinality or childreN) after removing default cardinality and existence,</li>
+ * </ul>
+ *
  */
-public class DefaultMultiplicityRemover {
+public class DefaultRmStructureRemover {
 
     private final MetaModels metaModels;
     private BMMConstraintImposer constraintImposer;
 
     private boolean removeEmptyAttributes = false;
 
-    public DefaultMultiplicityRemover(MetaModels metaModels) {
+    /**
+     * Construct a DefaultRmStructureRemover that does not remove empty attributes
+     * @param metaModels the metamodels containing metamodel information for the preseted archetypes
+     */
+    public DefaultRmStructureRemover(MetaModels metaModels) {
         this(metaModels, false);
     }
 
-    public DefaultMultiplicityRemover(MetaModels metaModels, boolean removeEmptyAttributes) {
+    /**
+     * Construct a DefaultRmStructureRemover
+     * @param metaModels the metamodels containing metamodel information for the preseted archetypes
+     * @param removeEmptyAttributes if true, will remove empty attributes. If false, will not
+     */
+    public DefaultRmStructureRemover(MetaModels metaModels, boolean removeEmptyAttributes) {
         this.metaModels = metaModels;
         this.removeEmptyAttributes = removeEmptyAttributes;
     }
@@ -36,17 +50,17 @@ public class DefaultMultiplicityRemover {
         this.removeEmptyAttributes = removeEmptyAttributes;
     }
 
-    public void removeDefaultMultiplicity(Archetype archetype) {
+    public void removeRMDefaults(Archetype archetype) {
         this.metaModels.selectModel(archetype);
         if(metaModels.getSelectedModel() == null) {
             throw new IllegalArgumentException("cannot find model for argument, so cannot remove default multiplicity");
         }
 
         this.constraintImposer = new BMMConstraintImposer(metaModels.getSelectedBmmModel());
-        removeMultiplicities(archetype.getDefinition());
+        removeRMDefaults(archetype.getDefinition());
     }
 
-    private void removeMultiplicities(CObject object) {
+    private void removeRMDefaults(CObject object) {
         if(object.getOccurrences() != null) {
             MultiplicityInterval defaultRMOccurrences = object.getDefaultRMOccurrences(metaModels::referenceModelPropMultiplicity);
             if(defaultRMOccurrences.equals(object.getOccurrences())) {
@@ -103,7 +117,7 @@ public class DefaultMultiplicityRemover {
             }
         }
         for(CObject child:attribute.getChildren()) {
-            removeMultiplicities(child);
+            removeRMDefaults(child);
         }
 
     }
