@@ -1,5 +1,6 @@
 package com.nedap.archie.adl14;
 
+import com.google.common.collect.Lists;
 import com.nedap.archie.adl14.log.ADL2ConversionLog;
 import com.nedap.archie.adl14.log.ConvertedCodeResult;
 import com.nedap.archie.adl14.log.CreatedCode;
@@ -23,6 +24,7 @@ import com.nedap.archie.rminfo.MetaModels;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -214,7 +216,7 @@ public class ADL14NodeIDConverter {
                     } else if (cAttributeInParent.getChildren().size() == 1) {
                         if(this.metaModels.rmTypesConformant(cObject.getRmTypeName(), cAttributeInParent.getChildren().get(0).getRmTypeName())) {
                             //this replaces a parent node, so a specialisation. add id code and possibly a term
-                            createSpecialisedNodeId(cObject, path, childrenWithSameRmTypeName);
+                            createSpecialisedNodeId(cObject, path, Arrays.asList(cAttributeInParent.getChildren().get(0)));
                         } else {
                             // doesn't conform to parent type, but we assume does to RM type.
                             // E.g. DV_INTERVAL<> being added alongside a DV_QUANTITY

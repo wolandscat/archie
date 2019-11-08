@@ -8,6 +8,9 @@ import com.nedap.archie.rules.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -16,6 +19,7 @@ import java.util.List;
 public class RulesParser extends BaseTreeWalker {
 
     private PrimitivesConstraintParser primitivesConstraintParser;
+    public static final Pattern VARIABLE_ASSIGNMENT_PATTERN = Pattern.compile("\\$(?<name>.*)\\:(?<type>.*)");
 
     public RulesParser(ANTLRParserErrors errors) {
         super(errors);
@@ -49,8 +53,14 @@ public class RulesParser extends BaseTreeWalker {
     }
 
     private void setVariableNameAndType(VariableDeclarationContext context, ExpressionVariable result) {
-        result.setName(context.identifier(0).getText());
-        result.setType(ExpressionType.fromString(context.identifier(1).getText()));
+        Matcher matcher = VARIABLE_ASSIGNMENT_PATTERN.matcher(context.VARIABLE_DECLARATION().getText());
+
+        if(matcher.matches()) {
+            result.setName(matcher.group("name"));
+            result.setType(ExpressionType.fromString(matcher.group("type")));
+        } else {
+            throw new IllegalStateException("variable declaration does not conform to $<name>:<type>. This should have been handled in the lexer and is likely a bug in Archie: " + context.getText());
+        }
     }
 
     private Expression parseExpression(ExpressionContext context) {

@@ -119,7 +119,7 @@ public class ValidateAgainstReferenceModel extends ValidatingVisitor {
                         }
                     }
                     if(defaultAttribute.isMultiple()) {
-                        if(defaultAttribute.getCardinality() != null && cAttribute.getCardinality() != null && !defaultAttribute.getCardinality().contains(cAttribute.getCardinality())){
+                        if(defaultAttribute.getCardinality() != null && cAttribute.getCardinality() != null && cAttribute.getCardinality().getInterval() != null && !defaultAttribute.getCardinality().contains(cAttribute.getCardinality())){
                             if(defaultAttribute.getCardinality().equals(cAttribute.getCardinality())) {
                                 if(settings.isStrictMultiplicitiesSpecializationValidation()) {
                                     addMessageWithPath(ErrorType.VCACA, cAttribute.path(),

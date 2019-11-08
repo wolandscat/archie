@@ -18,7 +18,7 @@ assertion_list: (assertion (';')?)+ ;// {_input.LA(1) == WS || _input.LA(1) == L
 
 assertion: variableDeclaration | booleanAssertion;
 
-variableDeclaration: SYM_VARIABLE_START identifier SYM_COLON identifier SYM_ASSIGNMENT expression;
+variableDeclaration: VARIABLE_DECLARATION SYM_ASSIGNMENT expression;
 
 booleanAssertion: ( identifier SYM_COLON )? expression ;
 

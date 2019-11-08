@@ -200,7 +200,7 @@ public class BigArchetypeValidatorTest {
                             errorStrings.add(archetype == null ? file : archetype.getArchetypeId()  + " has unknown parse errors: " + errors.toString());
                         }
                         log.error("exception:", exception);
-                        errorStrings.add(archetype == null ? file : archetype.getArchetypeId()  + " has exception: " + exception.getMessage());
+                        errorStrings.add(archetype == null ? file : archetype.getArchetypeId()  + " has exception: " + (exception == null ? "no exception": exception.getMessage()));
                         unexpectedParseErrors++;
                     }
                 } catch (IOException e) {

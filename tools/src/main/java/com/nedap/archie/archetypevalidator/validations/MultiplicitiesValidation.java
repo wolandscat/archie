@@ -37,7 +37,10 @@ public class MultiplicitiesValidation extends ValidatingVisitor {
                 } else {
                     //multiple
                     Cardinality cardinality = attribute.getCardinality();
-                    if(cardinality != null && !cardinality.getInterval().isUpperUnbounded() &&
+                    if(cardinality != null && cardinality.getInterval() == null) {
+                        addMessageWithPath(ErrorType.OTHER, attribute.path(),
+                                I18n.t("A cardinality must have an interval - in this case it is null"));
+                    } else if(cardinality != null && !cardinality.getInterval().isUpperUnbounded() &&
                             cObject.getOccurrences() != null  && !cObject.getOccurrences().isUpperUnbounded() &&
                             cObject.getOccurrences().getUpper() > cardinality.getInterval().getUpper()) {
                         addMessageWithPath(ErrorType.VACMCU, cObject.path(),

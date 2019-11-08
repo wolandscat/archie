@@ -15,6 +15,8 @@ import com.nedap.archie.rm.RMObject;
 import com.nedap.archie.rminfo.ArchieRMInfoLookup;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +33,8 @@ import static org.junit.Assert.*;
  * Created by pieter.bos on 06/04/16.
  */
 public class TestUtil {
+
+    private static final Logger logger = LoggerFactory.getLogger(TestUtil.class);
 
     private RMObjectCreator creator = new RMObjectCreator(ArchieRMInfoLookup.getInstance());
 
@@ -158,9 +162,8 @@ public class TestUtil {
         Reflections reflections = new Reflections("ckm-mirror", new ResourcesScanner());
         List<String> adlFiles = new ArrayList(reflections.getResources(Pattern.compile(".*\\.adls")));
         for(String file:adlFiles) {
-            Archetype archetype = null;
-            Exception exception = null;
-            ANTLRParserErrors errors = null;
+            Archetype archetype;
+            ANTLRParserErrors errors;
             try (InputStream stream = TestUtil.class.getResourceAsStream("/" + file)) {
                 ADLParser parser = new ADLParser();
                 parser.setLogEnabled(false);
@@ -168,8 +171,11 @@ public class TestUtil {
                 errors = parser.getErrors();
                 if (errors.hasNoErrors()) {
                     result.addArchetype(archetype);
+                } else {
+                    logger.warn("error parsing archetype: {}", errors);
                 }
             } catch (Exception e) {
+                logger.warn("exception parsing archetype {}", file, e);
             }
         }
         return result;

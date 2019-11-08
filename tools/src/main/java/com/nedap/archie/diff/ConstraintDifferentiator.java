@@ -243,8 +243,8 @@ public class ConstraintDifferentiator {
             }  else if (attribute.getCardinality() != null && defaultAttribute.getCardinality() != null) {
                 Cardinality cardinality = attribute.getCardinality();
                 Cardinality defaultCardinality = defaultAttribute.getCardinality();
-                if (cardinality.getInterval().equals(defaultCardinality.getInterval())) {
-                    cardinality.setInterval(null);
+                if (cardinality.getInterval().equals(defaultCardinality.getInterval()) && cardinality.isOrdered() == defaultCardinality.isOrdered() && cardinality.isUnique() == defaultCardinality.isUnique()) {
+                    attribute.setCardinality(null);
                 }
             }
             if(attributeInParent != null && attributeInParent.getExistence() != null) {

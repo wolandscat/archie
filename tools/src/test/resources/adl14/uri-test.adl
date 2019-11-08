@@ -1,0 +1,38 @@
+archetype (adl_version=1.4; uid=d8e13c17-6da2-40b7-b945-5f93df77daa4)
+	openEHR-EHR-OBSERVATION.fundoscopic_examination.v0
+
+concept
+	[at0000]	-- Fundoscopic examination of eyes
+language
+	original_language = <[ISO_639-1::en]>
+
+description
+	original_author = <
+		["name"] = <"Heather Leslie">
+		["organisation"] = <"Atomica Informatics">
+		["email"] = <"heather.leslie@atomicainformatics.com">
+		["date"] = <"2008-07-27">
+	>
+definition
+	OBSERVATION[at0000] matches {*}
+
+
+ontology
+	terminologies_available = <"SNOMED-CT", ...>
+	term_definitions = <
+		["es"] = <
+			items = <
+				["at0000"] = <
+					text = <"*Fundoscopic examination of eyes(en)">
+					description = <"*Record of clinical findings on fundoscopy of eyes.(en)">
+				>
+			>
+		>
+	>
+	constraint_bindings = <
+		["SNOMED-CT"] = <
+			items = <
+				["ac0002"] = <terminology:SNOMED-CT/408733002?subset=Diabetic%20Retinopathy%20Study%20field>
+			>
+		>
+	>

@@ -66,28 +66,30 @@ public class BasicTerminologyValidation extends ArchetypeValidationBase {
     private void validateTerminologyBindings() {
         ArchetypeTerminology terminology = archetype.getTerminology();
         Map<String, Map<String, URI>> termBindings = terminology.getTermBindings();
-        for(String terminologyId: termBindings.keySet()) {
-            for(String constraintCodeOrPath: termBindings.get(terminologyId).keySet()) {
-                boolean archetypeHasPath = false;
-                try {
-                    archetypeHasPath = !new AOMPathQuery(constraintCodeOrPath).findList(archetype.getDefinition()).isEmpty();
-                } catch (Exception e) {
-                    //if not a valid path, fine
-                }
-                if(!AOMUtils.isValidCode(constraintCodeOrPath) && !(
-                        archetypeHasPath || combinedModels.hasReferenceModelPath(archetype.getDefinition().getRmTypeName(), constraintCodeOrPath)
+        if(termBindings != null) {
+            for (String terminologyId : termBindings.keySet()) {
+                if(termBindings.get(terminologyId) != null) {
+                    for (String constraintCodeOrPath : termBindings.get(terminologyId).keySet()) {
+                        boolean archetypeHasPath = false;
+                        try {
+                            archetypeHasPath = !new AOMPathQuery(constraintCodeOrPath).findList(archetype.getDefinition()).isEmpty();
+                        } catch (Exception e) {
+                            //if not a valid path, fine
+                        }
+                        if (!AOMUtils.isValidCode(constraintCodeOrPath) && !(
+                                archetypeHasPath || combinedModels.hasReferenceModelPath(archetype.getDefinition().getRmTypeName(), constraintCodeOrPath)
                         )
-                    ) {
-                    addMessage(ErrorType.VTTBK, String.format("Term binding key %s in path format is not present in archetype", constraintCodeOrPath));
-                }
-                else if(AOMUtils.isValidCode(constraintCodeOrPath) &&
-                            !terminology.hasCode(constraintCodeOrPath) &&
-                            !(archetype.isSpecialized() && flatParent != null && !flatParent.getTerminology().hasCode(constraintCodeOrPath))
-                        )
-                    {
-                    addMessage(ErrorType.VTTBK, String.format("Term binding key %s is not present in terminology", constraintCodeOrPath));
-                } else {
-                    //TODO: two warnings
+                        ) {
+                            addMessage(ErrorType.VTTBK, String.format("Term binding key %s in path format is not present in archetype", constraintCodeOrPath));
+                        } else if (AOMUtils.isValidCode(constraintCodeOrPath) &&
+                                !terminology.hasCode(constraintCodeOrPath) &&
+                                !(archetype.isSpecialized() && flatParent != null && !flatParent.getTerminology().hasCode(constraintCodeOrPath))
+                        ) {
+                            addMessage(ErrorType.VTTBK, String.format("Term binding key %s is not present in terminology", constraintCodeOrPath));
+                        } else {
+                            //TODO: two warnings
+                        }
+                    }
                 }
             }
         }

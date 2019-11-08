@@ -123,6 +123,7 @@ public class Archetype extends AuthoredResource {
 
     public void setTerminology(ArchetypeTerminology terminology) {
         this.terminology = terminology;
+        terminology.setOwnerArchetype(this);
     }
 
     public String getAdlVersion() {

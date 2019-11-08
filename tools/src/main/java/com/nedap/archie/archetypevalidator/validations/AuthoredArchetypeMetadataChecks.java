@@ -49,7 +49,7 @@ public class AuthoredArchetypeMetadataChecks extends ArchetypeValidationBase {
                     addMessage(ErrorType.VTRLA, I18n.t("Translation details language {0} has an incorrect key: {1}", language, translationDetails.getLanguage().getCodeString()));
                 }
                 //check if also defined in terminology
-                if(archetype.getTerminology().getTermDefinitions().get(language) == null) {
+                if(archetype.getTerminology() == null || archetype.getTerminology().getTermDefinitions() == null || archetype.getTerminology().getTermDefinitions().get(language) == null) {
                     addMessage(ErrorType.VOTM, I18n.t("Language {0} is defined in the translations, but is not present in the terminology", language));
                 }
             }
