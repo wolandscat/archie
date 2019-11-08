@@ -1,17 +1,21 @@
 package com.nedap.archie.archetypevalidator.validations;
 
+import com.nedap.archie.aom.ArchetypeModelObject;
 import com.nedap.archie.aom.CAttribute;
 import com.nedap.archie.aom.CComplexObject;
 import com.nedap.archie.aom.CComplexObjectProxy;
+import com.nedap.archie.aom.CObject;
 import com.nedap.archie.aom.terminology.ArchetypeTerminology;
 import com.nedap.archie.aom.utils.AOMUtils;
 import com.nedap.archie.archetypevalidator.ErrorType;
 import com.nedap.archie.archetypevalidator.ValidatingVisitor;
 import com.nedap.archie.base.Cardinality;
+import com.nedap.archie.query.AOMPathQuery;
 import com.nedap.archie.query.ComplexObjectProxyReplacement;
 import org.openehr.utils.message.I18n;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 public class FlatFormValidation extends ValidatingVisitor {
@@ -19,13 +23,27 @@ public class FlatFormValidation extends ValidatingVisitor {
     @Override
     protected void validate(CComplexObjectProxy cObject) {
         //validate that CComplexObjectProxy nodes have a valid path
-        ComplexObjectProxyReplacement complexObjectProxyReplacement = ComplexObjectProxyReplacement.getComplexObjectProxyReplacement(cObject);
-        if(complexObjectProxyReplacement == null) {
+        List<ArchetypeModelObject> replacements = new AOMPathQuery(cObject.getTargetPath()).findList(ComplexObjectProxyReplacement.getNearestArchetypeRoot(cObject), true);
+        if(replacements.size() == 0) {
             addMessageWithPath(ErrorType.VUNP, cObject.path(), I18n.t("Use_node (C_COMPLEX_OBJECT_PROXY) points to a path that cannot be found: {0}", cObject.getTargetPath()));
+        } else if (replacements.size() > 1) {
+            addMessageWithPath(ErrorType.VUNP, cObject.path(), I18n.t("Use_node (C_COMPLEX_OBJECT_PROXY) points to a path that resolves to more than one object"));
         } else {
-            CComplexObject replacement = complexObjectProxyReplacement.getReplacement();
-            if(!combinedModels.rmTypesConformant(replacement.getRmTypeName(), cObject.getRmTypeName())) {
-                addMessageWithPath(ErrorType.VUNT, cObject.path(), I18n.t("Use_node (C_COMPLEX_OBJECT_PROXY) points to type {0}, which does not conform to type {1}", replacement.getRmTypeName(), cObject.getRmTypeName()));
+            ArchetypeModelObject replacement = replacements.get(0);
+
+            if (replacement instanceof CComplexObject) {
+                ComplexObjectProxyReplacement complexObjectProxyReplacement = ComplexObjectProxyReplacement.getComplexObjectProxyReplacement(cObject);
+
+                CComplexObject replacementComplexObject = complexObjectProxyReplacement.getReplacement();
+
+                if(!combinedModels.rmTypesConformant(replacementComplexObject.getRmTypeName(), cObject.getRmTypeName())) {
+                    addMessageWithPath(ErrorType.VUNT, cObject.path(), I18n.t("Use_node (C_COMPLEX_OBJECT_PROXY) points to type {0}, which does not conform to type {1}", replacementComplexObject.getRmTypeName(), cObject.getRmTypeName()));
+                }
+            } else {
+                String cObjectTypeName = cObject instanceof CComplexObjectProxy ?
+                        "use_node (C_COMPLEX_OBJECT)" :
+                        cObject.getClass().getSimpleName();
+                addMessageWithPath(ErrorType.VUNP, cObject.path(), I18n.t("Use_node (C_COMPLEX_OBJECT_PROXY) must point to a C_COMPLEX_OBJECT, but points to a {0}", cObjectTypeName));
             }
         }
     }
