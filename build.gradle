@@ -54,16 +54,16 @@ subprojects {
   }
 
   ext.reflectionsVersion = '0.9.11'
-  ext.jacksonVersion = '2.9.7'
+  ext.jacksonVersion = '2.9.10'
 
   dependencies {
-    compile 'org.slf4j:slf4j-api:1.7.25'
+    compile 'org.slf4j:slf4j-api:1.7.28'
 
     compile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
     compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
 
-    compile 'com.google.guava:guava:25.1-jre'
+    compile 'com.google.guava:guava:28.1-jre'
 
     compile "org.reflections:reflections:${reflectionsVersion}"
     compile 'com.esotericsoftware:kryo-shaded:4.0.2' //for easy and relatively fast object cloning
