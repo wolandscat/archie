@@ -69,17 +69,47 @@ public class RulesFlattener {
         return -1;
     }
 
+
     private void addVariableAndTagPrefix(RuleStatement clonedStatement, String variablePrefix, String tagPrefix, String pathPrefix) {
         if(clonedStatement instanceof Assertion) {
             Assertion assertion = (Assertion) clonedStatement;
             if(!Strings.isNullOrEmpty(assertion.getTag())) {
                 assertion.setTag(tagPrefix + assertion.getTag());
             }
+            if (!(assertion.getExpression() instanceof ForAllStatement)) {
+                //Cast expression to ForAllStatement. The variableReferencePrefix is set for all operands within this
+                //expression so that they are recognized as operands of a ForAllStatement, i.e. the prefix will be used
+                //instead of the full path within the flattened rule section. Note that the prefix "item" is
+                //concatenated with a unique variablePrefix within addVariableAndTagPrefixToExpression. Furthermore,
+                //note that the ForAllStatement is constructed with an empty path as the pathPrefix is set within
+                //addVariableAndTagPrefixToExpression.
+                setVariableReferencePrefix(assertion.getExpression(), "item");
+                assertion.setExpression(new ForAllStatement("item", new ModelReference(""), assertion.getExpression()));
+            }
             addVariableAndTagPrefixToExpression(assertion.getExpression(), variablePrefix, pathPrefix);
         } else if (clonedStatement instanceof ExpressionVariable) {
             ExpressionVariable declaration = (ExpressionVariable) clonedStatement;
             declaration.setName(variablePrefix + declaration.getName());
             addVariableAndTagPrefixToExpression(declaration.getExpression(), variablePrefix, pathPrefix);
+        }
+    }
+
+
+    private void setVariableReferencePrefix(Expression expression, String variablePrefix) {
+        if (expression instanceof  BinaryOperator) {
+            setVariableReferencePrefix(((BinaryOperator) expression).getLeftOperand(), variablePrefix);
+            setVariableReferencePrefix(((BinaryOperator) expression).getRightOperand(), variablePrefix);
+        } else if (expression instanceof UnaryOperator){
+            setVariableReferencePrefix(((UnaryOperator) expression).getOperand(), variablePrefix);
+        } else if (expression instanceof Function) {
+            Function function = (Function) expression;
+            if( function.getArguments() != null ) {
+                for(Expression argument : function.getArguments()) {
+                    setVariableReferencePrefix(argument, variablePrefix);
+                }
+            }
+        } else if (expression instanceof ModelReference) {
+            ((ModelReference) expression).setVariableReferencePrefix(variablePrefix);
         }
     }
 

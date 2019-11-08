@@ -169,7 +169,10 @@ public class Flattener implements IAttributeFlattenerSupport {
             prohibitZeroOccurrencesConstraints(result);
         }
 
-        rulesFlattener.combineRules(child, result, "prefix", "", "", true /* override statements with same tag */);//TODO: actually set a unique prefix
+        String prefix = child.getArchetypeId().getConceptId() + "_";
+        //Use empty tagPrefix here. If not empty, overridden rules in specialized archetype will not overwrite base rules,
+        //but be added to the rules section additionally to the base rules.
+        rulesFlattener.combineRules(child, result, prefix, "", "", true /* override statements with same tag */);
         if(createOperationalTemplate) {
             optCreator.fillSlots((OperationalTemplate) result);
 
