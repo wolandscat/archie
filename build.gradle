@@ -32,7 +32,6 @@ gradle.ext.ossrhPasswordSafe = hasProperty('ossrhPassword') ? ossrhPassword : ""
 gradle.ext.shouldSign = hasProperty('signing.keyId')
 gradle.ext.isParallel = hasProperty('org.gradle.parallel') ? project.property('org.gradle.parallel') == 'true' : false
 
-
 subprojects {
   apply plugin: 'java'
   apply plugin: 'org.owasp.dependencycheck'
