@@ -60,13 +60,12 @@ public abstract class COrderedSerializer<T extends COrdered<?>> extends Constrai
     }
 
     private boolean isSingleValueInterval(Interval<?> interval) {
-        return interval.getLower() != null && interval.getLower().equals(interval.getUpper());
-    }
-
-    private boolean isSingleValueConstraint(T cobj) {
-        if (cobj.getConstraint().size() != 1) return false;
-        Interval<?> interval = cobj.getConstraint().get(0);
-        return isSingleValueInterval(interval);
+        return interval.getLower() != null &&
+                interval.isUpperIncluded() &&
+                interval.isLowerIncluded() &&
+                !interval.isLowerUnbounded() &&
+                !interval.isUpperUnbounded() &&
+                interval.getLower().equals(interval.getUpper());
     }
 
     @Override
