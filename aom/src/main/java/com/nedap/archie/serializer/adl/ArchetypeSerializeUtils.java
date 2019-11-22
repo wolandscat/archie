@@ -21,13 +21,33 @@ public class ArchetypeSerializeUtils {
             builder.append(getLower(occ));
             builder.append("..");
             builder.append("*");
-        } else if (occ.getLower() != null && occ.isLowerIncluded() && occ.isUpperIncluded() && occ.getLower().equals(occ.getUpper())) {
+        } else if (getLowerNumber(occ).equals(getUpperNumber(occ))) {
             builder.append(getLower(occ));
         } else {
-            builder.append(occ.getLower() != null ? occ.getLower() : 0);
+            builder.append(getLower(occ));
             builder.append("..");
-            builder.append(occ.getUpper() != null ? occ.getUpper() : "*");
+            builder.append(getUpper(occ));
         }
+    }
+
+    private static Integer getUpperNumber(MultiplicityInterval occ) {
+        if(occ.getUpper() == null) {
+            return null;
+        }
+        if(!occ.isUpperIncluded()) {
+            return occ.getUpper() - 1;
+        }
+        return occ.getUpper();
+    }
+
+    private static Integer getLowerNumber(MultiplicityInterval occ) {
+        if(occ.getLower() == null) {
+            return 0;
+        }
+        if(!occ.isLowerIncluded()) {
+            return occ.getLower() + 1;
+        }
+        return occ.getLower();
     }
 
     /**
@@ -37,22 +57,13 @@ public class ArchetypeSerializeUtils {
      * @return
      */
     private static String getLower(MultiplicityInterval occ) {
-        if(occ.getLower() == null) {
-            return "0";
-        }
-        if(!occ.isLowerIncluded()) {
-            return ">" + occ.getLower();
-        }
-        return occ.getLower().toString();
+        return Integer.toString(getLowerNumber(occ));
     }
 
     private static String getUpper(MultiplicityInterval occ) {
         if(occ.getUpper() == null) {
             return "*";
         }
-        if(!occ.isUpperIncluded()) {
-            return "<" + occ.getUpper();
-        }
-        return occ.getUpper().toString();
+        return Integer.toString(getUpperNumber(occ));
     }
 }
