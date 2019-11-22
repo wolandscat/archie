@@ -60,6 +60,9 @@ public abstract class COrderedSerializer<T extends COrdered<?>> extends Constrai
     }
 
     private boolean isSingleValueInterval(Interval<?> interval) {
+        //In case we know interval is a of a discrete type, such as integers, this can be made to work in case !upperIncluded and !lowerIncluded
+        //but it's fine without. There is a separate solution for MultiplicityInterval and in case this returns false the
+        //only consequence is a slightly less intuitive serialization
         return interval.getLower() != null &&
                 interval.isUpperIncluded() &&
                 interval.isLowerIncluded() &&
