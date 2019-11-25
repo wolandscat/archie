@@ -99,7 +99,7 @@ public class MultiplicityInterval extends Interval<Integer> implements Serializa
     }
 
     public static MultiplicityInterval createUpperUnbounded(Integer lower) {
-        return new MultiplicityInterval(lower, true, false, 0, true, true);
+        return new MultiplicityInterval(lower, true, false, null, true, true);
     }
 
     public static MultiplicityInterval createBounded(int lower, int upper) {

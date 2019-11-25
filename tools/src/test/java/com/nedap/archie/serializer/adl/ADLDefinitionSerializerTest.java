@@ -5,6 +5,7 @@ import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.ArchetypeSlot;
 import com.nedap.archie.aom.CComplexObject;
 import com.nedap.archie.aom.CObject;
+import com.nedap.archie.base.MultiplicityInterval;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -287,6 +289,27 @@ public class ADLDefinitionSerializerTest {
                 equalTo("use_node ADDRESS[id12] /contacts[id6]/addresses[id8]"));
         assertThat(serializeConstraint(ccobjProxies.get(2)).trim(),
                 equalTo("use_node ADDRESS[id13] occurrences matches {1..3} /contacts[id6]/addresses[id9]"));
+    }
+
+    @Test
+    public void serializeOccurrencesTest() {
+        checkOccurrences("5..*", MultiplicityInterval.createUpperUnbounded(5));
+        checkOccurrences("1", MultiplicityInterval.createMandatory());
+        checkOccurrences("0..1", MultiplicityInterval.createOptional());
+        checkOccurrences("0", MultiplicityInterval.createProhibited());
+        checkOccurrences("10..50", MultiplicityInterval.createBounded(10, 50));
+        checkOccurrences("0..5", new MultiplicityInterval(null, false, true, 5, true, false));
+        checkOccurrences("4..5", new MultiplicityInterval(3, false, false, 5, true, false));
+        checkOccurrences("4", new MultiplicityInterval(3, false, false, 5, false, false));
+        checkOccurrences("4", new MultiplicityInterval(4, true, false, 5, false, false));
+        checkOccurrences("4", new MultiplicityInterval(3, false, false, 4, true, false));
+
+    }
+
+    private void checkOccurrences(String expected, MultiplicityInterval interval) {
+        ADLStringBuilder adlStringBuilder = new ADLStringBuilder();
+        ArchetypeSerializeUtils.buildOccurrences(adlStringBuilder, interval);
+        assertEquals(expected, adlStringBuilder.toString());
     }
 
 
