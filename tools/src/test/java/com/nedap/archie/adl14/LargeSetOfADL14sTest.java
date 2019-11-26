@@ -78,7 +78,7 @@ public class LargeSetOfADL14sTest {
                 logger.error("exception in converter for archetype id " + conversionResult.getArchetypeId(), conversionResult.getException());
             }
             if (conversionResult.getArchetype() != null) {
-                System.out.println(ADLArchetypeSerializer.serialize(conversionResult.getArchetype()));
+//                System.out.println(ADLArchetypeSerializer.serialize(conversionResult.getArchetype()));
             } else {
                 logger.warn("archetype null: " + conversionResult.getArchetypeId());
             }
@@ -109,9 +109,9 @@ public class LargeSetOfADL14sTest {
 
         List<Archetype> archetypes = new ArrayList<>();
         for(String file:adlFiles) {
-            if(!file.contains("diagnosekat")) {
-                continue;
-            }
+//            if(!file.contains("avpu")) {
+//                continue;
+//            }
             Archetype archetype = parse(exceptions, parseErrors, file);
             if(archetype != null) {
                 archetypes.add(archetype);
