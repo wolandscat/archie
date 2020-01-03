@@ -8,30 +8,28 @@ import com.nedap.archie.archetypevalidator.ValidationResult;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryFullArchetypeRepository extends SimpleArchetypeRepository implements FullArchetypeRepository, MutableArchetypeRepository {
 
-    private Map<String, ValidationResult> validationResult = new ConcurrentHashMap<>();
+    private ArchetypeHRIDMap<ValidationResult> validationResult = new ArchetypeHRIDMap<>();
 
-    private Map<String, Archetype> flattenedArchetypes = new ConcurrentHashMap<>();
-    private Map<String, OperationalTemplate> operationalTemplates = new ConcurrentHashMap<>();
+    private ArchetypeHRIDMap<Archetype> flattenedArchetypes = new ArchetypeHRIDMap<>();
+    private ArchetypeHRIDMap<OperationalTemplate> operationalTemplates = new ArchetypeHRIDMap<>();
     private ArchetypeValidationSettings archetypeValidationSettings;
 
     @Override
     public Archetype getFlattenedArchetype(String archetypeId) {
-        return flattenedArchetypes.get(new ArchetypeHRID(archetypeId).getSemanticId());
+        return flattenedArchetypes.getLatestVersion(archetypeId);
     }
 
     @Override
     public ValidationResult getValidationResult(String archetypeId) {
-        return validationResult.get(new ArchetypeHRID(archetypeId).getSemanticId());
+        return validationResult.getLatestVersion(archetypeId);
     }
 
     @Override
     public OperationalTemplate getOperationalTemplate(String archetypeId) {
-        return operationalTemplates.get(new ArchetypeHRID(archetypeId).getSemanticId());
+        return operationalTemplates.getLatestVersion(archetypeId);
     }
 
     @Override
@@ -39,23 +37,23 @@ public class InMemoryFullArchetypeRepository extends SimpleArchetypeRepository i
         if(result.getFlattened() != null) {
             setFlattenedArchetype(result.getFlattened());
         }
-        validationResult.put(new ArchetypeHRID(result.getArchetypeId()).getSemanticId(), result);
+        validationResult.put(new ArchetypeHRID(result.getArchetypeId()), result);
     }
 
     @Override
     public void setFlattenedArchetype(Archetype archetype) {
-        flattenedArchetypes.put(archetype.getArchetypeId().getSemanticId(), archetype);
+        flattenedArchetypes.put(archetype.getArchetypeId(), archetype);
     }
 
     @Override
     public void setOperationalTemplate(OperationalTemplate template) {
-        operationalTemplates.put(template.getArchetypeId().getSemanticId(), template);
+        operationalTemplates.put(template.getArchetypeId(), template);
     }
 
     @Override
     public void removeValidationResult(String archetypeId) {
-        operationalTemplates.remove(new ArchetypeHRID(archetypeId).getSemanticId());
-        validationResult.remove(new ArchetypeHRID(archetypeId).getSemanticId());
+        operationalTemplates.remove(new ArchetypeHRID(archetypeId));
+        validationResult.remove(new ArchetypeHRID(archetypeId));
     }
 
     @Override
