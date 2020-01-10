@@ -13,3 +13,9 @@ blocks:
             - sem-version java 1.8
             - checkout
             - ./gradlew build
+      epilogue:
+        on_pass:
+          commands:
+            - >-
+              curl -s https://codecov.io/bash | bash -s - -f
+              ./build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
