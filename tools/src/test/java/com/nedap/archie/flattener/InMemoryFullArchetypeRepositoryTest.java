@@ -66,6 +66,8 @@ public class InMemoryFullArchetypeRepositoryTest {
     @Test
     public void getArchetype() {
         assertEquals("openEHR-EHR-OBSERVATION.blood_pressure.v2.0.0",
+                inMemoryFullArchetypeRepository.getArchetype("openEHR-EHR-OBSERVATION.blood_pressure").getArchetypeId().getFullId());
+        assertEquals("openEHR-EHR-OBSERVATION.blood_pressure.v2.0.0",
                 inMemoryFullArchetypeRepository.getArchetype("openEHR-EHR-OBSERVATION.blood_pressure.v").getArchetypeId().getFullId());
         assertEquals("openEHR-EHR-OBSERVATION.blood_pressure.v1.11.0",
                 inMemoryFullArchetypeRepository.getArchetype("openEHR-EHR-OBSERVATION.blood_pressure.v1").getArchetypeId().getFullId());
@@ -79,6 +81,8 @@ public class InMemoryFullArchetypeRepositoryTest {
 
     @Test
     public void getFlattenedArchetype() {
+        assertEquals("openEHR-EHR-OBSERVATION.blood_pressure.v2.0.0",
+                inMemoryFullArchetypeRepository.getFlattenedArchetype("openEHR-EHR-OBSERVATION.blood_pressure").getArchetypeId().getFullId());
         assertEquals("openEHR-EHR-OBSERVATION.blood_pressure.v2.0.0",
                 inMemoryFullArchetypeRepository.getFlattenedArchetype("openEHR-EHR-OBSERVATION.blood_pressure.v").getArchetypeId().getFullId());
         assertEquals("openEHR-EHR-OBSERVATION.blood_pressure.v1.11.0",
@@ -94,6 +98,8 @@ public class InMemoryFullArchetypeRepositoryTest {
     @Test
     public void getOperationalTemplate() {
         assertEquals("openEHR-EHR-OBSERVATION.blood_pressure.v2.0.0",
+                inMemoryFullArchetypeRepository.getOperationalTemplate("openEHR-EHR-OBSERVATION.blood_pressure").getArchetypeId().getFullId());
+        assertEquals("openEHR-EHR-OBSERVATION.blood_pressure.v2.0.0",
                 inMemoryFullArchetypeRepository.getOperationalTemplate("openEHR-EHR-OBSERVATION.blood_pressure.v").getArchetypeId().getFullId());
         assertEquals("openEHR-EHR-OBSERVATION.blood_pressure.v1.11.0",
                 inMemoryFullArchetypeRepository.getOperationalTemplate("openEHR-EHR-OBSERVATION.blood_pressure.v1").getArchetypeId().getFullId());
@@ -107,6 +113,8 @@ public class InMemoryFullArchetypeRepositoryTest {
 
     @Test
     public void getValidationResult() {
+        assertEquals("openEHR-EHR-OBSERVATION.blood_pressure.v2.0.0",
+                inMemoryFullArchetypeRepository.getValidationResult("openEHR-EHR-OBSERVATION.blood_pressure").getArchetypeId());
         assertEquals("openEHR-EHR-OBSERVATION.blood_pressure.v2.0.0",
                 inMemoryFullArchetypeRepository.getValidationResult("openEHR-EHR-OBSERVATION.blood_pressure.v").getArchetypeId());
         assertEquals("openEHR-EHR-OBSERVATION.blood_pressure.v1.11.0",

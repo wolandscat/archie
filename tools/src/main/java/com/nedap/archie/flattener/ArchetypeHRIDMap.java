@@ -23,13 +23,6 @@ public class ArchetypeHRIDMap<T> extends ConcurrentHashMap<ArchetypeHRID,T> {
 
         //Filter if version is not fully defined
         List<ArchetypeHRID> keys = this.keySet().stream().
-//                filter(id -> (id.getNamespace() == null && archetypeHRID.getNamespace() == null) ||
-//                        ((id.getNamespace() != null && archetypeHRID.getNamespace() != null) &&
-//                                id.getNamespace().equals(archetypeHRID.getNamespace()))).
-//                filter(id -> id.getRmPublisher().equals(archetypeHRID.getRmPublisher())).
-//                filter(id -> id.getRmPackage().equals(archetypeHRID.getRmPackage())).
-//                filter(id -> id.getRmClass().equals(archetypeHRID.getRmClass())).
-//                filter(id -> id.getConceptId().equals(archetypeHRID.getConceptId())).
                 filter(id -> id.getIdUpToConcept().equals(archetypeHRID.getIdUpToConcept())).
                 filter(id -> (archetypeHRID.getMajorVersion() == null) || id.getMajorVersion().equals(archetypeHRID.getMajorVersion())).
                 filter(id -> (archetypeHRID.getMinorVersion() == null) || id.getMinorVersion().equals(archetypeHRID.getMinorVersion())).

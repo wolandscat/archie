@@ -54,7 +54,7 @@ public class ArchetypeHRID extends ArchetypeModelObject {
     @JsonCreator
     public ArchetypeHRID(String value) {
 
-        Pattern p = Pattern.compile("((?<namespace>.*)::)?(?<publisher>.*)-(?<package>.*)-(?<class>.*)\\.(?<concept>.*)\\.v(?<version>.*)");
+        Pattern p = Pattern.compile("((?<namespace>.*)::)?(?<publisher>[^.-]*)-(?<package>[^.-]*)-(?<class>[^.-]*)\\.(?<concept>[^.]*)(\\.v(?<version>.*))?");
         Matcher m = p.matcher(value);
 
         if(!m.matches()) {
@@ -68,6 +68,7 @@ public class ArchetypeHRID extends ArchetypeModelObject {
 
         conceptId = m.group("concept");
         releaseVersion = m.group("version");
+
         //TODO: versionStatus and build count
     }
 
@@ -93,7 +94,9 @@ public class ArchetypeHRID extends ArchetypeModelObject {
     public String getFullId() {
         StringBuilder result = new StringBuilder(30);
         result.append(getIdUpToConcept());
-        if(releaseVersion.startsWith("v")) {
+        if (releaseVersion == null) {
+            return result.toString();
+        } else if(releaseVersion.startsWith("v")) {
             result.append(".");
         } else {
             result.append(".v");
@@ -103,20 +106,22 @@ public class ArchetypeHRID extends ArchetypeModelObject {
     }
 
     public String getSemanticId() {
-        return getIdUpToConcept() + ".v" + getMajorVersion();
+        return getIdUpToConcept() + ((releaseVersion == null) ? "" : ".v" + ((releaseVersion.isEmpty()) ? "" : getMajorVersion()));
     }
 
     public String getMajorVersion() {
-        return releaseVersion.isEmpty() ? null : releaseVersion.split("\\.")[0];
+        return (releaseVersion == null || releaseVersion.isEmpty()) ? null : releaseVersion.split("\\.")[0];
     }
 
     public String getMinorVersion() {
+        if (releaseVersion == null) return null;
         String[] splitVersion = releaseVersion.split("\\.");
         return (splitVersion.length >= 2) ? splitVersion[1] : null;
     }
 
     public String getPatchVersion() {
-        String[] splitVersion = releaseVersion.split("\\.");
+        if (releaseVersion == null) return null;
+        String[] splitVersion = releaseVersion.split("\\.|\\-");
         return (splitVersion.length >= 3) ? splitVersion[2] : null;
     }
 
