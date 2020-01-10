@@ -48,7 +48,7 @@ public class ArchetypeID extends ObjectId {
     }
 
     private void parseValue(String value) {
-        Pattern p = Pattern.compile("((?<namespace>.*)::)?(?<publisher>.*)-(?<package>.*)-(?<class>.*)\\.(?<concept>.*)(-(?<specialisation>.*))?\\.v(?<version>.*)");
+        Pattern p = Pattern.compile("((?<namespace>.*)::)?(?<publisher>[^.-]*)-(?<package>[^.-]*)-(?<class>[^.-]*)\\.(?<concept>[^.]*)(-(?<specialisation>[^.]*))?(\\.v(?<version>.*))?");
         Matcher m = p.matcher(value);
 
         if (!m.matches()) {
@@ -124,7 +124,9 @@ public class ArchetypeID extends ObjectId {
             result.append("-");
             result.append(specialisation);
         }
-        if (versionId.startsWith("v")) {
+        if (versionId == null) {
+            return result.toString();
+        } else if (versionId.startsWith("v")) {
             result.append(".");
         } else {
             result.append(".v");
@@ -136,8 +138,10 @@ public class ArchetypeID extends ObjectId {
     @RMPropertyIgnore
     public String getSemanticId() {
         StringBuilder result = new StringBuilder();
-        result.append(namespace);
-        result.append("::");
+        if(namespace != null) {
+            result.append(namespace);
+            result.append("::");
+        }
         result.append(rmOriginator);
         result.append("-");
         result.append(rmName);
@@ -145,7 +149,13 @@ public class ArchetypeID extends ObjectId {
         result.append(rmEntity);
         result.append(".");
         result.append(domainConcept);
-        result.append(".v");
+        if (versionId == null) {
+            return result.toString();
+        } else if (versionId.startsWith("v")) {
+            result.append(".");
+        } else {
+            result.append(".v");
+        }
         result.append(versionId.split("\\.")[0]);
         return result.toString();
 
