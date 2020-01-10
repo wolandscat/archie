@@ -13,6 +13,7 @@ blocks:
             - sem-version java 1.8
             - checkout
             - ./gradlew build
+            - ./gradlew jacocoRootReport
       epilogue:
         on_pass:
           commands:
