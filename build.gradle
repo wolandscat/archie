@@ -16,7 +16,7 @@ repositories {
 
 
 wrapper {
-    gradleVersion = '4.10'
+    gradleVersion = '5.6.4'
 }
 
 allprojects {
@@ -31,7 +31,6 @@ gradle.ext.ossrhUsernameSafe = hasProperty('ossrhUsername') ? ossrhUsername : ""
 gradle.ext.ossrhPasswordSafe = hasProperty('ossrhPassword') ? ossrhPassword : ""
 gradle.ext.shouldSign = hasProperty('signing.keyId')
 gradle.ext.isParallel = hasProperty('org.gradle.parallel') ? project.property('org.gradle.parallel') == 'true' : false
-
 
 subprojects {
   apply plugin: 'java'

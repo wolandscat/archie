@@ -13,7 +13,7 @@ if(gradle.ext.shouldSign) {
   signing {
       useGpgCmd()
       sign configurations.archives
-  }
+  }  
 }
 
 //upload to sonatype configuration
@@ -61,7 +61,7 @@ def customizePom(pom, gradleProject) {
     // sort to make pom dependencies order consistent to ease comparison of older poms
     generatedPom.dependencies = generatedPom.dependencies.sort { dep ->
       "$dep.scope:$dep.groupId:$dep.artifactId"
-    } 
+    }
 
     // add all items necessary for maven central publication
     generatedPom.project {
