@@ -1,0 +1,33 @@
+version: v1.0
+name: Java
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+  - name: Gradle
+    task:
+      jobs:
+        - name: Java 8 build
+          commands:
+            - sem-version java 1.8
+            - ./gradlew build
+        - name: Java 9 build
+          commands:
+            - sem-version java 9
+            - ./gradlew build
+        - name: Java 10 build
+          commands:
+            - sem-version java 10
+            - ./gradlew build
+        - name: Java 11 build
+          commands:
+            - sem-version java 11
+            - ./gradlew build
+            - ./gradlew jacocoRootReport
+            - >-
+              curl -s https://codecov.io/bash | bash -s - -f
+              ./build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
+      prologue:
+        commands:
+          - checkout
