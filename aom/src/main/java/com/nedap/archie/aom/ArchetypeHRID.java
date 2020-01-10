@@ -3,6 +3,7 @@ package com.nedap.archie.aom;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
+import com.nedap.archie.rminfo.RMPropertyIgnore;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -214,6 +215,7 @@ public class ArchetypeHRID extends ArchetypeModelObject {
         return Objects.hash(namespace, rmPublisher, rmPackage, rmClass, conceptId, releaseVersion, versionStatus, buildCount);
     }
 
+    @RMPropertyIgnore
     public String getIdUpToConcept() {
         StringBuilder result = new StringBuilder(30);
         if(!Strings.isNullOrEmpty(namespace)) {
