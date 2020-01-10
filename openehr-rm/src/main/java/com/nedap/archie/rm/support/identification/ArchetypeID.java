@@ -209,12 +209,10 @@ public class ArchetypeID extends ObjectId {
         this.rmEntity = rmEntity;
     }
 
-    @Deprecated
     public String getSpecialisation() {
         return specialisation;
     }
 
-    @Deprecated
     public void setSpecialisation(String specialisation) {
         this.specialisation = specialisation;
     }
