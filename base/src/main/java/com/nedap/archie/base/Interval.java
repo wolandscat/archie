@@ -1,11 +1,14 @@
 package com.nedap.archie.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.nedap.archie.rminfo.RMPropertyIgnore;
+
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import java.time.Duration;
 import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 
@@ -146,11 +149,11 @@ public class Interval<T> extends OpenEHRBase {
         Comparable comparableValue;
         Comparable comparableLower;
         Comparable comparableUpper;
-		if (value instanceof TemporalAmount && !(value instanceof Comparable) && isNonComparableTemporalAmount(lower) && isNonComparableTemporalAmount(upper)) {
+		if (value instanceof TemporalAmount && lower instanceof TemporalAmount && upper instanceof TemporalAmount) {
             //TemporalAmount is not comparable, but can always be converted to a duration that is comparable.
-            comparableValue = value == null ? null : Duration.from((TemporalAmount) value);
-            comparableLower = lower == null ? null : Duration.from((TemporalAmount) lower);
-            comparableUpper = upper == null ? null : Duration.from((TemporalAmount) upper);
+            comparableValue = toComparable(value);
+            comparableLower = toComparable(lower);
+            comparableUpper = toComparable(upper);
 		} else if (!(isComparable(lower) && isComparable(upper) && isComparable(value))) {
             throw new UnsupportedOperationException("subclasses of interval not implementing comparable should implement their own has method");
         } else {
@@ -180,13 +183,50 @@ public class Interval<T> extends OpenEHRBase {
         return true;
     }
 
+    /**
+     * Get the lower value as a comparable amount. Required because some temporal amounts are not always directly comparable
+     * @return
+     */
+    @JsonIgnore
+    @XmlTransient
+    @RMPropertyIgnore
+    public Comparable getComparableLower() {
+        return toComparable(lower);
+    }
+
+    /**
+     * Get the lower value as a comparable amount. Required because some temporal amounts are not always directly comparable
+     * @return
+     */
+    @JsonIgnore
+    @XmlTransient
+    @RMPropertyIgnore
+    public Comparable getComparableUpper() {
+        return toComparable(upper);
+    }
+
+    private Comparable toComparable(T value) {
+        if(value == null) {
+            return null;
+        }
+        if (value instanceof TemporalAmount && !(value instanceof Comparable) && isNonComparableTemporalAmount(value)) {
+            //TemporalAmount is not comparable, but can always be converted to a duration that is comparable.
+            return IntervalDurationConverter.from((TemporalAmount) value);
+
+        } else if (!isComparable(value)) {
+            throw new UnsupportedOperationException("subclasses of interval not implementing comparable should implement their own has method");
+        } else {
+            return (Comparable) value;
+        }
+    }
+
     private int compareTo(T intervalValue, T value) {
         Comparable comparableIntervalValue;
         Comparable comparableValue;
         if (value instanceof TemporalAmount && !(value instanceof Comparable) && isNonComparableTemporalAmount(intervalValue)) {
             //TemporalAmount is not comparable, but can always be converted to a duration that is comparable.
-            comparableValue = value == null ? null : Duration.from((TemporalAmount) value);
-            comparableIntervalValue = intervalValue == null ? null : Duration.from((TemporalAmount) intervalValue);
+            comparableValue = value == null ? null : IntervalDurationConverter.from((TemporalAmount) value);
+            comparableIntervalValue = intervalValue == null ? null : IntervalDurationConverter.from((TemporalAmount) intervalValue);
         } else if (!(isComparable(intervalValue) && isComparable(value))) {
             throw new UnsupportedOperationException("subclasses of interval not implementing comparable should implement their own has method");
         } else {
@@ -200,8 +240,8 @@ public class Interval<T> extends OpenEHRBase {
         return value == null || (!(value instanceof Comparable) && value instanceof TemporalAmount);
     }
 
-    private boolean isComparable(T upper) {
-        return upper == null || upper instanceof Comparable;
+    private boolean isComparable(T value) {
+        return value == null || value instanceof Comparable;
     }
 
 
