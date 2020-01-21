@@ -47,6 +47,7 @@ public class ArchetypeHRID extends ArchetypeModelObject {
     private String buildCount;
     //TODO: XML attribute 'physical id', which is the full id
 
+    private static final Pattern archetypeHRIDPattern = Pattern.compile("((?<namespace>.*)::)?(?<publisher>[^.-]*)-(?<package>[^.-]*)-(?<class>[^.-]*)\\.(?<concept>[^.]*)(\\.v(?<version>.*))?");
 
     public ArchetypeHRID() {
 
@@ -54,9 +55,7 @@ public class ArchetypeHRID extends ArchetypeModelObject {
 
     @JsonCreator
     public ArchetypeHRID(String value) {
-
-        Pattern p = Pattern.compile("((?<namespace>.*)::)?(?<publisher>[^.-]*)-(?<package>[^.-]*)-(?<class>[^.-]*)\\.(?<concept>[^.]*)(\\.v(?<version>.*))?");
-        Matcher m = p.matcher(value);
+        Matcher m = archetypeHRIDPattern.matcher(value);
 
         if(!m.matches()) {
             throw new IllegalArgumentException(value + " is not a valid archetype human readable id");

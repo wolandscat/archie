@@ -31,6 +31,8 @@ public class ArchetypeID extends ObjectId {
     @Nullable
     private String versionId;
 
+    private final static Pattern archetypeIDPattern = Pattern.compile("((?<namespace>.*)::)?(?<publisher>[^.-]*)-(?<package>[^.-]*)-(?<class>[^.-]*)\\.(?<concept>[^.]*)(-(?<specialisation>[^.]*))?(\\.v(?<version>.*))?");
+
     public ArchetypeID() {
     }
 
@@ -48,8 +50,7 @@ public class ArchetypeID extends ObjectId {
     }
 
     private void parseValue(String value) {
-        Pattern p = Pattern.compile("((?<namespace>.*)::)?(?<publisher>[^.-]*)-(?<package>[^.-]*)-(?<class>[^.-]*)\\.(?<concept>[^.]*)(-(?<specialisation>[^.]*))?(\\.v(?<version>.*))?");
-        Matcher m = p.matcher(value);
+        Matcher m = archetypeIDPattern.matcher(value);
 
         if (!m.matches()) {
             throw new IllegalArgumentException(value + " is not a valid archetype human readable id");
