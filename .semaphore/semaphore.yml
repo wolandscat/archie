@@ -28,7 +28,9 @@ blocks:
             - >-
               bash <(curl -s https://codecov.io/bash) -f
               ./build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml -t
-              $ARCHIE_CODECOV_TOKEN
+              "$ARCHIE_CODECOV_TOKEN"
       prologue:
         commands:
           - checkout
+      secrets:
+        - name: Archie codecov token
