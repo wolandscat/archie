@@ -29,12 +29,7 @@ public class Flattener implements IAttributeFlattenerSupport {
     private Archetype child;
 
     private Archetype result;
-    private boolean createOperationalTemplate = false;
-    private boolean removeLanguagesFromMetaData = false;
-    private boolean useComplexObjectForArchetypeSlotReplacement = false;
-    private boolean removeZeroOccurrencesObjects = false;
-
-    private String[] languagesToKeep = null;
+    private FlattenerConfiguration config;
 
     private RulesFlattener rulesFlattener = new RulesFlattener();
     private AnnotationsFlattener annotationsFlattener = new AnnotationsFlattener();
@@ -56,13 +51,19 @@ public class Flattener implements IAttributeFlattenerSupport {
         this.metaModels = models;
     }
 
+    public Flattener(ArchetypeRepository repository, MetaModels models, FlattenerConfiguration configuration) {
+        this.repository = new OverridingArchetypeRepository(repository);
+        this.metaModels = models;
+        this.config = configuration.clone();
+    }
+
     /**
      * Create operational templates in addition to flattening. Default is false;
      * @param makeTemplate
      * @return
      */
     public Flattener createOperationalTemplate(boolean makeTemplate) {
-        this.createOperationalTemplate = makeTemplate;
+        config.setCreateOperationalTemplate(makeTemplate);
         return this;
     }
 
@@ -74,7 +75,7 @@ public class Flattener implements IAttributeFlattenerSupport {
      * @return
      */
     public Flattener removeZeroOccurrencesConstraints(boolean remove) {
-        this.removeZeroOccurrencesObjects = remove;
+        config.setRemoveZeroOccurrencesObjects(remove);
         return this;
     }
 
@@ -85,12 +86,12 @@ public class Flattener implements IAttributeFlattenerSupport {
      * @return
      */
     public Flattener keepLanguages(String... languages) {
-        languagesToKeep = languages;
+        config.setLanguagesToKeep(languages);
         return this;
     }
 
     public Flattener removeLanguagesFromMetadata(boolean remove) {
-        this.removeLanguagesFromMetaData = remove;
+        config.setRemoveZeroOccurrencesObjects(remove);
         return this;
     }
 
@@ -104,12 +105,12 @@ public class Flattener implements IAttributeFlattenerSupport {
         //validate that we can legally flatten first
         String parentId = toFlatten.getParentArchetypeId();
         if(parentId == null) {
-            if(createOperationalTemplate) {
+            if(config.isCreateOperationalTemplate()) {
                 OperationalTemplate template = optCreator.createOperationalTemplate(toFlatten);
                 result = template;
                 //make an operational template by just filling complex object proxies and archetype slots
                 optCreator.fillSlots(template);
-                TerminologyFlattener.filterLanguages(template, removeLanguagesFromMetaData, languagesToKeep);
+                TerminologyFlattener.filterLanguages(template, config.isRemoveLanguagesFromMetaData(), config.getLanguagesToKeep());
                 result = template;
             } else {
                 result = toFlatten.clone();
@@ -143,7 +144,7 @@ public class Flattener implements IAttributeFlattenerSupport {
 
 
         this.result = null;
-        if(createOperationalTemplate) {
+        if(config.isCreateOperationalTemplate()) {
             result = optCreator.createOperationalTemplate(parent);
             optCreator.overrideArchetypeId(result, child);
         } else {
@@ -163,7 +164,7 @@ public class Flattener implements IAttributeFlattenerSupport {
         //1. redefine structure
         //2. fill archetype slots if we are creating an operational template
         flattenDefinition(result, child);
-        if(createOperationalTemplate) {
+        if(config.isCreateOperationalTemplate()) {
             optCreator.removeZeroOccurrencesConstraints(result);
         } else {
             prohibitZeroOccurrencesConstraints(result);
@@ -173,14 +174,14 @@ public class Flattener implements IAttributeFlattenerSupport {
         //Use empty tagPrefix here. If not empty, overridden rules in specialized archetype will not overwrite base rules,
         //but be added to the rules section additionally to the base rules.
         rulesFlattener.combineRules(child, result, prefix, "", "", true /* override statements with same tag */);
-        if(createOperationalTemplate) {
+        if(config.isCreateOperationalTemplate()) {
             optCreator.fillSlots((OperationalTemplate) result);
 
         }
         TerminologyFlattener.flattenTerminology(result, child);
 
-        if(createOperationalTemplate) {
-            TerminologyFlattener.filterLanguages((OperationalTemplate) result, removeLanguagesFromMetaData, languagesToKeep);
+        if(config.isCreateOperationalTemplate()) {
+            TerminologyFlattener.filterLanguages((OperationalTemplate) result, config.isRemoveLanguagesFromMetaData(), config.getLanguagesToKeep());
         }
         result.getDefinition().setArchetype(result);
         result.setDescription(child.getDescription());
@@ -189,7 +190,7 @@ public class Flattener implements IAttributeFlattenerSupport {
         result.setOriginalLanguage(child.getOriginalLanguage());
         result.setTranslations(child.getTranslations());
 
-        if(child instanceof Template && !createOperationalTemplate) {
+        if(child instanceof Template && !config.isCreateOperationalTemplate()) {
             Template resultTemplate = (Template) result;
             resultTemplate.setTemplateOverlays(new ArrayList<>());
             Template childTemplate = (Template) child;
@@ -238,7 +239,7 @@ public class Flattener implements IAttributeFlattenerSupport {
                             if(child instanceof CComplexObject) {
                                 ((CComplexObject) child).setAttributes(new ArrayList<>());
                             }
-                            if(this.removeZeroOccurrencesObjects) {
+                            if(config.isRemoveZeroOccurrencesObjects()) {
                                 objectsToRemove.add(child);
                             }
                         } else {
@@ -378,18 +379,18 @@ public class Flattener implements IAttributeFlattenerSupport {
     }
 
     protected Flattener getNewFlattener() {
-        return new Flattener(repository, metaModels)
+        return new Flattener(repository, metaModels, config)
                 .createOperationalTemplate(false) //do not create operational template except at the end.
-                .useComplexObjectForArchetypeSlotReplacement(useComplexObjectForArchetypeSlotReplacement);
+                ;
     }
 
     private Flattener useComplexObjectForArchetypeSlotReplacement(boolean useComplexObjectForArchetypeSlotReplacement) {
-        this.useComplexObjectForArchetypeSlotReplacement = useComplexObjectForArchetypeSlotReplacement;
+        config.setUseComplexObjectForArchetypeSlotReplacement(useComplexObjectForArchetypeSlotReplacement);
         return this;
     }
 
     public boolean isUseComplexObjectForArchetypeSlotReplacement() {
-        return useComplexObjectForArchetypeSlotReplacement;
+        return config.isUseComplexObjectForArchetypeSlotReplacement();
     }
 
     @Override
@@ -399,7 +400,7 @@ public class Flattener implements IAttributeFlattenerSupport {
 
 
     public boolean getCreateOperationalTemplate() {
-        return createOperationalTemplate;
+        return config.isCreateOperationalTemplate();
     }
 
     protected RulesFlattener getRulesFlattener() {
