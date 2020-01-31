@@ -29,7 +29,7 @@ public class Flattener implements IAttributeFlattenerSupport {
     private Archetype child;
 
     private Archetype result;
-    private FlattenerConfiguration config;
+    private final FlattenerConfiguration config;
 
     private RulesFlattener rulesFlattener = new RulesFlattener();
     private AnnotationsFlattener annotationsFlattener = new AnnotationsFlattener();
@@ -44,11 +44,13 @@ public class Flattener implements IAttributeFlattenerSupport {
     public Flattener(ArchetypeRepository repository, ReferenceModels models) {
         this.repository = new OverridingArchetypeRepository(repository);
         this.metaModels = new MetaModels(models, (BmmRepository) null);
+        config = FlattenerConfiguration.forFlattened();
     }
 
     public Flattener(ArchetypeRepository repository, MetaModels models) {
         this.repository = new OverridingArchetypeRepository(repository);
         this.metaModels = models;
+        config = FlattenerConfiguration.forFlattened();
     }
 
     public Flattener(ArchetypeRepository repository, MetaModels models, FlattenerConfiguration configuration) {
@@ -91,7 +93,7 @@ public class Flattener implements IAttributeFlattenerSupport {
     }
 
     public Flattener removeLanguagesFromMetadata(boolean remove) {
-        config.setRemoveZeroOccurrencesObjects(remove);
+        config.setRemoveLanguagesFromMetaData(remove);
         return this;
     }
 
@@ -379,9 +381,14 @@ public class Flattener implements IAttributeFlattenerSupport {
     }
 
     protected Flattener getNewFlattener() {
-        return new Flattener(repository, metaModels, config)
-                .createOperationalTemplate(false) //do not create operational template except at the end.
-                ;
+        Flattener result = new Flattener(repository, metaModels, config)
+                .createOperationalTemplate(false); //do not create operational template except at the end.
+        if(config.isRemoveZeroOccurrencesInParents()) {
+            //remove all zero occurrences objects EXCEPT in the top level archetype
+            //so that you can see that things have been removed that you can still edit - but not others
+            result.removeZeroOccurrencesConstraints(true);
+        }
+        return result;
     }
 
     private Flattener useComplexObjectForArchetypeSlotReplacement(boolean useComplexObjectForArchetypeSlotReplacement) {
@@ -411,5 +418,9 @@ public class Flattener implements IAttributeFlattenerSupport {
 
     public OverridingArchetypeRepository getRepository() {
         return repository;
+    }
+
+    FlattenerConfiguration getConfiguration() {
+        return config;
     }
 }

@@ -83,6 +83,9 @@ class OperationalTemplateCreator {
 
 
     private void closeArchetypeSlots(OperationalTemplate archetype) {
+        if(!getConfig().isCloseArchetypeSlots()) {
+            return;
+        }
         Stack<CObject> workList = new Stack<>();
         workList.push(archetype.getDefinition());
         while(!workList.isEmpty()) {
@@ -103,7 +106,9 @@ class OperationalTemplateCreator {
     }
 
     private void fillArchetypeRoots(OperationalTemplate result) {
-
+        if(!getConfig().isFillArchetypeRoots()) {
+            return;
+        }
         Stack<CObject> workList = new Stack<>();
         workList.push(result.getDefinition());
         while(!workList.isEmpty()) {
@@ -120,7 +125,9 @@ class OperationalTemplateCreator {
     }
 
     private void fillComplexObjectProxies(OperationalTemplate result) {
-
+        if(!getConfig().isReplaceUseNode()) {
+            return;
+        }
         Stack<CObject> workList = new Stack<>();
         workList.push(result.getDefinition());
         List<ComplexObjectProxyReplacement> replacements = new ArrayList<>();
@@ -210,6 +217,10 @@ class OperationalTemplateCreator {
             //templateResult.addTerminologyExtract(child.getNodeId(), archetype.getTerminology().);
         }
 
+    }
+
+    private FlattenerConfiguration getConfig() {
+        return flattener.getConfiguration();
     }
 
 
