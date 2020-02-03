@@ -141,7 +141,7 @@ public class Flattener implements IAttributeFlattenerSupport {
 
         if(parent.getParentArchetypeId() != null) {
             //parent needs flattening first
-            parent = getNewFlattener().flatten(parent);
+            parent = getNewFlattenerForParent().flatten(parent);
         }
 
 
@@ -380,7 +380,13 @@ public class Flattener implements IAttributeFlattenerSupport {
         }
     }
 
-    protected Flattener getNewFlattener() {
+    /**
+     * Get a new flattener to flatten parent archetypes. Works the same as {@link #getNewFlattener()}, except that
+     * it will remove zero occurrences constraints in parents if so configured.
+     *
+     * @return
+     */
+    protected Flattener getNewFlattenerForParent() {
         Flattener result = new Flattener(repository, metaModels, config)
                 .createOperationalTemplate(false); //do not create operational template except at the end.
         if(config.isRemoveZeroOccurrencesInParents()) {
@@ -389,6 +395,18 @@ public class Flattener implements IAttributeFlattenerSupport {
             result.removeZeroOccurrencesConstraints(true);
         }
         return result;
+    }
+
+    /**
+     * Get a new flattener with the same configuration as this, except that it will not create operational templates
+     * <br/>
+     * The not creating operational templates is because the operational template creator needs to be done only for the
+     * final result, not the intermediate steps
+     * @return
+     */
+    protected Flattener getNewFlattener() {
+        return new Flattener(repository, metaModels, config)
+                .createOperationalTemplate(false); //do not create operational template except at the end.
     }
 
     private Flattener useComplexObjectForArchetypeSlotReplacement(boolean useComplexObjectForArchetypeSlotReplacement) {

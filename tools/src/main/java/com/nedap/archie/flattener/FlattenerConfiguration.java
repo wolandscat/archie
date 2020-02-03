@@ -21,11 +21,9 @@ public class FlattenerConfiguration {
      */
     private boolean removeZeroOccurrencesObjects = false;
     /**
-     * Remove zero occurrences objects in parents. Useful for modeling tools, where you cannot undo a zero occurrences if it's defined in a parent, so don't need to know
+     * Remove zero occurrences objects in parents. Useful for modeling tools, where you cannot undo a zero occurrences if it's defined in a parent, so don't need to know that it exists
      */
     private boolean removeZeroOccurrencesInParents = false;
-
-
     /**
      * Set to true to remove languages from the metadata and translations. Only for operational templates. Default false
      */
