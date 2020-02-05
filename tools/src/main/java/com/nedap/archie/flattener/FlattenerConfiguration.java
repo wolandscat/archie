@@ -17,7 +17,7 @@ public class FlattenerConfiguration {
      */
     private boolean useComplexObjectForArchetypeSlotReplacement = false;
     /**
-     * Remove all zero occurrences objects. Default false, except for OperationalTemplates
+     * Remove all zero occurrences objects. Default false, except for OperationalTemplates, where it is default true.
      */
     private boolean removeZeroOccurrencesObjects = false;
     /**
@@ -46,6 +46,10 @@ public class FlattenerConfiguration {
      * Only for Operational templates: remove any closed archetype slots from the archetype.
      */
     private boolean closeArchetypeSlots = true;
+
+    private FlattenerConfiguration() {
+
+    }
 
     public static FlattenerConfiguration forFlattened() {
         return new FlattenerConfiguration();

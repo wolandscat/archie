@@ -60,11 +60,11 @@ class OperationalTemplateCreator {
     public void removeZeroOccurrencesConstraints(Archetype archetype) {
         Stack<CObject> workList = new Stack<>();
         workList.push(archetype.getDefinition());
-        while(!workList.isEmpty()) {
+        while (!workList.isEmpty()) {
             CObject object = workList.pop();
             List<CAttribute> attributesToRemove = new ArrayList<>();
-            for(CAttribute attribute:object.getAttributes()) {
-                if(attribute.getExistence() != null && attribute.getExistence().getUpper() == 0 && !attribute.getExistence().isUpperUnbounded()) {
+            for (CAttribute attribute : object.getAttributes()) {
+                if (attribute.getExistence() != null && attribute.getExistence().getUpper() == 0 && !attribute.getExistence().isUpperUnbounded()) {
                     attributesToRemove.add(attribute);
                 } else {
                     List<CObject> objectsToRemove = new ArrayList<>();

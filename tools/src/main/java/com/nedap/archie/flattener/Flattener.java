@@ -66,6 +66,7 @@ public class Flattener implements IAttributeFlattenerSupport {
      */
     public Flattener createOperationalTemplate(boolean makeTemplate) {
         config.setCreateOperationalTemplate(makeTemplate);
+        config.setRemoveZeroOccurrencesObjects(true);
         return this;
     }
 
@@ -166,7 +167,7 @@ public class Flattener implements IAttributeFlattenerSupport {
         //1. redefine structure
         //2. fill archetype slots if we are creating an operational template
         flattenDefinition(result, child);
-        if(config.isCreateOperationalTemplate()) {
+        if(config.isCreateOperationalTemplate() && config.isRemoveZeroOccurrencesObjects()) {
             optCreator.removeZeroOccurrencesConstraints(result);
         } else {
             prohibitZeroOccurrencesConstraints(result);
