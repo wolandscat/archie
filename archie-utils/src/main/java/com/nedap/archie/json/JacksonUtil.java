@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.nedap.archie.aom.ResourceDescription;
@@ -154,7 +155,8 @@ public class JacksonUtil {
         private Set<Class> classesToNotAddTypeProperty;
         public ArchieTypeResolverBuilder(RMJacksonConfiguration configuration)
         {
-            super(ObjectMapper.DefaultTyping.NON_FINAL);
+            super(ObjectMapper.DefaultTyping.NON_FINAL, BasicPolymorphicTypeValidator.builder()
+                    .allowIfBaseType(OpenEHRBase.class).build());
             classesToNotAddTypeProperty = new HashSet<>();
             if(!configuration.isAlwaysIncludeTypeProperty()) {
                 List<RMTypeInfo> allTypes = ArchieRMInfoLookup.getInstance().getAllTypes();
