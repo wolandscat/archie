@@ -66,7 +66,9 @@ public class Flattener implements IAttributeFlattenerSupport {
      */
     public Flattener createOperationalTemplate(boolean makeTemplate) {
         config.setCreateOperationalTemplate(makeTemplate);
-        config.setRemoveZeroOccurrencesObjects(true);
+        if(makeTemplate) {
+            config.setRemoveZeroOccurrencesObjects(true);
+        }
         return this;
     }
 
