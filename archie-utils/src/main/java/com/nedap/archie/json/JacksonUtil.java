@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.nedap.archie.aom.ResourceDescription;
@@ -93,6 +94,7 @@ public class JacksonUtil {
         objectMapper.disable(SerializationFeature.WRITE_NULL_MAP_VALUES);
         objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        objectMapper.disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         objectMapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
@@ -153,7 +155,8 @@ public class JacksonUtil {
         private Set<Class> classesToNotAddTypeProperty;
         public ArchieTypeResolverBuilder(RMJacksonConfiguration configuration)
         {
-            super(ObjectMapper.DefaultTyping.NON_FINAL);
+            super(ObjectMapper.DefaultTyping.NON_FINAL, BasicPolymorphicTypeValidator.builder()
+                    .allowIfBaseType(OpenEHRBase.class).build());
             classesToNotAddTypeProperty = new HashSet<>();
             if(!configuration.isAlwaysIncludeTypeProperty()) {
                 List<RMTypeInfo> allTypes = ArchieRMInfoLookup.getInstance().getAllTypes();
