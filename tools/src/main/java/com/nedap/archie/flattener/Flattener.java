@@ -402,7 +402,7 @@ public class Flattener implements IAttributeFlattenerSupport {
 
     /**
      * Get a new flattener with the same configuration as this, except that it will not create operational templates
-     * <br/>
+     * <br>
      * The not creating operational templates is because the operational template creator needs to be done only for the
      * final result, not the intermediate steps
      * @return
