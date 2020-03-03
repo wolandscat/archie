@@ -202,7 +202,7 @@ public class AOMPathQuery {
             }
             return attribute.getChild(pathSegment.getNodeId());
         } else if (pathSegment.hasNumberIndex()) {
-            return attribute.getChildren().get(pathSegment.getIndex() - 1);//APath path numbers start at 1 instead of 0
+            return !attribute.getChildren().isEmpty() ? attribute.getChildren().get(pathSegment.getIndex() - 1) : null;//APath path numbers start at 1 instead of 0
         } else if (pathSegment.getNodeId() != null) {
             return attribute.getChildByMeaning(pathSegment.getNodeId());//TODO: the ANTLR grammar removes all whitespace. what to do here?
         } else {
