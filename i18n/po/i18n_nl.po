@@ -693,7 +693,7 @@ msgstr "De node id is niet in de form id1(.1)*: {0}"
 
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/ErrorType.java:29
 msgid "The node_id of the root object of the archetype must be of the form id1'{.1}'*, where the number of .1 components equals the specalisation depth, and must be defined in the terminology"
-msgstr "De node id van het bovenste object van het archetype moet van de form id`{.1}`* zijn, waar het aantal van .1 onderdelen gelijk is aan de specialization depth, and de code moet bestaan in de terminologie"
+msgstr "De node id van het bovenste object van het archetype moet van de form id'{.1}'* zijn, waar het aantal van .1 onderdelen gelijk is aan de specialization depth, and de code moet bestaan in de terminologie"
 
 #: ../tools/src/main/java/com/nedap/archie/archetypevalidator/validations/FlatFormValidation.java:38
 #, java-format
