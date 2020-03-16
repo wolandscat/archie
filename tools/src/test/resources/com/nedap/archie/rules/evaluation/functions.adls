@@ -83,6 +83,9 @@ rules
     $round_down:Integer ::= round(4.0 / 3.0)
     $round_multiple:Integer ::= round(/data[id2]/events[id3]/data[id4]/items[id5]/value/magnitude)
 
+    $ceil_path:Integer ::= ceil(/data[id2]/events[id3]/data[id4]/items[id5]/value/magnitude / 2.0)
+    $floor_path:Integer ::= floor(/data[id2]/events[id3]/data[id4]/items[id5]/value/magnitude / 2.0)
+
 
 terminology
 	term_definitions = <
