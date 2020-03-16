@@ -24,18 +24,20 @@ public class FunctionUtil {
 
     /**
      * All arguments should have an equal list size OR list size of allowedLength
+     * @return If list sizes equal or allowedLength return this length, otherwise return -1
      */
     public static int checkEqualLengthOrOne(List<ValueList> arguments) {
-        int[] allowedLengths = { 1, -1 };
+        final int allowedLength = 1;
+        int otherLength = -1;
         for (ValueList list : arguments) {
-            if (list.size() != allowedLengths[0]) {
-                if (allowedLengths[1] != -1 && allowedLengths[1] != list.size()) {
+            if (list.size() != allowedLength) {
+                if (otherLength != -1 && otherLength != list.size()) {
                     return -1;
                 }
-                allowedLengths[1] = list.size();
+                otherLength = list.size();
             }
         }
-        return allowedLengths[1] == -1 ? allowedLengths[0] : allowedLengths[1];
+        return otherLength == -1 ? allowedLength : otherLength;
     }
 
     public static ValueList checkAndHandleNull(ValueList leftValues, ValueList rightValues) {

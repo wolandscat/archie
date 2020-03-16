@@ -1,6 +1,5 @@
 package com.nedap.archie.rules.evaluation;
 
-import com.nedap.archie.rules.PrimitiveType;
 import com.nedap.archie.rules.evaluation.evaluators.FunctionUtil;
 import org.junit.Test;
 
