@@ -13,19 +13,27 @@ public class FunctionUtilTest {
 
     @Test
     public void checkEqualLengthOrOne() {
-        List<ValueList> arguments = new ArrayList<>();
-        ValueList valueList1 = new ValueList(PrimitiveType.Real);
-        Value value = new Value<>(1d);
+        ValueList valueList1 = new ValueList();
+        ValueList valueList2 = new ValueList();
+        ValueList valueList3 = new ValueList();
+        Value<Double> value = new Value<>(1d);
         valueList1.addValue(value);
-        valueList1.addValue(value);
-        ValueList valueList2 = new ValueList(PrimitiveType.Real);
         valueList2.addValue(value);
         valueList2.addValue(value);
-        valueList2.addValue(value);
-        arguments.add(valueList1);
-        arguments.add(valueList2);
-
-        int result = FunctionUtil.checkEqualLengthOrOne(arguments);
-        assertEquals(-1, result);
+        valueList3.addValue(value);
+        valueList3.addValue(value);
+        valueList3.addValue(value);
+        List<ValueList> arguments1 = new ArrayList<>();
+        arguments1.add(valueList1);
+        arguments1.add(valueList1);
+        assertEquals(1, FunctionUtil.checkEqualLengthOrOne(arguments1));
+        List<ValueList> arguments2 = new ArrayList<>();
+        arguments2.add(valueList1);
+        arguments2.add(valueList2);
+        assertEquals(2, FunctionUtil.checkEqualLengthOrOne(arguments2));
+        List<ValueList> arguments3 = new ArrayList<>();
+        arguments3.add(valueList2);
+        arguments3.add(valueList3);
+        assertEquals(-1, FunctionUtil.checkEqualLengthOrOne(arguments3));
     }
 }
