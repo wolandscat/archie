@@ -6,10 +6,8 @@ import com.nedap.archie.rules.evaluation.FunctionImplementation;
 import com.nedap.archie.rules.evaluation.Value;
 import com.nedap.archie.rules.evaluation.ValueList;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.nedap.archie.rules.evaluation.evaluators.FunctionUtil.castToDouble;
 import static com.nedap.archie.rules.evaluation.evaluators.FunctionUtil.checkAndHandleNull;
 import static com.nedap.archie.rules.evaluation.evaluators.FunctionUtil.checkEqualLength;
 
@@ -23,6 +21,13 @@ public class Round implements FunctionImplementation {
     public ValueList evaluate(List<ValueList> arguments) throws FunctionCallException {
         if(arguments.size() != 1) {
             throw new FunctionCallException("round expects one argument, but got " + arguments.size());
+        }
+
+        //if one of the values is null, return null.
+        ValueList possiblyNullResult = checkAndHandleNull(arguments);
+        if(possiblyNullResult != null) {
+            possiblyNullResult.setType(PrimitiveType.Real);
+            return possiblyNullResult;
         }
 
         ValueList result = new ValueList();

@@ -8,6 +8,8 @@ import com.nedap.archie.rules.evaluation.ValueList;
 
 import java.util.List;
 
+import static com.nedap.archie.rules.evaluation.evaluators.FunctionUtil.checkAndHandleNull;
+
 public class Ceil implements FunctionImplementation {
     @Override
     public String getName() {
@@ -18,6 +20,13 @@ public class Ceil implements FunctionImplementation {
     public ValueList evaluate(List<ValueList> arguments) throws FunctionCallException {
         if(arguments.size() != 1) {
             throw new FunctionCallException("ceil expects one argument, but got " + arguments.size());
+        }
+
+        //if one of the values is null, return null.
+        ValueList possiblyNullResult = checkAndHandleNull(arguments);
+        if(possiblyNullResult != null) {
+            possiblyNullResult.setType(PrimitiveType.Real);
+            return possiblyNullResult;
         }
 
         ValueList result = new ValueList();
