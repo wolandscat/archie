@@ -23,8 +23,8 @@ public class FunctionUtil {
     }
 
     /**
-     * All arguments should have an equal list size OR list size of allowedLength
-     * @return If list sizes equal or allowedLength return this length, otherwise return -1
+     * All arguments should have an equal list size OR list size of 1
+     * @return If list sizes equal or 1 return this length, otherwise return -1
      */
     public static int checkEqualLengthOrOne(List<ValueList> arguments) {
         final int allowedLength = 1;
