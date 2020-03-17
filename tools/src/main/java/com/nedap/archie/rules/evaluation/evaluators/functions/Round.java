@@ -9,7 +9,6 @@ import com.nedap.archie.rules.evaluation.ValueList;
 import java.util.List;
 
 import static com.nedap.archie.rules.evaluation.evaluators.FunctionUtil.checkAndHandleNull;
-import static com.nedap.archie.rules.evaluation.evaluators.FunctionUtil.checkEqualLength;
 
 public class Round implements FunctionImplementation {
     @Override
