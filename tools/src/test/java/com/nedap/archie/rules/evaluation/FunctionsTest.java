@@ -123,8 +123,8 @@ public class FunctionsTest {
         quantity.setMagnitude(21d);
 
         ruleEvaluation.evaluate(rmObject, archetype.getRules().getRules());
-        ValueList flatSum = ruleEvaluation.getVariableMap().get("mean");
-        assertEquals("mean should work", (65+21+3.3)/3, (double) flatSum.getValues().get(0).getValue(), 0.001);
+        ValueList mean = ruleEvaluation.getVariableMap().get("mean");
+        assertEquals("mean should work", (65+21+3.3)/3, (double) mean.getValues().get(0).getValue(), 0.001);
     }
     @Test
     public void valueWhenUndefined() throws Exception {
