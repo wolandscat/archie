@@ -1,14 +1,12 @@
 package com.nedap.archie.adl14;
 
 import com.google.common.collect.Lists;
-import com.nedap.archie.adl14.log.ADL2ConversionLog;
 import com.nedap.archie.adl14.log.ADL2ConversionRunLog;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.CAttribute;
 import com.nedap.archie.aom.CObject;
 import com.nedap.archie.archetypevalidator.ArchetypeValidator;
 import com.nedap.archie.archetypevalidator.ValidationResult;
-import com.nedap.archie.serializer.adl.ADLArchetypeSerializer;
 import org.junit.Test;
 import org.openehr.referencemodels.BuiltinReferenceModels;
 
@@ -63,7 +61,6 @@ public class PreviousLogConversionTest {
             Archetype converted = result.getConversionResults().get(0).getArchetype();
             ValidationResult validated = new ArchetypeValidator(BuiltinReferenceModels.getMetaModels()).validate(converted);
             assertTrue(validated.toString(), validated.passes() );
-            System.out.println(ADLArchetypeSerializer.serialize(result.getConversionResults().get(0).getArchetype()));
             assertTrue(converted.getTerminology().getTermDefinitions().get("nl").containsKey("ac9000"));
             assertTrue(converted.getTerminology().getTermDefinitions().get("nl").containsKey("ac9001"));
             assertTrue(converted.getTerminology().getTermDefinitions().get("nl").containsKey("ac9002"));
@@ -77,7 +74,7 @@ public class PreviousLogConversionTest {
                     Lists.newArrayList(new ADL14Parser(BuiltinReferenceModels.getMetaModels()).parse(stream, conversionConfiguration)),
                     log);
             Archetype converted = result.getConversionResults().get(0).getArchetype();
-            System.out.println(ADLArchetypeSerializer.serialize(result.getConversionResults().get(0).getArchetype()));
+
             ValidationResult validated = new ArchetypeValidator(BuiltinReferenceModels.getMetaModels()).validate(converted);
             assertTrue(validated.toString(), validated.passes() );
             assertTrue(converted.getTerminology().getTermDefinitions().get("nl").containsKey("ac9000"));
