@@ -87,6 +87,45 @@ public class FunctionsTest {
         assertEquals("flat_sum should work", 122.6, (double) flatSum.getValues().get(0).getValue(), 0.001);
     }
 
+
+
+    @Test
+    public void sum() throws Exception {
+        archetype = parser.parse(ParsedRulesEvaluationTest.class.getResourceAsStream("functions.adls"));
+        assertTrue(parser.getErrors().hasNoErrors());
+        System.out.println(archetype);
+        RuleEvaluation ruleEvaluation = getRuleEvaluation();
+
+        Locatable rmObject = (Locatable) new TestUtil().constructEmptyRMObject(archetype.getDefinition());
+        DvQuantity quantity = (DvQuantity) rmObject.itemAtPath("/data[id2]/events[id3]/data[id4]/items[id5]/value");
+        quantity.setMagnitude(65d);
+
+        quantity = (DvQuantity) rmObject.itemAtPath("/data[id2]/events[id3]/data[id4]/items[id6]/value");
+        quantity.setMagnitude(21d);
+
+        ruleEvaluation.evaluate(rmObject, archetype.getRules().getRules());
+        ValueList sum = ruleEvaluation.getVariableMap().get("sum");
+        assertEquals("sum should work", 65+21+3.3, (double) sum.getValues().get(0).getValue(), 0.001);
+    }
+
+    @Test
+    public void mean() throws Exception {
+        archetype = parser.parse(ParsedRulesEvaluationTest.class.getResourceAsStream("functions.adls"));
+        assertTrue(parser.getErrors().hasNoErrors());
+        System.out.println(archetype);
+        RuleEvaluation ruleEvaluation = getRuleEvaluation();
+
+        Locatable rmObject = (Locatable) new TestUtil().constructEmptyRMObject(archetype.getDefinition());
+        DvQuantity quantity = (DvQuantity) rmObject.itemAtPath("/data[id2]/events[id3]/data[id4]/items[id5]/value");
+        quantity.setMagnitude(65d);
+
+        quantity = (DvQuantity) rmObject.itemAtPath("/data[id2]/events[id3]/data[id4]/items[id6]/value");
+        quantity.setMagnitude(21d);
+
+        ruleEvaluation.evaluate(rmObject, archetype.getRules().getRules());
+        ValueList mean = ruleEvaluation.getVariableMap().get("mean");
+        assertEquals("mean should work", (65+21+3.3)/3, (double) mean.getValues().get(0).getValue(), 0.001);
+    }
     @Test
     public void valueWhenUndefined() throws Exception {
         archetype = parser.parse(ParsedRulesEvaluationTest.class.getResourceAsStream("functions.adls"));
