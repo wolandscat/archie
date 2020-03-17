@@ -104,8 +104,8 @@ public class FunctionsTest {
         quantity.setMagnitude(21d);
 
         ruleEvaluation.evaluate(rmObject, archetype.getRules().getRules());
-        ValueList flatSum = ruleEvaluation.getVariableMap().get("sum");
-        assertEquals("sum should work", 65+21+3.3, (double) flatSum.getValues().get(0).getValue(), 0.001);
+        ValueList sum = ruleEvaluation.getVariableMap().get("sum");
+        assertEquals("sum should work", 65+21+3.3, (double) sum.getValues().get(0).getValue(), 0.001);
     }
 
     @Test
