@@ -33,8 +33,7 @@ public class Floor implements FunctionImplementation {
         result.setType(PrimitiveType.Integer);
 
         for(Value valueObject : arguments.get(0).getValues()) {
-            // QUESTION: What should the type be? Int/Double/Long/Real?
-            result.addValue(new Value((int) Math.floor((Double) valueObject.getValue())));
+            result.addValue(new Value((long) Math.floor((Double) valueObject.getValue())));
         }
 
         return result;
