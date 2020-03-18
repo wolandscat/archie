@@ -11,7 +11,7 @@ import java.util.List;
 
 import static com.nedap.archie.rules.evaluation.evaluators.FunctionUtil.castToDouble;
 import static com.nedap.archie.rules.evaluation.evaluators.FunctionUtil.checkAndHandleNull;
-import static com.nedap.archie.rules.evaluation.evaluators.FunctionUtil.checkEqualLength;
+import static com.nedap.archie.rules.evaluation.evaluators.FunctionUtil.checkEqualLengthOrOne;
 
 /**
  * Created by pieter.bos on 07/04/2017.
@@ -32,7 +32,7 @@ public class Sum implements FunctionImplementation {
         }
 
         //check that all valueList are equal length or 1 length
-        int length = checkEqualLength(arguments);
+        int length = checkEqualLengthOrOne(arguments);
 
         ValueList result = new ValueList();
 
