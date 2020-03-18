@@ -189,4 +189,34 @@ public class FunctionsTest {
         assertEquals("first value is rounded", 65L, (long) roundMultiple.getValues().get(0).getValue());
         assertEquals("second value is rounded", 46L, (long) roundMultiple.getValues().get(1).getValue());
     }
+
+    @Test
+    public void ceil() throws Exception {
+        archetype = parser.parse(ParsedRulesEvaluationTest.class.getResourceAsStream("functions.adls"));
+        assertTrue(parser.getErrors().hasNoErrors());
+
+        RuleEvaluation ruleEvaluation = getRuleEvaluation();
+        Locatable rmObject = (Locatable) new TestUtil().constructEmptyRMObject(archetype.getDefinition());
+        DvQuantity quantity = (DvQuantity) rmObject.itemAtPath("/data[id2]/events[id3]/data[id4]/items[id5]/value");
+        quantity.setMagnitude(26.1);
+
+        ruleEvaluation.evaluate(rmObject, archetype.getRules().getRules());
+        ValueList ceilPath = ruleEvaluation.getVariableMap().get("ceil_path");
+        assertEquals("ceil should round up", 14L, ceilPath.getValues().get(0).getValue());
+    }
+
+    @Test
+    public void floor() throws Exception {
+        archetype = parser.parse(ParsedRulesEvaluationTest.class.getResourceAsStream("functions.adls"));
+        assertTrue(parser.getErrors().hasNoErrors());
+
+        RuleEvaluation ruleEvaluation = getRuleEvaluation();
+        Locatable rmObject = (Locatable) new TestUtil().constructEmptyRMObject(archetype.getDefinition());
+        DvQuantity quantity = (DvQuantity) rmObject.itemAtPath("/data[id2]/events[id3]/data[id4]/items[id5]/value");
+        quantity.setMagnitude(27.9);
+
+        ruleEvaluation.evaluate(rmObject, archetype.getRules().getRules());
+        ValueList floorPath = ruleEvaluation.getVariableMap().get("floor_path");
+        assertEquals("floor should round down", 13L, floorPath.getValues().get(0).getValue());
+    }
 }

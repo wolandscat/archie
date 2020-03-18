@@ -10,16 +10,16 @@ import java.util.List;
 
 import static com.nedap.archie.rules.evaluation.evaluators.FunctionUtil.checkAndHandleNull;
 
-public class Round implements FunctionImplementation {
+public class Ceil implements FunctionImplementation {
     @Override
     public String getName() {
-        return "round";
+        return "ceil";
     }
 
     @Override
     public ValueList evaluate(List<ValueList> arguments) throws FunctionCallException {
         if(arguments.size() != 1) {
-            throw new FunctionCallException("round expects one argument, but got " + arguments.size());
+            throw new FunctionCallException("ceil expects one argument, but got " + arguments.size());
         }
 
         //if one of the values is null, return null.
@@ -33,7 +33,7 @@ public class Round implements FunctionImplementation {
         result.setType(PrimitiveType.Integer);
 
         for(Value valueObject : arguments.get(0).getValues()) {
-            result.addValue(new Value(Math.round((Double) valueObject.getValue())));
+            result.addValue(new Value((long) Math.ceil((Double) valueObject.getValue())));
         }
 
         return result;
