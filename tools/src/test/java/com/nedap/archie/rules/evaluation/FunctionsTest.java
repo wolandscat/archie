@@ -163,7 +163,7 @@ public class FunctionsTest {
 
         ruleEvaluation.evaluate(rmObject, archetype.getRules().getRules());
         ValueList ceilPath = ruleEvaluation.getVariableMap().get("ceil_path");
-        assertEquals("floor should round down", 14L, ceilPath.getValues().get(0).getValue());
+        assertEquals("ceil should round up", 14L, ceilPath.getValues().get(0).getValue());
     }
 
     @Test
@@ -178,6 +178,6 @@ public class FunctionsTest {
 
         ruleEvaluation.evaluate(rmObject, archetype.getRules().getRules());
         ValueList floorPath = ruleEvaluation.getVariableMap().get("floor_path");
-        assertEquals("ceil should round up", 13L, floorPath.getValues().get(0).getValue());
+        assertEquals("floor should round down", 13L, floorPath.getValues().get(0).getValue());
     }
 }

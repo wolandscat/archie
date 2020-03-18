@@ -25,7 +25,7 @@ public class Round implements FunctionImplementation {
         //if one of the values is null, return null.
         ValueList possiblyNullResult = checkAndHandleNull(arguments);
         if(possiblyNullResult != null) {
-            possiblyNullResult.setType(PrimitiveType.Real);
+            possiblyNullResult.setType(PrimitiveType.Integer);
             return possiblyNullResult;
         }
 
