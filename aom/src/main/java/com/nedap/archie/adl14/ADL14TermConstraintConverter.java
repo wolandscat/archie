@@ -215,11 +215,14 @@ public class ADL14TermConstraintConverter {
         if(flatParentArchetype != null) {
             ValueSet valueSet = findValueSet(flatParentArchetype, localCodes);
             if (valueSet != null) {
+                //do not need to add a term in this case
                 return valueSet;
             }
         }
         ValueSet valueSet = findValueSet(archetype, localCodes);
         if (valueSet != null) {
+            //if this value set was added through the conversion log, it would not have had a term set. So ensure it's set every single time
+            addTermForValueSet(archetype, owningConstraint, valueSet);
             return valueSet;
         }
         valueSet = new ValueSet();
@@ -229,10 +232,15 @@ public class ADL14TermConstraintConverter {
         converter.addCreatedValueSet(valueSet.getId(), valueSet);
         archetype.getTerminology().getValueSets().put(valueSet.getId(), valueSet);
 
+        addTermForValueSet(archetype, owningConstraint, valueSet);
+        return valueSet;
+    }
+
+    private void addTermForValueSet(Archetype archetype, CObject owningConstraint, ValueSet valueSet) {
         for(String language: archetype.getTerminology().getTermDefinitions().keySet()) {
             //TODO: add new archetype term to conversion log!
             ArchetypeTerm term = getTerm(language, owningConstraint);
-            if(term != null) {
+            if(term != null && archetype.getTerminology().getTermDefinitions().get(language).get(valueSet.getId()) == null) {
                 ArchetypeTerm newTerm = new ArchetypeTerm();
                 newTerm.setCode(valueSet.getId());
                 newTerm.setText(term.getText() + " (synthesised)");
@@ -240,7 +248,6 @@ public class ADL14TermConstraintConverter {
                 archetype.getTerminology().getTermDefinitions().get(language).put(newTerm.getCode(), newTerm);
             }
         }
-        return valueSet;
     }
 
     private ValueSet findValueSet(Archetype archetype, Set<String> localCodes) {
