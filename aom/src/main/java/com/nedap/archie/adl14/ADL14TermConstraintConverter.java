@@ -8,6 +8,8 @@ import com.nedap.archie.aom.primitives.CTerminologyCode;
 import com.nedap.archie.aom.terminology.ArchetypeTerm;
 import com.nedap.archie.aom.terminology.ValueSet;
 import com.nedap.archie.aom.utils.AOMUtils;
+import com.nedap.archie.aom.utils.NodeIdUtil;
+import com.nedap.archie.base.OpenEHRBase;
 import com.nedap.archie.base.terminology.TerminologyCode;
 
 import java.net.URI;
@@ -212,11 +214,33 @@ public class ADL14TermConstraintConverter {
     private ValueSet findOrCreateValueSet(Archetype archetype, Set<String> localCodes, CObject owningConstraint) {
         //TODO: already checks for equal value sets. But if specialized check if parent contains a value set that  can be redefined to
         //be the same
+        String idInparent = null;
         if(flatParentArchetype != null) {
+            //let's find the exact same value set first
             ValueSet valueSet = findValueSet(flatParentArchetype, localCodes);
             if (valueSet != null) {
                 //do not need to add a term in this case
                 return valueSet;
+            }
+            //now if this has a parent with a value set already, we probably want to use that
+            if(flatParentArchetype != null) {
+                String parentPath = AOMUtils.pathAtSpecializationLevel(owningConstraint.getPathSegments(), archetype.specializationDepth() - 1);
+                OpenEHRBase inParent = flatParentArchetype.itemAtPath(parentPath);
+                if(inParent instanceof CAttribute) {
+                    CAttribute cAttributeInParent = (CAttribute) inParent;
+                    if(!cAttributeInParent.getChildren().isEmpty()) {
+                        CObject cObject = cAttributeInParent.getChildren().get(0);
+                        if(cObject instanceof CTerminologyCode) {
+                            CTerminologyCode termCodeInParent = (CTerminologyCode) cObject;
+                            if(termCodeInParent.getConstraint() != null && !termCodeInParent.getConstraint().isEmpty()) {
+                                if(termCodeInParent.getConstraint().get(0).startsWith("ac")) {
+                                    idInparent = termCodeInParent.getConstraint().get(0);
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
         }
         ValueSet valueSet = findValueSet(archetype, localCodes);
@@ -227,7 +251,13 @@ public class ADL14TermConstraintConverter {
         }
         valueSet = new ValueSet();
         valueSet.setMembers(localCodes);
-        valueSet.setId(converter.getIdCodeGenerator().generateNextValueSetCode());
+        if(idInparent == null) {
+            valueSet.setId(converter.getIdCodeGenerator().generateNextValueSetCode());
+        } else {
+            valueSet.setId(this.converter.getIdCodeGenerator().generateNextSpecializedIdCode(idInparent));
+            //TODO: is adding this in teh conversionlog a good idea?
+        }
+
         converter.addCreatedCode(valueSet.getId(), new CreatedCode(valueSet.getId(), ReasonForCodeCreation.CREATED_VALUE_SET));
         converter.addCreatedValueSet(valueSet.getId(), valueSet);
         archetype.getTerminology().getValueSets().put(valueSet.getId(), valueSet);

@@ -213,7 +213,7 @@ public class ADL14NodeIDConverter {
                         //this is a bit odd - it now specializes the first child it finds. Let's warn
                         synthesizeNodeId(cObject, path);
                         conversionResult.getLog().addWarningWithLocation(ADL14ConversionMessageCode.WARNING_SPECIALIZED_FIRST_MATCHING_CHILD, cObject.path());
-                    } else if (cAttributeInParent.getChildren().size() == 1) {
+                    } else if (cAttributeInParent.getChildren().size() == 1 || cObject.getParent().getChildren().size() == 1) {
                         if(this.metaModels.rmTypesConformant(cObject.getRmTypeName(), cAttributeInParent.getChildren().get(0).getRmTypeName())) {
                             //this replaces a parent node, so a specialisation. add id code and possibly a term
                             createSpecialisedNodeId(cObject, path, Arrays.asList(cAttributeInParent.getChildren().get(0)));
@@ -298,7 +298,21 @@ public class ADL14NodeIDConverter {
             }
             calculateNewNodeId(cObject);
         } else if (cObject instanceof ArchetypeSlot) {
+
             calculateNewNodeId(cObject);
+            if (cObject.getNodeId() != null) {
+                //VSSID validation does not exist in ADL 1.4. Fix it here
+
+                if(flatParentArchetype != null) {
+                    String parentPath = AOMUtils.pathAtSpecializationLevel(cObject.getPathSegments(), archetype.specializationDepth() - 1);
+                    CObject cObjectInParent = flatParentArchetype.itemAtPath(parentPath);
+                    if (cObjectInParent != null && cObjectInParent instanceof ArchetypeSlot && !cObjectInParent.getNodeId().equalsIgnoreCase(cObject.getNodeId())) {
+                        //specializing a node id for an archetype slot is not allowed in ADL 2. Set to parent node id.
+                        cObject.setNodeId(cObjectInParent.getNodeId());
+                        //TODO: remove id code from terminology as well
+                    }
+                }
+            }
         } else if (cObject instanceof CComplexObjectProxy) {
             CComplexObjectProxy proxy = (CComplexObjectProxy) cObject;
             calculateNewNodeId(cObject);

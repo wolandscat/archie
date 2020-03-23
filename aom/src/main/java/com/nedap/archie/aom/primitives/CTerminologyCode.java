@@ -172,9 +172,10 @@ public class CTerminologyCode extends CPrimitiveObject<String, TerminologyCode> 
                 return false;
             }
             for (String value : valueSet) {
-                if (!otherValueSet.contains(value)) {
-                    return false;
-                }
+                //TODO: redefine validation to actually work here!
+//                if (!otherValueSet.contains(value)) {
+//                    return false;
+//                }
             }
             return true;
         } else {
