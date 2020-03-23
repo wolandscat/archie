@@ -2,39 +2,40 @@ package com.nedap.archie.opt_marand;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.common.collect.Lists;
 import com.nedap.archie.adl14.ADL14ConversionConfiguration;
 import com.nedap.archie.adl14.ADL14Converter;
 import com.nedap.archie.adl14.ADL14Parser;
 import com.nedap.archie.adl14.ADL2ConversionResult;
 import com.nedap.archie.adl14.ADL2ConversionResultList;
 import com.nedap.archie.adl14.ConversionConfigForTest;
-import com.nedap.archie.adlparser.ADLParser;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.AuthoredResource;
 import com.nedap.archie.aom.CArchetypeRoot;
 import com.nedap.archie.aom.CComplexObject;
 import com.nedap.archie.aom.CDefinedObject;
 import com.nedap.archie.aom.Template;
+import com.nedap.archie.aom.TemplateOverlay;
 import com.nedap.archie.aom.primitives.CTerminologyCode;
 import com.nedap.archie.archetypevalidator.ValidationResult;
 import com.nedap.archie.base.terminology.TerminologyCode;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 import com.nedap.archie.json.JacksonUtil;
 import com.nedap.archie.json.RMJacksonConfiguration;
-import com.nedap.archie.rm.datavalues.DataValue;
+import com.nedap.archie.rm.datatypes.CodePhrase;
 import com.nedap.archie.rm.datavalues.DvCodedText;
 import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.serializer.adl.ADLArchetypeSerializer;
-import com.nedap.archie.testutil.TestUtil;
 import org.junit.Test;
 import org.openehr.referencemodels.BuiltinReferenceModels;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 
@@ -90,9 +91,27 @@ public class ParseBetterSystemsOptTest {
         objectMapper.addMixIn(CComplexObject.class, CComplexObjectMixin.class);
         objectMapper.addMixIn(CDefinedObject.class, CDefinedObjectMixin.class);
 
+
         objectMapper.addMixIn(CTerminologyCode.class, CTerminologyCodeMixin.class);
+
+
+        objectMapper.addMixIn(DvCodedText.class, DvCodedTextMixin.class);
+        objectMapper.addMixIn(CodePhrase.class, CodePhraseMixin.class);
         return objectMapper;
     }
+
+//    private void fixtermBindings(Archetype archetype) {
+//        if(archetype.getTerminology() != null && archetype.getTerminology().getTermBindings() != null) {
+//            Map<String, Map<String, URI>> termBindings = archetype.getTerminology().getTermBindings();
+//            for(String terminologyId: termBindings.keySet()) {
+//                for(String key:termBindings.get(terminologyId).keySet()) {
+//                    URI uri = termBindings.get(terminologyId).get(key);
+//                    if(uri.toString().startsWith("term:"))
+//
+//                }
+//            }
+//        }
+//    }
 
     @Test
     public void parseCovidAssessment() throws Exception {
@@ -112,12 +131,10 @@ public class ParseBetterSystemsOptTest {
         }
         ADL2ConversionResultList converted = new ADL14Converter(BuiltinReferenceModels.getMetaModels(), adl14ConversionConfiguration)
                 .convert(archetypes);
-        int convertedArchetypes = 0;
+
         for(ADL2ConversionResult conversionResult:converted.getConversionResults()) {
             if(conversionResult.getException() != null) {
                 throw new RuntimeException("problem converting archetype " + conversionResult.getArchetypeId(), conversionResult.getException());
-            } else if (conversionResult.getArchetype() != null) {
-                convertedArchetypes++;
             }
         }
         InMemoryFullArchetypeRepository adl2Repository = new InMemoryFullArchetypeRepository();
@@ -127,7 +144,7 @@ public class ParseBetterSystemsOptTest {
             }
         }
         adl2Repository.compile(BuiltinReferenceModels.getMetaModels());
-        int passingValidations = 0;
+
         for(ValidationResult validationResult:adl2Repository.getAllValidationResults()) {
             if(!validationResult.passes()) {
                 throw new RuntimeException(MessageFormat.format("error validating {0}: {1}", validationResult.getArchetypeId(), validationResult.getErrors()));
@@ -139,7 +156,32 @@ public class ParseBetterSystemsOptTest {
         ObjectMapper mapper = getObjectMapper(config);
         try(InputStream stream = getClass().getResourceAsStream("/opt_json/Templates/Suspected Covid-19 Assessment.v0.1.t.json")) {
             Archetype archetype = mapper.readValue(stream, Archetype.class);
-            ADLArchetypeSerializer.serialize(archetype);
+            ADL14ConversionConfiguration templateconfig = ConversionConfigForTest.getConfig();
+            templateconfig.setApplyDiff(false);
+            ADL14Converter adl14Converter = new ADL14Converter(BuiltinReferenceModels.getMetaModels(), templateconfig);
+            adl14Converter.setExistingRepository(adl2Repository);
+            ADL2ConversionResultList convert = adl14Converter.convert(Lists.newArrayList(archetype));
+            System.out.println("somethign");
+            Template foundTemplate = null;
+
+            for(ADL2ConversionResult result:convert.getConversionResults()) {
+                if(result.getArchetype() instanceof Template) {
+                    foundTemplate = (Template) result.getArchetype();
+                    //TODO: move to converter!
+                    foundTemplate.setTemplateOverlays(new ArrayList<>());//remove the template overlays for now
+                }
+                if(result.getException() != null) {
+                    throw result.getException();
+                }
+            }
+
+            for(ADL2ConversionResult result:convert.getConversionResults()) {
+                if (result.getArchetype() instanceof TemplateOverlay) {
+                    foundTemplate.addTemplateOverlay((TemplateOverlay) result.getArchetype());
+                }
+            }
+            UnconstrainedIntervalRemover.removeUnconstrainedIntervals(foundTemplate);
+            System.out.println(ADLArchetypeSerializer.serialize(foundTemplate));
         }
 
     }

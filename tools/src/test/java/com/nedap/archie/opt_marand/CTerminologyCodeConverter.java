@@ -31,6 +31,26 @@ public class CTerminologyCodeConverter implements Converter<TemplateCTerminology
             result.setAssumedValue(value.getAssumedValue());
             return result;
             //TODO: check if it's possible that this is just a term binding to a terminology id?
+        } else if (value.getTerminologyId() != null && !value.getTerminologyId().getValue().equalsIgnoreCase("local") && value.getConstraint() != null && !value.getConstraint().isEmpty()) {
+            //convert external term codes to the non-parsed format. The converter will handle that
+            String termCode = "[" + value.getTerminologyId().getValue() + "::";
+            //assuming only one terminology id for now - might not be correct!
+            boolean first = true;
+            for(String code:value.getConstraint()) {
+                if(first) {
+                    first = false;
+                } else {
+                    termCode = termCode + ", ";
+                }
+                termCode = termCode + code;
+
+            }
+            termCode = termCode + "]";
+            CTerminologyCode result = new CTerminologyCode();
+
+            result.setConstraint(Lists.newArrayList(termCode));
+            result.setAssumedValue(value.getAssumedValue());
+            return result;
         }
         CTerminologyCode result = new CTerminologyCode();
 

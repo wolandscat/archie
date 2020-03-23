@@ -4,7 +4,10 @@ import com.nedap.archie.adl14.log.ADL2ConversionLog;
 import com.nedap.archie.adl14.log.ADL2ConversionRunLog;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.ResourceDescription;
+import com.nedap.archie.aom.Template;
+import com.nedap.archie.aom.TemplateOverlay;
 import com.nedap.archie.aom.utils.ArchetypeParsePostProcesser;
+import com.nedap.archie.diff.DifferentialPathGenerator;
 import com.nedap.archie.diff.Differentiator;
 import com.nedap.archie.flattener.Flattener;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
@@ -20,12 +23,17 @@ public class ADL14Converter {
 
     private final MetaModels metaModels;
     private final ADL14ConversionConfiguration conversionConfiguration;
+    InMemoryFullArchetypeRepository existingRepository;
 
     public ADL14Converter(MetaModels metaModels, ADL14ConversionConfiguration conversionConfiguration) {
         this.metaModels = metaModels;
         this.conversionConfiguration = conversionConfiguration;
     }
 
+
+    public void setExistingRepository(InMemoryFullArchetypeRepository existingRepository) {
+        this.existingRepository = existingRepository;
+    }
 
     public ADL2ConversionResultList convert(List<Archetype> archetypes) {
         return convert(archetypes, null);
@@ -34,8 +42,24 @@ public class ADL14Converter {
     public ADL2ConversionResultList convert(List<Archetype> archetypes, ADL2ConversionRunLog previousConversion) {
         ADL2ConversionResultList resultList = new ADL2ConversionResultList();
 
-        InMemoryFullArchetypeRepository repository = new InMemoryFullArchetypeRepository();
+        InMemoryFullArchetypeRepository repository = existingRepository;
+        if(repository == null) {
+            repository = new InMemoryFullArchetypeRepository();
+        }
         List<Archetype> unprocessed = new ArrayList<>(archetypes);
+
+        List<Archetype> newOnes = new ArrayList<>();
+        for(Archetype ar:unprocessed) {
+            //add the overlays in the right order, at least for now
+            if(ar instanceof Template) {
+                Template t = (Template) ar;
+                for(TemplateOverlay overlay:t.getTemplateOverlays()) {
+                    newOnes.add(overlay);
+                    overlay.setRmRelease(t.getRmRelease());
+                }
+            }
+        }
+        unprocessed.addAll(newOnes);
 
         //process the archetypes ordered by specialization level
         unprocessed.sort(Comparator.comparingInt(a -> a.specializationDepth()));
@@ -54,7 +78,11 @@ public class ADL14Converter {
                     Archetype flatParent = new Flattener(repository, metaModels).flatten(parent);
                     result = convert(archetype, flatParent, previousConversion);
                     if (result.getArchetype() != null) {
-                        result.setArchetype(differentiator.differentiate(result.getArchetype(), flatParent));
+                        if(conversionConfiguration.isApplyDiff()) {
+                            result.setArchetype(differentiator.differentiate(result.getArchetype(), flatParent));
+                        } else {
+                            new DifferentialPathGenerator().replace(result.getArchetype());
+                        }
                     }
                     resultList.addConversionResult(result);
                 } else {

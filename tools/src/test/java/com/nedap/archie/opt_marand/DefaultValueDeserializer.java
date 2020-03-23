@@ -23,6 +23,10 @@ import java.io.IOException;
 
 public class DefaultValueDeserializer extends JsonDeserializer<OpenEHRBase> {
 
+    public DefaultValueDeserializer() {
+        System.out.println("me!");
+    }
+
     private static final ObjectMapper objectMapper = getObjectMapper(new RMJacksonConfiguration());
 
     private static final ObjectMapper getObjectMapper(RMJacksonConfiguration config) {
