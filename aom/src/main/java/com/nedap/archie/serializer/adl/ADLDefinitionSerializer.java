@@ -3,11 +3,14 @@ package com.nedap.archie.serializer.adl;
 import com.nedap.archie.aom.*;
 import com.nedap.archie.aom.primitives.*;
 import com.nedap.archie.aom.terminology.ArchetypeTerm;
+import com.nedap.archie.aom.terminology.ArchetypeTerminology;
+import com.nedap.archie.aom.utils.AOMUtils;
 import com.nedap.archie.base.terminology.TerminologyCode;
 import com.nedap.archie.serializer.adl.constraints.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
 
@@ -18,9 +21,11 @@ public class ADLDefinitionSerializer {
     protected final ADLStringBuilder builder;
 
     private final Map<Class, ConstraintSerializer> constraintSerializers;
+    private Function<String, Archetype> flatArchetypeProvider;
 
-    public ADLDefinitionSerializer(ADLStringBuilder builder) {
+    public ADLDefinitionSerializer(ADLStringBuilder builder, Function<String, Archetype> flatArchetypeProvider) {
         this.builder = builder;
+        this.flatArchetypeProvider = flatArchetypeProvider;
 
         constraintSerializers = new HashMap<>();
         constraintSerializers.put(ArchetypeSlot.class, new ArchetypeSlotSerializer(this));
@@ -40,7 +45,7 @@ public class ADLDefinitionSerializer {
 
     public static String serialize(CObject cons) {
         final ADLStringBuilder builder = new ADLStringBuilder();
-        ADLDefinitionSerializer serializer = new ADLDefinitionSerializer(builder);
+        ADLDefinitionSerializer serializer = new ADLDefinitionSerializer(builder, null);
         serializer.appendCObject(cons);
         return builder.toString();
     }
@@ -50,15 +55,32 @@ public class ADLDefinitionSerializer {
     }
 
     public String getTermText(CObject cobj) {
+        if(cobj == null) {
+            return null;
+        }
+        Archetype archetype = cobj.getArchetype();
         String originalLanguage = ofNullable(cobj)
-                .flatMap(c -> ofNullable(c.getArchetype()))
+                .flatMap(c -> ofNullable(archetype))
                 .flatMap(a -> ofNullable(a.getOriginalLanguage()))
                 .map(TerminologyCode::getCodeString)
                 .orElse(null);
         if (originalLanguage == null) return null;
 
         ArchetypeTerm term = cobj.getArchetype().getTerm(cobj, originalLanguage);
-        if (term == null) return null;
+        if (term == null) {
+            if(flatArchetypeProvider != null && archetype.getParentArchetypeId() != null) {
+                Archetype flatParent = flatArchetypeProvider.apply(archetype.getParentArchetypeId());
+                if(flatParent != null && flatParent.getTerminology() != null) {
+                    ArchetypeTerminology terminology = flatParent.getTerminology();
+                    String nodeId = AOMUtils.codeAtLevel(cobj.getNodeId(), flatParent.specializationDepth());
+                    term = terminology.getTermDefinition(originalLanguage, nodeId);
+                }
+            }
+
+        }
+        if(term == null) {
+            return null;
+        }
         return term.getText();
     }
 

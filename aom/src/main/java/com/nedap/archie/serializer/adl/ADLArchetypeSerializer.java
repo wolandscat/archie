@@ -2,36 +2,57 @@ package com.nedap.archie.serializer.adl;
 
 import com.nedap.archie.aom.*;
 
+import java.util.function.Function;
+
 /**
  * @author markopi
  */
 abstract public class ADLArchetypeSerializer<T extends Archetype> {
     protected final T archetype;
+    Function<String, Archetype> flatArchetypeProvider;
     protected final ADLStringBuilder builder = new ADLStringBuilder();
 
     private final ADLDefinitionSerializer definitionSerializer;
     private final ADLRulesSerializer rulesSerializer;
 
 
-    protected ADLArchetypeSerializer(T archetype) {
+    protected ADLArchetypeSerializer(T archetype, Function<String, Archetype> flatArchetypeProvider) {
         this.archetype = archetype;
+        this.flatArchetypeProvider = flatArchetypeProvider;
 
-        this.definitionSerializer = new ADLDefinitionSerializer(builder);
+        this.definitionSerializer = new ADLDefinitionSerializer(builder, flatArchetypeProvider);
         this.rulesSerializer = new ADLRulesSerializer(builder, definitionSerializer);
     }
 
-    public static String serialize(Archetype archetype) {
+    /**
+     * Serialize the archetype to ADL, using the flattened parent archetypes to get names for in the comments
+     * of specialized archetypes
+     * @param archetype the archetype to serialize
+     * @param flatArchetypeProvider the function to retrieve flat parent archetypes
+     * @return the ADL output
+     */
+    public static String serialize(Archetype archetype, Function<String, Archetype> flatArchetypeProvider) {
         if (archetype instanceof Template) {
-            return new ADLTemplateSerializer((Template) archetype).serialize();
+            return new ADLTemplateSerializer((Template) archetype, flatArchetypeProvider).serialize();
         } else if (archetype instanceof OperationalTemplate) {
-            return new ADLOperationalTemplateSerializer((OperationalTemplate) archetype).serialize();
+            return new ADLOperationalTemplateSerializer((OperationalTemplate) archetype, flatArchetypeProvider).serialize();
         } else if (archetype instanceof TemplateOverlay) {
-            return new ADLTemplateOverlaySerializer((TemplateOverlay) archetype).serialize();
+            return new ADLTemplateOverlaySerializer((TemplateOverlay) archetype, flatArchetypeProvider).serialize();
         } else if (archetype instanceof AuthoredArchetype) {
-            return new ADLAuthoredArchetypeSerializer<>((AuthoredArchetype) archetype).serialize();
+            return new ADLAuthoredArchetypeSerializer<>((AuthoredArchetype) archetype, flatArchetypeProvider).serialize();
         }
         throw new AssertionError("Could not serialize archetype of class " +
                 (archetype == null ? null : archetype.getClass().getName()));
+    }
+
+
+    /**
+     * Serialize the archetype to ADL
+     * @param archetype the archetype to serialize
+     * @return the ADL output
+     */
+    public static String serialize(Archetype archetype) {
+        return serialize(archetype, null);
     }
 
     protected String serialize() {
