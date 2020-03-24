@@ -20,6 +20,7 @@ import com.nedap.archie.aom.TemplateOverlay;
 import com.nedap.archie.aom.primitives.CTerminologyCode;
 import com.nedap.archie.archetypevalidator.ValidationResult;
 import com.nedap.archie.base.terminology.TerminologyCode;
+import com.nedap.archie.flattener.Flattener;
 import com.nedap.archie.template.betterjson.ArchetypeTermFixer;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 import com.nedap.archie.json.JacksonUtil;
@@ -28,6 +29,7 @@ import com.nedap.archie.rm.datatypes.CodePhrase;
 import com.nedap.archie.rm.datavalues.DvCodedText;
 import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.serializer.adl.ADLArchetypeSerializer;
+import com.nedap.archie.template.betterjson.NodeIdFixer;
 import com.nedap.archie.template.betterjson.parser.ArchetypeMixin;
 import com.nedap.archie.template.betterjson.parser.AuthoredResourceMixin;
 import com.nedap.archie.template.betterjson.parser.CArchetypeRootMixin;
@@ -177,10 +179,21 @@ public class ParseBetterSystemsOptTest {
                 }
             }
 
+            //FIRST remove node ids that shouldn't have been created
+            //THEN add terms
+            new NodeIdFixer().fixNodeIds(foundTemplate, adl2Repository);
             new ArchetypeTermFixer().fixTerms(foundTemplate, adl2Repository);
 
-            System.out.println(ADLArchetypeSerializer.serialize(foundTemplate));
+
+
             adl2Repository.compile(BuiltinReferenceModels.getMetaModels());
+
+            System.out.println(ADLArchetypeSerializer.serialize(foundTemplate, adl2Repository::getFlattenedArchetype));
+
+            Flattener optCreator = new Flattener(adl2Repository, BuiltinReferenceModels.getMetaModels()).createOperationalTemplate(true);
+
+            System.out.println("\n\n\n==========================================\nOPT 2\n==================\n\n");
+           // System.out.println(ADLArchetypeSerializer.serialize(optCreator.flatten(foundTemplate)));
 
             for(ValidationResult validationResult:adl2Repository.getAllValidationResults()) {
                 if(!validationResult.passes()) {

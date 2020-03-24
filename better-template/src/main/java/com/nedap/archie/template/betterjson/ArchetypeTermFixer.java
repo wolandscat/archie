@@ -9,6 +9,7 @@ import com.nedap.archie.aom.CPrimitiveObject;
 import com.nedap.archie.aom.Template;
 import com.nedap.archie.aom.TemplateOverlay;
 import com.nedap.archie.aom.terminology.ArchetypeTerm;
+import com.nedap.archie.aom.terminology.ArchetypeTerminology;
 import com.nedap.archie.aom.utils.AOMUtils;
 import com.nedap.archie.aom.utils.NodeIdUtil;
 import com.nedap.archie.base.Interval;
@@ -16,6 +17,7 @@ import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class ArchetypeTermFixer {
 
@@ -40,7 +42,7 @@ public class ArchetypeTermFixer {
     }
 
     private void fixTerms(Archetype archetype, InMemoryFullArchetypeRepository repo, CAttribute cAttribute) {
-        List<CObject> cObjectsToRemove = new ArrayList<>();
+
         String language = originalLanguage;
         boolean noTerminology = false;
         if(archetype.getTerminology().getTermDefinitions().isEmpty()) {
@@ -55,7 +57,7 @@ public class ArchetypeTermFixer {
                         archetype.specializationDepth() == AOMUtils.getSpecializationDepthFromCode(cObject.getNodeId())
                 ) {
                     Archetype referencedArchetype = repo.getArchetype(((CArchetypeRoot) cObject).getArchetypeRef());
-                    createTermForNewCode(archetype, cObject, referencedArchetype);
+                    createTermForNewCodeWithRoot(archetype, cObject, referencedArchetype);
                     //TODO: fix lots of problems where node ids are set wrong, for example id2.1 to set the occurrences of id2 to {0} is a problem!
                 }
                 fixTerms(archetype, repo, (CComplexObject) cObject);
@@ -64,35 +66,64 @@ public class ArchetypeTermFixer {
                 } else if(!archetype.getTerminology().getTermDefinitions().get(language).containsKey(cObject.getNodeId()) &&
                         archetype.specializationDepth() == AOMUtils.getSpecializationDepthFromCode(cObject.getNodeId())
                 ) {
-                    createTermForNewCode(archetype, cObject, null);
+                    Archetype flatParent = repo.getArchetype(archetype.getParentArchetypeId());
+                    createTermForNewCodeWithFlatParent(archetype, cObject, flatParent);
                     //TODO: fix lots of problems where node ids are set wrong, for example id2.1 to set the occurrences of id2 to {0} is a problem!
                 }
                 fixTerms(archetype, repo, (CComplexObject) cObject);
             }
         }
-        for(CObject cObject:cObjectsToRemove) {
-            cAttribute.removeChild(cObject);
-        }
     }
 
-    private void createTermForNewCode(Archetype archetype, CObject cObject, Archetype referencedArchetype) {
-        //if(cObject.getParent().isMultiple()) {
-            for(String language: archetype.getTerminology().getTermDefinitions().keySet()) {
-                //TODO: add new archetype term to conversion log?
-                ArchetypeTerm term = null;
-                if(term == null) {
-                    ArchetypeTerm newTerm = new ArchetypeTerm();
-                    newTerm.setCode(cObject.getNodeId());
-                    ArchetypeTerm rootTerm = null;
-                    if(referencedArchetype != null) {
-                        rootTerm = referencedArchetype.getTerm(archetype.getDefinition(), language);
-                    }
+    private static Pattern synthesizedCodesPattern = Pattern.compile("(at|ac|id)(0\\.)*9[0-9]3");
 
-                    newTerm.setText(rootTerm == null ? "* missing code" : rootTerm.getText());
-                    newTerm.setDescription(rootTerm == null ? "* missing code" : rootTerm.getDescription());
-                    archetype.getTerminology().getTermDefinitions().get(language).put(newTerm.getCode(), newTerm);
+    private void createTermForNewCodeWithRoot(Archetype archetype, CObject cObject, Archetype referencedArchetype) {
+        if(!synthesizedCodesPattern.matcher(cObject.getNodeId()).matches()) {
+            //if(cObject.getParent().isMultiple()) {
+            for (String language : archetype.getTerminology().getTermDefinitions().keySet()) {
+                //TODO: add new archetype term to conversion log?
+
+                ArchetypeTerm newTerm = new ArchetypeTerm();
+                newTerm.setCode(cObject.getNodeId());
+                ArchetypeTerm rootTerm = null;
+                if (referencedArchetype != null) {
+                    rootTerm = referencedArchetype.getTerm(referencedArchetype.getDefinition(), language);
                 }
+
+                newTerm.setText(rootTerm == null ? "* missing code" : rootTerm.getText());
+                newTerm.setDescription(rootTerm == null ? "* missing code" : rootTerm.getDescription());
+                archetype.getTerminology().getTermDefinitions().get(language).put(newTerm.getCode(), newTerm);
+
             }
+        }
        // }
     }
+
+    private void createTermForNewCodeWithFlatParent(Archetype archetype, CObject cObject, Archetype flatParent) {
+        if(!synthesizedCodesPattern.matcher(cObject.getNodeId()).matches()) {
+            //if(cObject.getParent().isMultiple()) {
+            for (String language : archetype.getTerminology().getTermDefinitions().keySet()) {
+                //TODO: add new archetype term to conversion log?
+
+                ArchetypeTerm newTerm = new ArchetypeTerm();
+                newTerm.setCode(cObject.getNodeId());
+                ArchetypeTerm parentTerm = null;
+                if (flatParent != null) {
+                    ArchetypeTerminology terminology = flatParent.getTerminology();
+                    parentTerm = terminology == null ?
+                            null :
+                            terminology.getTermDefinition(language, AOMUtils.codeAtLevel(cObject.getNodeId(), flatParent.specializationDepth()));
+                }
+
+                newTerm.setText(parentTerm == null ? "* missing code" : parentTerm.getText());
+                newTerm.setDescription(parentTerm == null ? "* missing code" : parentTerm.getDescription());
+                archetype.getTerminology().getTermDefinitions().get(language).put(newTerm.getCode(), newTerm);
+
+            }
+        }
+        // }
+    }
+
+
+
 }
