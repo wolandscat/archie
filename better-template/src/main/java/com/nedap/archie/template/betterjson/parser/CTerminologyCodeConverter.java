@@ -7,6 +7,9 @@ import com.google.common.collect.Lists;
 import com.nedap.archie.aom.primitives.CTerminologyCode;
 import com.nedap.archie.rm.support.identification.TerminologyId;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CTerminologyCodeConverter implements Converter<TemplateCTerminologyCode, CTerminologyCode> {
     @Override
     public CTerminologyCode convert(TemplateCTerminologyCode value) {
@@ -14,41 +17,29 @@ public class CTerminologyCodeConverter implements Converter<TemplateCTerminology
             //convert external term codes to the non-parsed format. The converter will handle that
             String termCode = "[" + value.getTerminologyId().getValue() + "::";
             //assuming only one terminology id for now - might not be correct!
+            List<String> constraints = new ArrayList<>();
             boolean first = true;
             for(TemplateTermCode templateTermCode:value.getIncludedExternalTerminologyCodes()) {
                 if(first) {
+                    constraints.add("[" + value.getTerminologyId().getValue() + "::" + templateTermCode.getCode() + "]");
                     first = false;
                 } else {
-                    termCode = termCode + ", ";
+                    constraints.add( templateTermCode.getCode());
                 }
-                termCode = termCode + templateTermCode.getCode();
-
             }
-            termCode = termCode + "]";
             CTerminologyCode result = new CTerminologyCode();
 
-            result.setConstraint(Lists.newArrayList(termCode));
+            result.setConstraint(constraints);
             result.setAssumedValue(value.getAssumedValue());
             return result;
             //TODO: check if it's possible that this is just a term binding to a terminology id?
         } else if (value.getTerminologyId() != null && !value.getTerminologyId().getValue().equalsIgnoreCase("local") && value.getConstraint() != null && !value.getConstraint().isEmpty()) {
-            //convert external term codes to the non-parsed format. The converter will handle that
-            String termCode = "[" + value.getTerminologyId().getValue() + "::";
-            //assuming only one terminology id for now - might not be correct!
-            boolean first = true;
-            for(String code:value.getConstraint()) {
-                if(first) {
-                    first = false;
-                } else {
-                    termCode = termCode + ", ";
-                }
-                termCode = termCode + code;
-
-            }
-            termCode = termCode + "]";
+            List<String> constraints = new ArrayList<>();
+            constraints.addAll(value.getConstraint());
+            String first = "[" + value.getTerminologyId() + "::" + constraints.get(0) + "]";
+            constraints.set(0, first);
             CTerminologyCode result = new CTerminologyCode();
-
-            result.setConstraint(Lists.newArrayList(termCode));
+            result.setConstraint(constraints);
             result.setAssumedValue(value.getAssumedValue());
             return result;
         }

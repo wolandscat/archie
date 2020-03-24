@@ -21,6 +21,7 @@ import com.nedap.archie.aom.primitives.CTerminologyCode;
 import com.nedap.archie.archetypevalidator.ValidationResult;
 import com.nedap.archie.base.terminology.TerminologyCode;
 import com.nedap.archie.flattener.Flattener;
+import com.nedap.archie.flattener.FlattenerConfiguration;
 import com.nedap.archie.template.betterjson.ArchetypeTermFixer;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 import com.nedap.archie.json.JacksonUtil;
@@ -187,13 +188,15 @@ public class ParseBetterSystemsOptTest {
 
 
             adl2Repository.compile(BuiltinReferenceModels.getMetaModels());
-
             System.out.println(ADLArchetypeSerializer.serialize(foundTemplate, adl2Repository::getFlattenedArchetype));
+            FlattenerConfiguration flattenerConfiguration = FlattenerConfiguration.forOperationalTemplate();
+            flattenerConfiguration.setRemoveLanguagesFromMetaData(true);
+            String[] langaugesToKeep = {"en"};
+            flattenerConfiguration.setLanguagesToKeep(langaugesToKeep);
+            Flattener optCreator = new Flattener(adl2Repository, BuiltinReferenceModels.getMetaModels(), flattenerConfiguration);
 
-            Flattener optCreator = new Flattener(adl2Repository, BuiltinReferenceModels.getMetaModels()).createOperationalTemplate(true);
-
-            System.out.println("\n\n\n==========================================\nOPT 2\n==================\n\n");
-           // System.out.println(ADLArchetypeSerializer.serialize(optCreator.flatten(foundTemplate)));
+            //System.out.println("\n\n\n==========================================\nOPT 2\n==================\n\n");
+            //System.out.println(ADLArchetypeSerializer.serialize(optCreator.flatten(foundTemplate)));
 
             for(ValidationResult validationResult:adl2Repository.getAllValidationResults()) {
                 if(!validationResult.passes()) {
