@@ -1,4 +1,4 @@
-package com.nedap.archie.opt_marand;
+package com.nedap.archie.template.betterjson.parser;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;

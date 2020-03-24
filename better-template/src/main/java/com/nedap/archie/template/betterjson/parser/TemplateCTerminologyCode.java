@@ -1,4 +1,4 @@
-package com.nedap.archie.opt_marand;
+package com.nedap.archie.template.betterjson.parser;
 
 import com.nedap.archie.aom.primitives.CTerminologyCode;
 import com.nedap.archie.rm.support.identification.TerminologyId;

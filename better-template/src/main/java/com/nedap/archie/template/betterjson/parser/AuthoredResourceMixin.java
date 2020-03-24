@@ -1,4 +1,4 @@
-package com.nedap.archie.opt_marand;
+package com.nedap.archie.template.betterjson.parser;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.nedap.archie.aom.TranslationDetails;

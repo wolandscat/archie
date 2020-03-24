@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.common.collect.Lists;
 import com.nedap.archie.adl14.ADL14ConversionConfiguration;
+import com.nedap.archie.adl14.ADL14ConversionUtil;
 import com.nedap.archie.adl14.ADL14Converter;
 import com.nedap.archie.adl14.ADL14Parser;
 import com.nedap.archie.adl14.ADL2ConversionResult;
@@ -19,6 +20,7 @@ import com.nedap.archie.aom.TemplateOverlay;
 import com.nedap.archie.aom.primitives.CTerminologyCode;
 import com.nedap.archie.archetypevalidator.ValidationResult;
 import com.nedap.archie.base.terminology.TerminologyCode;
+import com.nedap.archie.template.betterjson.ArchetypeTermFixer;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 import com.nedap.archie.json.JacksonUtil;
 import com.nedap.archie.json.RMJacksonConfiguration;
@@ -26,12 +28,22 @@ import com.nedap.archie.rm.datatypes.CodePhrase;
 import com.nedap.archie.rm.datavalues.DvCodedText;
 import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.serializer.adl.ADLArchetypeSerializer;
+import com.nedap.archie.template.betterjson.parser.ArchetypeMixin;
+import com.nedap.archie.template.betterjson.parser.AuthoredResourceMixin;
+import com.nedap.archie.template.betterjson.parser.CArchetypeRootMixin;
+import com.nedap.archie.template.betterjson.parser.CComplexObjectMixin;
+import com.nedap.archie.template.betterjson.parser.CDefinedObjectMixin;
+import com.nedap.archie.template.betterjson.parser.CTerminologyCodeMixin;
+import com.nedap.archie.template.betterjson.parser.CodePhraseMixin;
+import com.nedap.archie.template.betterjson.parser.DvCodedTextMixin;
+import com.nedap.archie.template.betterjson.parser.TerminologyIdParsingTerminologyCodeMixin;
 import org.junit.Test;
 import org.openehr.referencemodels.BuiltinReferenceModels;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,56 +112,39 @@ public class ParseBetterSystemsOptTest {
         return objectMapper;
     }
 
-//    private void fixtermBindings(Archetype archetype) {
-//        if(archetype.getTerminology() != null && archetype.getTerminology().getTermBindings() != null) {
-//            Map<String, Map<String, URI>> termBindings = archetype.getTerminology().getTermBindings();
-//            for(String terminologyId: termBindings.keySet()) {
-//                for(String key:termBindings.get(terminologyId).keySet()) {
-//                    URI uri = termBindings.get(terminologyId).get(key);
-//                    if(uri.toString().startsWith("term:"))
-//
-//                }
-//            }
-//        }
-//    }
+    private void fixtermBindings(Archetype archetype, ADL14ConversionConfiguration adl14ConversionConfiguration) {
+        ADL14ConversionUtil adl14ConversionUtil = new ADL14ConversionUtil(adl14ConversionConfiguration);
+        if(archetype.getTerminology() != null && archetype.getTerminology().getTermBindings() != null) {
+            Map<String, Map<String, URI>> termBindings = archetype.getTerminology().getTermBindings();
+            for(String terminologyId: termBindings.keySet()) {
+                for(String key:termBindings.get(terminologyId).keySet()) {
+                    URI uri = termBindings.get(terminologyId).get(key);
+                    if(uri.toString().startsWith("term:")) {
+                        String termCode = "[" + uri.toString().substring(5) + "]";
+                        try {
+                            termBindings.get(terminologyId).put(key, adl14ConversionUtil.convertToUri(TerminologyCode.createFromString(termCode)));
+                        } catch (URISyntaxException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                }
+            }
+        }
+    }
 
     @Test
     public void parseCovidAssessment() throws Exception {
         MetaModels metaModels = BuiltinReferenceModels.getMetaModels();
         ADL14ConversionConfiguration adl14ConversionConfiguration = ConversionConfigForTest.getConfig();
         List<Archetype> archetypes = new ArrayList<>();
-        for(String fileName:archetypeFiles) {
-            try(InputStream stream = getClass().getResourceAsStream("/opt_json/Archetypes/" + fileName)) {
-
-                ADL14Parser parser = new ADL14Parser(metaModels);
-                Archetype archetype = parser.parse(stream, adl14ConversionConfiguration);
-                archetypes.add(archetype);
-                assertTrue(fileName + " should not contain errors", parser.getErrors().hasNoErrors());
-            } catch (Exception e) {
-                throw new RuntimeException(fileName + " did not parse", e);
-            }
-        }
+        parseADL14Archetypes(metaModels, adl14ConversionConfiguration, archetypes);
         ADL2ConversionResultList converted = new ADL14Converter(BuiltinReferenceModels.getMetaModels(), adl14ConversionConfiguration)
                 .convert(archetypes);
 
-        for(ADL2ConversionResult conversionResult:converted.getConversionResults()) {
-            if(conversionResult.getException() != null) {
-                throw new RuntimeException("problem converting archetype " + conversionResult.getArchetypeId(), conversionResult.getException());
-            }
-        }
-        InMemoryFullArchetypeRepository adl2Repository = new InMemoryFullArchetypeRepository();
-        for(ADL2ConversionResult conversionResult:converted.getConversionResults()) {
-            if(conversionResult.getException() == null && conversionResult.getArchetype() != null) {
-                adl2Repository.addArchetype(conversionResult.getArchetype());
-            }
-        }
-        adl2Repository.compile(BuiltinReferenceModels.getMetaModels());
+        checkConversions(converted);
 
-        for(ValidationResult validationResult:adl2Repository.getAllValidationResults()) {
-            if(!validationResult.passes()) {
-                throw new RuntimeException(MessageFormat.format("error validating {0}: {1}", validationResult.getArchetypeId(), validationResult.getErrors()));
-            }
-        }
+        InMemoryFullArchetypeRepository adl2Repository = createRepository(converted);
 
         RMJacksonConfiguration config = new RMJacksonConfiguration();
         config.setFailOnUnknownProperties(true);
@@ -170,6 +165,7 @@ public class ParseBetterSystemsOptTest {
                     //TODO: move to converter!
                     foundTemplate.setTemplateOverlays(new ArrayList<>());//remove the template overlays for now
                 }
+                fixtermBindings(result.getArchetype(), templateconfig);
                 if(result.getException() != null) {
                     throw result.getException();
                 }
@@ -180,9 +176,58 @@ public class ParseBetterSystemsOptTest {
                     foundTemplate.addTemplateOverlay((TemplateOverlay) result.getArchetype());
                 }
             }
-            UnconstrainedIntervalRemover.removeUnconstrainedIntervals(foundTemplate);
+
+            new ArchetypeTermFixer().fixTerms(foundTemplate, adl2Repository);
+
             System.out.println(ADLArchetypeSerializer.serialize(foundTemplate));
+            adl2Repository.compile(BuiltinReferenceModels.getMetaModels());
+
+            for(ValidationResult validationResult:adl2Repository.getAllValidationResults()) {
+                if(!validationResult.passes()) {
+
+                    throw new RuntimeException(MessageFormat.format("error validating {0}: {1}", validationResult.getArchetypeId(), validationResult));
+                }
+            }
         }
 
+    }
+
+    private InMemoryFullArchetypeRepository createRepository(ADL2ConversionResultList converted) {
+        InMemoryFullArchetypeRepository adl2Repository = new InMemoryFullArchetypeRepository();
+        for(ADL2ConversionResult conversionResult:converted.getConversionResults()) {
+            if(conversionResult.getException() == null && conversionResult.getArchetype() != null) {
+                adl2Repository.addArchetype(conversionResult.getArchetype());
+            }
+        }
+        adl2Repository.compile(BuiltinReferenceModels.getMetaModels());
+
+        for(ValidationResult validationResult:adl2Repository.getAllValidationResults()) {
+            if(!validationResult.passes()) {
+                throw new RuntimeException(MessageFormat.format("error validating {0}: {1}", validationResult.getArchetypeId(), validationResult.getErrors()));
+            }
+        }
+        return adl2Repository;
+    }
+
+    private void parseADL14Archetypes(MetaModels metaModels, ADL14ConversionConfiguration adl14ConversionConfiguration, List<Archetype> archetypes) {
+        for(String fileName:archetypeFiles) {
+            try(InputStream stream = getClass().getResourceAsStream("/opt_json/Archetypes/" + fileName)) {
+
+                ADL14Parser parser = new ADL14Parser(metaModels);
+                Archetype archetype = parser.parse(stream, adl14ConversionConfiguration);
+                archetypes.add(archetype);
+                assertTrue(fileName + " should not contain errors", parser.getErrors().hasNoErrors());
+            } catch (Exception e) {
+                throw new RuntimeException(fileName + " did not parse", e);
+            }
+        }
+    }
+
+    private void checkConversions(ADL2ConversionResultList converted) {
+        for(ADL2ConversionResult conversionResult:converted.getConversionResults()) {
+            if(conversionResult.getException() != null) {
+                throw new RuntimeException("problem converting archetype " + conversionResult.getArchetypeId(), conversionResult.getException());
+            }
+        }
     }
 }

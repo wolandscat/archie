@@ -1,4 +1,4 @@
-package com.nedap.archie.opt_marand;
+package com.nedap.archie.template.betterjson.parser;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
