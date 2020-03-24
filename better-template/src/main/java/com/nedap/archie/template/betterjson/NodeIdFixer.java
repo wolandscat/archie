@@ -6,6 +6,7 @@ import com.nedap.archie.aom.CAttribute;
 import com.nedap.archie.aom.CObject;
 import com.nedap.archie.aom.Template;
 import com.nedap.archie.aom.TemplateOverlay;
+import com.nedap.archie.aom.terminology.ArchetypeTerminology;
 import com.nedap.archie.aom.utils.AOMUtils;
 import com.nedap.archie.aom.utils.NodeIdUtil;
 import com.nedap.archie.archetypevalidator.ErrorType;
@@ -50,8 +51,13 @@ public class NodeIdFixer {
                     if (parentCObject != null) {
                         if (cObject.isProhibited()) {
                             if (!parentCObject.getNodeId().equals(cObject.getNodeId())) {
-                                System.out.println("fixing node id " + cObject.getNodeId() + " for archetype " + archetype.getArchetypeId());
+                               // System.out.println("fixing node id " + cObject.getNodeId() + " for archetype " + archetype.getArchetypeId());
+                                String oldNodeId = cObject.getNodeId();
                                 cObject.setNodeId(parentCObject.getNodeId());
+                                ArchetypeTerminology terminology = cObject.getArchetype().getTerminology();
+                                for(String language:terminology.getTermDefinitions().keySet()) {
+                                    terminology.getTermDefinitions().get(language).remove(oldNodeId);
+                                }
                             }
                         }
                     }

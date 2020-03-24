@@ -27,10 +27,30 @@ public class ArchetypeTermFixer {
         originalLanguage = archetype.getOriginalLanguage().getCodeString();
         fixTerms(archetype,repo, archetype.getDefinition());
 
+        removeUntranslatedLanguages(archetype);
+
         if(archetype instanceof Template) {
             Template template = (Template) archetype;
             for(TemplateOverlay overlay:template.getTemplateOverlays()) {
                 fixTerms(overlay, repo, overlay.getDefinition());
+            }
+        }
+    }
+
+    /** If any languages do not exist in the terminology, remove from translations*/
+    private void removeUntranslatedLanguages(Archetype archetype) {
+        if(archetype.getTranslations() == null) {
+            return;
+        }
+        List<String> toRemove = new ArrayList<>();
+        for(String translation:archetype.getTranslations().keySet()) {
+            if(archetype.getTerminology() != null && !archetype.getTerminology().getTermDefinitions().containsKey(translation)) {
+                toRemove.add(translation);
+            }
+        }
+        if(!toRemove.isEmpty()) {
+            for(String translation:toRemove) {
+                archetype.getTranslations().remove(translation);
             }
         }
     }
