@@ -30,6 +30,7 @@ import com.nedap.archie.rm.datatypes.CodePhrase;
 import com.nedap.archie.rm.datavalues.DvCodedText;
 import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.serializer.adl.ADLArchetypeSerializer;
+import com.nedap.archie.template.betterjson.LanguageConsistencyFixer;
 import com.nedap.archie.template.betterjson.NodeIdFixer;
 import com.nedap.archie.template.betterjson.parser.ArchetypeMixin;
 import com.nedap.archie.template.betterjson.parser.AuthoredResourceMixin;
@@ -184,6 +185,7 @@ public class ParseBetterSystemsOptTest {
             //THEN add terms
             new NodeIdFixer().fixNodeIds(foundTemplate, adl2Repository);
             new ArchetypeTermFixer().fixTerms(foundTemplate, adl2Repository);
+            new LanguageConsistencyFixer().fixLanguageConsistency(foundTemplate);
 
 
 

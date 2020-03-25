@@ -62,7 +62,7 @@ public class ArchetypeTermFixer {
     }
 
     private void fixTerms(Archetype archetype, InMemoryFullArchetypeRepository repo, CAttribute cAttribute) {
-
+        //TODO: create terminology if it does not exist!
         String language = originalLanguage;
         boolean noTerminology = false;
         if(archetype.getTerminology().getTermDefinitions().isEmpty()) {
@@ -73,6 +73,7 @@ public class ArchetypeTermFixer {
         for(CObject cObject:cAttribute.getChildren()) {
             if(cObject instanceof CArchetypeRoot) {
                 if (noTerminology) {
+                    //
                 } else if(!archetype.getTerminology().getTermDefinitions().get(language).containsKey(cObject.getNodeId()) &&
                         archetype.specializationDepth() == AOMUtils.getSpecializationDepthFromCode(cObject.getNodeId())
                 ) {
