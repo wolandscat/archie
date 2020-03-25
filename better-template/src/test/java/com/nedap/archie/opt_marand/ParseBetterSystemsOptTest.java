@@ -32,6 +32,7 @@ import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.serializer.adl.ADLArchetypeSerializer;
 import com.nedap.archie.template.betterjson.LanguageConsistencyFixer;
 import com.nedap.archie.template.betterjson.NodeIdFixer;
+import com.nedap.archie.template.betterjson.ValueSetFixer;
 import com.nedap.archie.template.betterjson.parser.ArchetypeMixin;
 import com.nedap.archie.template.betterjson.parser.AuthoredResourceMixin;
 import com.nedap.archie.template.betterjson.parser.CArchetypeRootMixin;
@@ -159,6 +160,9 @@ public class ParseBetterSystemsOptTest {
             templateconfig.setApplyDiff(false);
             ADL14Converter adl14Converter = new ADL14Converter(BuiltinReferenceModels.getMetaModels(), templateconfig);
             adl14Converter.setExistingRepository(adl2Repository);
+
+            new ValueSetFixer().convertValueSets(archetype);
+
             ADL2ConversionResultList convert = adl14Converter.convert(Lists.newArrayList(archetype));
             System.out.println("somethign");
             Template foundTemplate = null;

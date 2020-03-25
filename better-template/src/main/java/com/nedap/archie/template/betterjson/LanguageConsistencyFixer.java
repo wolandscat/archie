@@ -4,6 +4,7 @@ import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.Template;
 import com.nedap.archie.aom.TemplateOverlay;
 import com.nedap.archie.aom.terminology.ArchetypeTerm;
+import com.nedap.archie.aom.terminology.ArchetypeTerminology;
 import com.nedap.archie.archetypevalidator.ErrorType;
 
 import java.util.List;
@@ -23,9 +24,7 @@ public class LanguageConsistencyFixer {
     }
 
     private void fixInner(Archetype archetype) {
-        if(archetype.getTerminology() == null || archetype.getTerminology().getTermDefinitions() == null) {
-            return;
-        }
+
         List<String> codes = archetype.getTerminology().allCodes();
         for(String code:codes) {
             for (String language : archetype.getTerminology().getTermDefinitions().keySet()) {

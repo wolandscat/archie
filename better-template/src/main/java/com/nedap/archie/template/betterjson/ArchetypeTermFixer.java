@@ -16,6 +16,7 @@ import com.nedap.archie.base.Interval;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -25,6 +26,7 @@ public class ArchetypeTermFixer {
 
     public void fixTerms(Archetype archetype, InMemoryFullArchetypeRepository repo) {
         originalLanguage = archetype.getOriginalLanguage().getCodeString();
+        addTerminologyIfNotPresent(archetype);
         fixTerms(archetype,repo, archetype.getDefinition());
 
         removeUntranslatedLanguages(archetype);
@@ -32,8 +34,18 @@ public class ArchetypeTermFixer {
         if(archetype instanceof Template) {
             Template template = (Template) archetype;
             for(TemplateOverlay overlay:template.getTemplateOverlays()) {
+                addTerminologyIfNotPresent(overlay);
                 fixTerms(overlay, repo, overlay.getDefinition());
             }
+        }
+    }
+
+    private void addTerminologyIfNotPresent(Archetype archetype) {
+        if(archetype.getTerminology() == null) {
+            archetype.setTerminology(new ArchetypeTerminology());
+        }
+        if(archetype.getTerminology().getTermDefinitions().isEmpty()) {
+            archetype.getTerminology().getTermDefinitions().put(originalLanguage, new LinkedHashMap<>());
         }
     }
 
@@ -56,41 +68,37 @@ public class ArchetypeTermFixer {
     }
 
     private void fixTerms(Archetype archetype, InMemoryFullArchetypeRepository repo, CComplexObject cObject) {
+        String language = originalLanguage;
+        if(!archetype.getTerminology().getTermDefinitions().containsKey(originalLanguage)) {
+            language = archetype.getTerminology().getTermDefinitions().keySet().iterator().next();
+        }
+        if(cObject instanceof CArchetypeRoot) {
+            if(!archetype.getTerminology().getTermDefinitions().get(language).containsKey(cObject.getNodeId()) &&
+                    archetype.specializationDepth() == AOMUtils.getSpecializationDepthFromCode(cObject.getNodeId())
+            ) {
+                Archetype referencedArchetype = repo.getArchetype(((CArchetypeRoot) cObject).getArchetypeRef());
+                createTermForNewCodeWithRoot(archetype, cObject, referencedArchetype);
+                //TODO: fix lots of problems where node ids are set wrong, for example id2.1 to set the occurrences of id2 to {0} is a problem!
+            }
+        } else if(cObject instanceof CComplexObject) {
+
+            if(!archetype.getTerminology().getTermDefinitions().get(language).containsKey(cObject.getNodeId()) &&
+                    archetype.specializationDepth() == AOMUtils.getSpecializationDepthFromCode(cObject.getNodeId())
+            ) {
+                Archetype flatParent = repo.getArchetype(archetype.getParentArchetypeId());
+                createTermForNewCodeWithFlatParent(archetype, cObject, flatParent);
+                //TODO: fix lots of problems where node ids are set wrong, for example id2.1 to set the occurrences of id2 to {0} is a problem!
+            }
+        }
         for(CAttribute attribute:cObject.getAttributes()) {
             fixTerms(archetype, repo, attribute);
         }
     }
 
     private void fixTerms(Archetype archetype, InMemoryFullArchetypeRepository repo, CAttribute cAttribute) {
-        //TODO: create terminology if it does not exist!
-        String language = originalLanguage;
-        boolean noTerminology = false;
-        if(archetype.getTerminology().getTermDefinitions().isEmpty()) {
-            noTerminology = true;
-        } else if(!archetype.getTerminology().getTermDefinitions().containsKey(originalLanguage)) {
-            language = archetype.getTerminology().getTermDefinitions().keySet().iterator().next();
-        }
+
         for(CObject cObject:cAttribute.getChildren()) {
-            if(cObject instanceof CArchetypeRoot) {
-                if (noTerminology) {
-                    //
-                } else if(!archetype.getTerminology().getTermDefinitions().get(language).containsKey(cObject.getNodeId()) &&
-                        archetype.specializationDepth() == AOMUtils.getSpecializationDepthFromCode(cObject.getNodeId())
-                ) {
-                    Archetype referencedArchetype = repo.getArchetype(((CArchetypeRoot) cObject).getArchetypeRef());
-                    createTermForNewCodeWithRoot(archetype, cObject, referencedArchetype);
-                    //TODO: fix lots of problems where node ids are set wrong, for example id2.1 to set the occurrences of id2 to {0} is a problem!
-                }
-                fixTerms(archetype, repo, (CComplexObject) cObject);
-            } else if(cObject instanceof CComplexObject) {
-                if(noTerminology) {
-                } else if(!archetype.getTerminology().getTermDefinitions().get(language).containsKey(cObject.getNodeId()) &&
-                        archetype.specializationDepth() == AOMUtils.getSpecializationDepthFromCode(cObject.getNodeId())
-                ) {
-                    Archetype flatParent = repo.getArchetype(archetype.getParentArchetypeId());
-                    createTermForNewCodeWithFlatParent(archetype, cObject, flatParent);
-                    //TODO: fix lots of problems where node ids are set wrong, for example id2.1 to set the occurrences of id2 to {0} is a problem!
-                }
+            if(cObject instanceof CComplexObject) {
                 fixTerms(archetype, repo, (CComplexObject) cObject);
             }
         }

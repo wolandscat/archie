@@ -92,7 +92,7 @@ public class ADL14NodeIDConverter {
         convertTermBindings(archetype);
         generateMissingNodeIds(archetype.getDefinition());
 
-        convertTermDefinitions();
+        convertTermDefinitions(archetype, convertedCodes);
         previousConversionApplier.removeCreatedUnusedTermCodesAndValueSets();
         return new ADL2ConversionLog(/*convertedCodes*/ null, createdCodes, createdValueSets);
     }
@@ -114,7 +114,7 @@ public class ADL14NodeIDConverter {
 
     }
 
-    private void convertTermDefinitions() {
+    public static void convertTermDefinitions(Archetype archetype, Map<String, ConvertedCodeResult> convertedCodes) {
         //process the codes in alphabetical order, high to low, to prevent overwriting codes
         //even better would probably be to create an empty terminology and separate all new+converted codes and old codes
         //instead of doing this in place. Worth a refactor perhaps?
@@ -376,7 +376,7 @@ public class ADL14NodeIDConverter {
         return convertCode(oldCode, "ac");
     }
 
-    private String convertCode(String oldCode, String newCodePrefix) {
+    public static String convertCode(String oldCode, String newCodePrefix) {
         NodeIdUtil nodeIdUtil = new NodeIdUtil(oldCode);
         if (nodeIdUtil.getCodes().isEmpty()) {
             return oldCode;
