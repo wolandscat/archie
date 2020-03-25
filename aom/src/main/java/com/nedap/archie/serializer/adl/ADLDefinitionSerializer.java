@@ -84,6 +84,36 @@ public class ADLDefinitionSerializer {
         return term.getText();
     }
 
+    public String getTermText(CObject cobj, String code) {
+        if(cobj == null) {
+            return null;
+        }
+        Archetype archetype = cobj.getArchetype();
+        String originalLanguage = ofNullable(cobj)
+                .flatMap(c -> ofNullable(archetype))
+                .flatMap(a -> ofNullable(a.getOriginalLanguage()))
+                .map(TerminologyCode::getCodeString)
+                .orElse(null);
+        if (originalLanguage == null) return null;
+
+        ArchetypeTerm term = cobj.getArchetype().getTerm(cobj, code, originalLanguage);
+        if (term == null) {
+            if(flatArchetypeProvider != null && archetype.getParentArchetypeId() != null) {
+                Archetype flatParent = flatArchetypeProvider.apply(archetype.getParentArchetypeId());
+                if(flatParent != null && flatParent.getTerminology() != null) {
+                    ArchetypeTerminology terminology = flatParent.getTerminology();
+                    String nodeId = AOMUtils.codeAtLevel(cobj.getNodeId(), flatParent.specializationDepth());
+                    term = terminology.getTermDefinition(originalLanguage, nodeId);
+                }
+            }
+
+        }
+        if(term == null) {
+            return null;
+        }
+        return term.getText();
+    }
+
     public void appendCObject(CObject cobj) {
         ConstraintSerializer<CObject> serializer = getSerializer(cobj);
         if (serializer != null) {
