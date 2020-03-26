@@ -94,6 +94,7 @@ public class BigArchetypeValidatorTest {
         archetypesTestingNotImplementedFeatures.add("openEHR-TEST_PKG-ENTRY.VTVSUQ_at_code_duplicated_in_internal_codes.v1.0.0");
         //no external terminology binding yet, so cannot implement
         archetypesTestingNotImplementedFeatures.add("openehr-TEST_PKG-SOME_TYPE.VETDF_wrong_property_code.v1.0.0");
+        archetypesTestingNotImplementedFeatures.add("openEHR-EHR-EVALUATION.VPOV_code_list_constrained.v1.0.0");
 
 
     }
