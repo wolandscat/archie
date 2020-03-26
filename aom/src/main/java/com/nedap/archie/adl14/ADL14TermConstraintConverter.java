@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ADL14TermConstraintConverter {
@@ -128,7 +129,7 @@ public class ADL14TermConstraintConverter {
                 List<String> newConstraint = new ArrayList<>();
                 for(String constraint:cTerminologyCode.getConstraint()) {
                     TerminologyCode code = TerminologyCode.createFromString(constraint);
-                    String newCode = converter.convertValueSetCode(termCode.getCodeString());
+                    String newCode = converter.convertValueSetCode(code.getCodeString());
                     converter.addConvertedCode(termCode.getCodeString(), newCode);
                     newConstraint.add(newCode);
                 }
