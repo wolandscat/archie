@@ -67,7 +67,7 @@ public class ParseBetterSystemsOptTest {
 
     public static final String OPT_JSON_ARCHETYPES = "/opt_json/Archetypes/";
     private String[] adl2Archetypes = {
-            "openEHR-EHR-CLUSTER.symptom_sign.v1.0.0"
+            "openEHR-EHR-CLUSTER.symptom_sign.v1.0.0.adls"
     };
 
     private String[] archetypeFiles = {
@@ -171,6 +171,7 @@ public class ParseBetterSystemsOptTest {
         ADL2ConversionResultList converted = adl14ArchetypeConverter.convert(archetypes);
 
         output(converted);
+        output(adl2Symptom);
 
         checkConversions(converted);
 
