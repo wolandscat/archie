@@ -2,6 +2,7 @@ package com.nedap.archie.opt_marand;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.nedap.archie.adl14.ADL14ConversionConfiguration;
 import com.nedap.archie.adl14.ADL14ConversionUtil;
@@ -10,6 +11,7 @@ import com.nedap.archie.adl14.ADL14Parser;
 import com.nedap.archie.adl14.ADL2ConversionResult;
 import com.nedap.archie.adl14.ADL2ConversionResultList;
 import com.nedap.archie.adl14.ConversionConfigForTest;
+import com.nedap.archie.adlparser.ADLParser;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.AuthoredResource;
 import com.nedap.archie.aom.CArchetypeRoot;
@@ -46,6 +48,10 @@ import com.nedap.archie.template.betterjson.parser.TerminologyIdParsingTerminolo
 import org.junit.Test;
 import org.openehr.referencemodels.BuiltinReferenceModels;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -59,6 +65,11 @@ import static org.junit.Assert.assertTrue;
 
 public class ParseBetterSystemsOptTest {
 
+    public static final String OPT_JSON_ARCHETYPES = "/opt_json/Archetypes/";
+    private String[] adl2Archetypes = {
+            "openEHR-EHR-CLUSTER.symptom_sign.v1.0.0"
+    };
+
     private String[] archetypeFiles = {
             "openEHR-EHR-CLUSTER.address_cc.v0.adl",
             "openEHR-EHR-CLUSTER.dwelling.v0.adl",
@@ -68,7 +79,7 @@ public class ParseBetterSystemsOptTest {
             "openEHR-EHR-CLUSTER.outbreak_exposure.v0.adl",
             "openEHR-EHR-CLUSTER.overcrowding_screening.v0.adl",
             "openEHR-EHR-CLUSTER.problem_qualifier.v1.adl",
-            "openEHR-EHR-CLUSTER.symptom_sign.v1.adl",
+           // "openEHR-EHR-CLUSTER.symptom_sign.v1.adl",
             "openEHR-EHR-CLUSTER.symptom_sign-cvid.v0.adl",
             "openEHR-EHR-COMPOSITION.encounter.v1.adl",
             "openEHR-EHR-EVALUATION.health_risk.v1.adl",
@@ -145,12 +156,25 @@ public class ParseBetterSystemsOptTest {
         ADL14ConversionConfiguration adl14ConversionConfiguration = ConversionConfigForTest.getConfig();
         List<Archetype> archetypes = new ArrayList<>();
         parseADL14Archetypes(metaModels, adl14ConversionConfiguration, archetypes);
-        ADL2ConversionResultList converted = new ADL14Converter(BuiltinReferenceModels.getMetaModels(), adl14ConversionConfiguration)
-                .convert(archetypes);
+        ADLParser adl2Parser = new ADLParser(BuiltinReferenceModels.getMetaModels());
+        Archetype adl2Symptom = null;
+        try(InputStream stream = getClass().getResourceAsStream("/opt_json/adl2/" + adl2Archetypes[0])){
+            adl2Symptom = adl2Parser.parse(stream);
+        }
+
+        ADL14Converter adl14ArchetypeConverter = new ADL14Converter(BuiltinReferenceModels.getMetaModels(), adl14ConversionConfiguration);
+        {
+            InMemoryFullArchetypeRepository tmpRepository = new InMemoryFullArchetypeRepository();
+            tmpRepository.addArchetype(adl2Symptom);
+            adl14ArchetypeConverter.setExistingRepository(tmpRepository);
+        }
+        ADL2ConversionResultList converted = adl14ArchetypeConverter.convert(archetypes);
+
+        output(converted);
 
         checkConversions(converted);
 
-        InMemoryFullArchetypeRepository adl2Repository = createRepository(converted);
+        InMemoryFullArchetypeRepository adl2Repository = createRepository(converted, adl2Symptom);
 
         RMJacksonConfiguration config = new RMJacksonConfiguration();
         config.setFailOnUnknownProperties(true);
@@ -165,7 +189,7 @@ public class ParseBetterSystemsOptTest {
             new ValueSetFixer().convertValueSets(archetype);
 
             ADL2ConversionResultList convert = adl14Converter.convert(Lists.newArrayList(archetype));
-            System.out.println("somethign");
+
             Template foundTemplate = null;
 
             for(ADL2ConversionResult result:convert.getConversionResults()) {
@@ -189,14 +213,17 @@ public class ParseBetterSystemsOptTest {
             //FIRST remove node ids that shouldn't have been created
             //THEN add terms
             new NodeIdFixer().fixNodeIds(foundTemplate, adl2Repository);
-            new SpecializedTerminologyCodeFixer().fixTerminologyCodes(archetype, adl2Repository);
             new ArchetypeTermFixer().fixTerms(foundTemplate, adl2Repository);
             new LanguageConsistencyFixer().fixLanguageConsistency(foundTemplate);
+            new SpecializedTerminologyCodeFixer().fixTerminologyCodes(foundTemplate, adl2Repository);
+
+
 
 
 
 
             adl2Repository.compile(BuiltinReferenceModels.getMetaModels());
+            output(foundTemplate);
             System.out.println(ADLArchetypeSerializer.serialize(foundTemplate, adl2Repository::getFlattenedArchetype));
             FlattenerConfiguration flattenerConfiguration = FlattenerConfiguration.forOperationalTemplate();
             flattenerConfiguration.setRemoveLanguagesFromMetaData(true);
@@ -205,7 +232,7 @@ public class ParseBetterSystemsOptTest {
             Flattener optCreator = new Flattener(adl2Repository, BuiltinReferenceModels.getMetaModels(), flattenerConfiguration);
 
             //System.out.println("\n\n\n==========================================\nOPT 2\n==================\n\n");
-            //System.out.println(ADLArchetypeSerializer.serialize(optCreator.flatten(foundTemplate)));
+            output(optCreator.flatten(foundTemplate), "opt_thingy");
 
             for(ValidationResult validationResult:adl2Repository.getAllValidationResults()) {
                 if(!validationResult.passes()) {
@@ -217,12 +244,51 @@ public class ParseBetterSystemsOptTest {
 
     }
 
-    private InMemoryFullArchetypeRepository createRepository(ADL2ConversionResultList converted) {
+    private void output(ADL2ConversionResultList converted) {
+        String outputDir = "/Users/pieter.bos/projects/openehr/covid/";
+        for(ADL2ConversionResult result:converted.getConversionResults()) {
+            String fileName = outputDir + result.getArchetypeId() + ".adls";
+
+            try(FileOutputStream stream = new FileOutputStream(fileName)) {
+                stream.write(ADLArchetypeSerializer.serialize(result.getArchetype()).getBytes(Charsets.UTF_8));
+                stream.flush();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void output(Archetype template) {
+        output(template, "");
+
+    }
+
+    private void output(Archetype template, String suffix) {
+        String outputDir = "/Users/pieter.bos/projects/openehr/covid/";
+
+        String fileName = outputDir + template.getArchetypeId().toString() + suffix + ".adls";
+
+        try(FileOutputStream stream = new FileOutputStream(fileName)) {
+            stream.write(ADLArchetypeSerializer.serialize(template).getBytes(Charsets.UTF_8));
+            stream.flush();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private InMemoryFullArchetypeRepository createRepository(ADL2ConversionResultList converted, Archetype extraArchetype) {
         InMemoryFullArchetypeRepository adl2Repository = new InMemoryFullArchetypeRepository();
         for(ADL2ConversionResult conversionResult:converted.getConversionResults()) {
             if(conversionResult.getException() == null && conversionResult.getArchetype() != null) {
                 adl2Repository.addArchetype(conversionResult.getArchetype());
             }
+        }
+        if(extraArchetype != null) {
+            adl2Repository.addArchetype(extraArchetype);
         }
         adl2Repository.compile(BuiltinReferenceModels.getMetaModels());
 
@@ -236,7 +302,7 @@ public class ParseBetterSystemsOptTest {
 
     private void parseADL14Archetypes(MetaModels metaModels, ADL14ConversionConfiguration adl14ConversionConfiguration, List<Archetype> archetypes) {
         for(String fileName:archetypeFiles) {
-            try(InputStream stream = getClass().getResourceAsStream("/opt_json/Archetypes/" + fileName)) {
+            try(InputStream stream = getClass().getResourceAsStream(OPT_JSON_ARCHETYPES + fileName)) {
 
                 ADL14Parser parser = new ADL14Parser(metaModels);
                 Archetype archetype = parser.parse(stream, adl14ConversionConfiguration);

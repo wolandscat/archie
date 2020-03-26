@@ -1,8 +1,11 @@
 package com.nedap.archie.template.betterjson;
 
+import com.google.common.collect.Lists;
 import com.nedap.archie.adl14.ADL14NodeIDConverter;
 import com.nedap.archie.adl14.OutsideRangeIdCodeGenerator;
 import com.nedap.archie.adl14.log.ConvertedCodeResult;
+import com.nedap.archie.adl14.log.CreatedCode;
+import com.nedap.archie.adl14.log.ReasonForCodeCreation;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.ArchetypeModelObject;
 import com.nedap.archie.aom.CAttribute;
@@ -10,12 +13,16 @@ import com.nedap.archie.aom.CObject;
 import com.nedap.archie.aom.Template;
 import com.nedap.archie.aom.TemplateOverlay;
 import com.nedap.archie.aom.primitives.CTerminologyCode;
+import com.nedap.archie.aom.terminology.ArchetypeTerm;
 import com.nedap.archie.aom.terminology.ValueSet;
 import com.nedap.archie.aom.utils.AOMUtils;
+import com.nedap.archie.base.OpenEHRBase;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Lots of errors in the better template where new value sets get created that should have been specialised codes. Fix that here.
@@ -57,24 +64,27 @@ public class SpecializedTerminologyCodeFixer {
             CTerminologyCode cTerminologyCode = (CTerminologyCode) cObject;
             if(cTerminologyCode.getConstraint() != null && cTerminologyCode.getConstraint().size() > 0) {
                 String constraint = cTerminologyCode.getConstraint().get(0);
+                String pathInParent = AOMUtils.pathAtSpecializationLevel(cObject.getPathSegments(), flatParent.specializationDepth());
+                ArchetypeModelObject parentCObject = flatParent.itemAtPath(pathInParent);
                 if(AOMUtils.getSpecializationDepthFromCode(constraint) == archetype.specializationDepth()) {
-                    String pathInParent = AOMUtils.pathAtSpecializationLevel(cObject.getPathSegments(), flatParent.specializationDepth());
-                    ArchetypeModelObject parentCObject = flatParent.itemAtPath(pathInParent);
                     if(parentCObject instanceof CTerminologyCode) {
-                        CTerminologyCode codeInParent = (CTerminologyCode) parentCObject;
-                        if(codeInParent.getConstraint() != null && codeInParent.getConstraint().size() > 0) {
-                            String constraintInParent = cTerminologyCode.getConstraint().get(0);
-                            if(AOMUtils.isValueSetCode(constraint) && AOMUtils.isValueSetCode(constraintInParent) && !AOMUtils.codesConformant(constraint, constraintInParent)) {
-                                //this is invalid. Let's fix it!
-                                String newCode = archetype.generateNextSpecializedIdCode(constraintInParent);
-                                cTerminologyCode.getConstraint().set(0, newCode);
-
-                                ValueSet valueSet = archetype.getTerminology().getValueSets().remove(constraint);
-                                archetype.getTerminology().getValueSets().put(newCode, valueSet);
-                                convertedCodes.put(constraint, new ConvertedCodeResult(constraint, newCode));
-
-                            }
-
+                        fixCTerminologyCode(archetype, cTerminologyCode, constraint, (CTerminologyCode) parentCObject);
+                    } else if (parentCObject instanceof CAttribute) {
+                        CAttribute parentAttribute = (CAttribute) parentCObject;
+                        Optional<CObject> parent = parentAttribute.getChildren().stream().filter(a -> a instanceof CTerminologyCode).findFirst();
+                        if(parent.isPresent()) {
+                            fixCTerminologyCode(archetype, cTerminologyCode, constraint, (CTerminologyCode) parent.get());
+                        }
+                    }
+                } else if(AOMUtils.getSpecializationDepthFromCode(constraint) < archetype.specializationDepth() &&
+                        AOMUtils.isValueCode(constraint)) {
+                    if(parentCObject instanceof CTerminologyCode) {
+                        fixTerminologyCode2(archetype, flatParent, cTerminologyCode, constraint, (CTerminologyCode) parentCObject);
+                    } else if (parentCObject instanceof CAttribute) {
+                        CAttribute parentAttribute = (CAttribute) parentCObject;
+                        Optional<CObject> parent = parentAttribute.getChildren().stream().filter(a -> a instanceof CTerminologyCode).findFirst();
+                        if (parent.isPresent()) {
+                            fixTerminologyCode2(archetype, flatParent, cTerminologyCode, constraint, (CTerminologyCode) parent.get());
                         }
                     }
                 }
@@ -86,10 +96,91 @@ public class SpecializedTerminologyCodeFixer {
         }
     }
 
+    private void fixTerminologyCode2(Archetype archetype, Archetype flatParent, CTerminologyCode cTerminologyCode, String constraint, CTerminologyCode parentCObject) {
+        CTerminologyCode codeInParent = parentCObject;
+        if (codeInParent.getConstraint() != null && codeInParent.getConstraint().size() > 0) {
+            String constraintInParent = codeInParent.getConstraint().get(0);
+            if (AOMUtils.isValueCode(constraint) && AOMUtils.isValueSetCode(constraintInParent)) {
+                //this is invalid. Let's fix it!
+                //current archetype a single code, parent archetype a value set
+                //let's assume the code is from the value set, otherwise the validator will check it anyway
+                String newCode = archetype.generateNextSpecializedIdCode(constraintInParent);
+                cTerminologyCode.getConstraint().set(0, newCode);
+
+                ValueSet valueSet = new ValueSet();
+                valueSet.setId(newCode);
+                valueSet.setMembers(Lists.newArrayList(constraint));
+                archetype.getTerminology().getValueSets().put(newCode, valueSet);
+
+                addTermForValueSet(archetype, flatParent.getTerm(codeInParent, constraintInParent,
+                        flatParent.getOriginalLanguage() == null ? "en" : flatParent.getOriginalLanguage().getCodeString()),
+                        valueSet);
+
+            }
+        }
+    }
+
+    private void fixCTerminologyCode(Archetype archetype, CTerminologyCode cTerminologyCode, String constraint, CTerminologyCode parentCObject) {
+        CTerminologyCode codeInParent = parentCObject;
+        if (codeInParent.getConstraint() != null && codeInParent.getConstraint().size() > 0) {
+            String constraintInParent = codeInParent.getConstraint().get(0);
+            if (AOMUtils.isValueSetCode(constraint) && AOMUtils.isValueSetCode(constraintInParent) && !AOMUtils.codesConformant(constraint, constraintInParent)) {
+                //this is invalid. Let's fix it!
+
+                String newCode = archetype.generateNextSpecializedIdCode(constraintInParent);
+
+
+                ValueSet valueSet = archetype.getTerminology().getValueSets().remove(constraint);
+                if (valueSet != null) {
+                    cTerminologyCode.getConstraint().set(0, newCode);
+                    //else means validation error
+                    archetype.getTerminology().getValueSets().put(newCode, valueSet);
+                    convertedCodes.put(constraint, new ConvertedCodeResult(constraint, newCode));
+                }
+
+
+
+            } else if (AOMUtils.isValueSetCode(constraintInParent) && AOMUtils.isValueCode(constraint)) {
+                System.out.println("fix more");
+            } else if (AOMUtils.isValueCode(constraintInParent) && AOMUtils.isValueSetCode(constraint)) {
+                System.out.println("fix more");
+            }
+
+        }
+    }
+
+
+    private void addTermForValueSet(Archetype archetype, ArchetypeTerm termInParent, ValueSet valueSet) {
+        for(String language: archetype.getTerminology().getTermDefinitions().keySet()) {
+            //TODO: add new archetype term to conversion log!
+
+            ArchetypeTerm newTerm = new ArchetypeTerm();
+            newTerm.setCode(valueSet.getId());
+            if(termInParent == null) {
+                newTerm.setText("unknown valueset name");
+                newTerm.setDescription("unknown valueset name");
+            } else {
+                newTerm.setText(termInParent.getText() + " (synthesised)");
+                newTerm.setDescription(termInParent.getDescription() + " (synthesised)");
+            }
+            archetype.getTerminology().getTermDefinitions().get(language).put(newTerm.getCode(), newTerm);
+        }
+    }
+
     private void fixInner(Archetype archetype, CAttribute cAttribute, Archetype flatParent) {
 
         for(CObject child:cAttribute.getChildren()) {
             fixInner(archetype, child, flatParent);
         }
     }
+
+    private ValueSet findValueSet(Archetype archetype, Set<String> localCodes) {
+        for(ValueSet valueSet:archetype.getTerminology().getValueSets().values()) {
+            if(valueSet.getMembers().equals(localCodes)) {
+                return valueSet;
+            }
+        }
+        return null;
+    }
+
 }
