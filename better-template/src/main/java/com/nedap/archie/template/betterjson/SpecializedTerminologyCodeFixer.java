@@ -135,6 +135,7 @@ public class SpecializedTerminologyCodeFixer {
                     cTerminologyCode.getConstraint().set(0, newCode);
                     //else means validation error
                     archetype.getTerminology().getValueSets().put(newCode, valueSet);
+                    valueSet.setId(newCode);
                     convertedCodes.put(constraint, new ConvertedCodeResult(constraint, newCode));
                 }
 

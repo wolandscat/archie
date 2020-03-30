@@ -32,19 +32,12 @@ import com.nedap.archie.rm.datatypes.CodePhrase;
 import com.nedap.archie.rm.datavalues.DvCodedText;
 import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.serializer.adl.ADLArchetypeSerializer;
+import com.nedap.archie.template.betterjson.ExternalTermBindingTranslationFixer;
 import com.nedap.archie.template.betterjson.LanguageConsistencyFixer;
 import com.nedap.archie.template.betterjson.NodeIdFixer;
 import com.nedap.archie.template.betterjson.SpecializedTerminologyCodeFixer;
 import com.nedap.archie.template.betterjson.ValueSetFixer;
-import com.nedap.archie.template.betterjson.parser.ArchetypeMixin;
-import com.nedap.archie.template.betterjson.parser.AuthoredResourceMixin;
-import com.nedap.archie.template.betterjson.parser.CArchetypeRootMixin;
-import com.nedap.archie.template.betterjson.parser.CComplexObjectMixin;
-import com.nedap.archie.template.betterjson.parser.CDefinedObjectMixin;
-import com.nedap.archie.template.betterjson.parser.CTerminologyCodeMixin;
-import com.nedap.archie.template.betterjson.parser.CodePhraseMixin;
-import com.nedap.archie.template.betterjson.parser.DvCodedTextMixin;
-import com.nedap.archie.template.betterjson.parser.TerminologyIdParsingTerminologyCodeMixin;
+import com.nedap.archie.template.betterjson.parser.*;
 import org.junit.Test;
 import org.openehr.referencemodels.BuiltinReferenceModels;
 
@@ -182,6 +175,7 @@ public class ParseBetterSystemsOptTest {
         ObjectMapper mapper = getObjectMapper(config);
         try(InputStream stream = getClass().getResourceAsStream("/opt_json/Templates/Suspected Covid-19 Assessment.v0.1.t.json")) {
             Archetype archetype = mapper.readValue(stream, Archetype.class);
+            new CTerminologyCodeConverter().fixCTerminologyCodes(archetype);
             ADL14ConversionConfiguration templateconfig = ConversionConfigForTest.getConfig();
             templateconfig.setApplyDiff(false);
             ADL14Converter adl14Converter = new ADL14Converter(BuiltinReferenceModels.getMetaModels(), templateconfig);
@@ -217,7 +211,7 @@ public class ParseBetterSystemsOptTest {
             new ArchetypeTermFixer().fixTerms(foundTemplate, adl2Repository);
             new LanguageConsistencyFixer().fixLanguageConsistency(foundTemplate);
             new SpecializedTerminologyCodeFixer().fixTerminologyCodes(foundTemplate, adl2Repository);
-
+            new ExternalTermBindingTranslationFixer().fixTranslations(templateconfig, foundTemplate);
 
 
 

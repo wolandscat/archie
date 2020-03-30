@@ -4,18 +4,54 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
 import com.google.common.collect.Lists;
+import com.nedap.archie.aom.Archetype;
+import com.nedap.archie.aom.CAttribute;
+import com.nedap.archie.aom.CComplexObject;
+import com.nedap.archie.aom.CObject;
+import com.nedap.archie.aom.Template;
+import com.nedap.archie.aom.TemplateOverlay;
 import com.nedap.archie.aom.primitives.CTerminologyCode;
 import com.nedap.archie.rm.support.identification.TerminologyId;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CTerminologyCodeConverter implements Converter<TemplateCTerminologyCode, CTerminologyCode> {
-    @Override
-    public CTerminologyCode convert(TemplateCTerminologyCode value) {
+public class CTerminologyCodeConverter {
+
+    public void fixCTerminologyCodes(Archetype archetype) {
+        fixInner(archetype);
+        if(archetype instanceof Template) {
+            Template template = (Template) archetype;
+            for(TemplateOverlay overlay:template.getTemplateOverlays()) {
+                fixInner(overlay);
+            }
+        }
+    }
+
+    private void fixInner(Archetype archetype) {
+        fixInner(archetype, archetype.getDefinition());
+    }
+
+    private void fixInner(Archetype archetype, CObject cObject) {
+        if(cObject instanceof TemplateCTerminologyCode) {
+            TemplateCTerminologyCode templateCode = (TemplateCTerminologyCode) cObject;
+            CAttribute parent = cObject.getParent();
+            convert(templateCode);
+        }
+        for(CAttribute attribute:cObject.getAttributes()) {
+            fixInner(archetype, attribute);
+        }
+    }
+
+    private void fixInner(Archetype archetype, CAttribute attribute) {
+        for(CObject object:attribute.getChildren()) {
+            fixInner(archetype, object);
+        }
+    }
+
+    public void convert(TemplateCTerminologyCode value) {
         if(value.getTerminologyId() != null && value.getIncludedExternalTerminologyCodes() != null) {
             //convert external term codes to the non-parsed format. The converter will handle that
-            String termCode = "[" + value.getTerminologyId().getValue() + "::";
             //assuming only one terminology id for now - might not be correct!
             List<String> constraints = new ArrayList<>();
             boolean first = true;
@@ -27,37 +63,20 @@ public class CTerminologyCodeConverter implements Converter<TemplateCTerminology
                     constraints.add( templateTermCode.getCode());
                 }
             }
-            CTerminologyCode result = new CTerminologyCode();
 
-            result.setConstraint(constraints);
-            result.setAssumedValue(value.getAssumedValue());
-            return result;
+            value.setConstraint(constraints);
+
             //TODO: check if it's possible that this is just a term binding to a terminology id?
         } else if (value.getTerminologyId() != null && !value.getTerminologyId().getValue().equalsIgnoreCase("local") && value.getConstraint() != null && !value.getConstraint().isEmpty()) {
             List<String> constraints = new ArrayList<>();
             constraints.addAll(value.getConstraint());
             String first = "[" + value.getTerminologyId() + "::" + constraints.get(0) + "]";
             constraints.set(0, first);
-            CTerminologyCode result = new CTerminologyCode();
-            result.setConstraint(constraints);
-            result.setAssumedValue(value.getAssumedValue());
-            return result;
+
+            value.setConstraint(constraints);
+
+
         }
-        CTerminologyCode result = new CTerminologyCode();
-
-        result.setConstraint(value.getConstraint());
-        result.setAssumedValue(value.getAssumedValue());
-        return result;
-
     }
 
-    @Override
-    public JavaType getInputType(TypeFactory typeFactory) {
-        return typeFactory.constructType(TemplateCTerminologyCode.class);
-    }
-
-    @Override
-    public JavaType getOutputType(TypeFactory typeFactory) {
-        return typeFactory.constructType(CTerminologyCode.class);
-    }
 }
