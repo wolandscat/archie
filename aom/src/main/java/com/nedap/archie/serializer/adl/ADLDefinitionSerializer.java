@@ -136,7 +136,13 @@ public class ADLDefinitionSerializer {
 
     @SuppressWarnings("unchecked")
     private ConstraintSerializer<CObject> getSerializer(CObject cobj) {
-        return constraintSerializers.get(cobj.getClass());
+        Class c = cobj.getClass();
+        ConstraintSerializer result = constraintSerializers.get(c);
+        while(result == null && c.getSuperclass() != null) {
+            c = c.getSuperclass();
+            result = constraintSerializers.get(c);
+        }
+        return result;
     }
 
 }

@@ -163,13 +163,13 @@ public class ADL14TermConstraintConverter {
                             if(constraint.startsWith("[") && constraint.endsWith("]")) {
                                 TerminologyCode constraintCode = TerminologyCode.createFromString(constraint);
                                 URI uri = new ADL14ConversionUtil(converter.getConversionConfiguration()).convertToUri(constraintCode);
-                                atCodes.add(findOrAddTermBindingAndCode(termCode, uri, termBindingsMap));
+                                atCodes.add(findOrAddTermBindingAndCode(constraintCode, uri, termBindingsMap));
                             } else {
                                 TerminologyCode constraintCode = new TerminologyCode();
                                 constraintCode.setTerminologyId(terminologyId);
                                 constraintCode.setCodeString(constraint);
                                 URI uri = new ADL14ConversionUtil(converter.getConversionConfiguration()).convertToUri(constraintCode);
-                                atCodes.add(findOrAddTermBindingAndCode(termCode, uri, termBindingsMap));
+                                atCodes.add(findOrAddTermBindingAndCode(constraintCode, uri, termBindingsMap));
                             }
 
                         } catch (URISyntaxException e) {
