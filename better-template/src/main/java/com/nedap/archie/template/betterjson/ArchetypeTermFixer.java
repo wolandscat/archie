@@ -25,7 +25,7 @@ public class ArchetypeTermFixer {
 
     private String originalLanguage;
 
-    public void fixTerms(Archetype archetype, InMemoryFullArchetypeRepository repo) {
+    public void fixTerms(Archetype archetype, FlatArchetypeProvider repo) {
         originalLanguage = archetype.getOriginalLanguage().getCodeString();
         addTerminologyIfNotPresent(archetype);
         fixTerms(archetype,repo, archetype.getDefinition());
@@ -43,7 +43,7 @@ public class ArchetypeTermFixer {
         }
     }
 
-    private void fixValueSetCodes(Archetype archetype, InMemoryFullArchetypeRepository repo) {
+    private void fixValueSetCodes(Archetype archetype, FlatArchetypeProvider repo) {
         String language = originalLanguage;
         if(!archetype.getTerminology().getTermDefinitions().containsKey(originalLanguage)) {
             language = archetype.getTerminology().getTermDefinitions().keySet().iterator().next();
@@ -52,13 +52,13 @@ public class ArchetypeTermFixer {
             for(String code:archetype.getTerminology().getValueSets().keySet()) {
                 if(!archetype.getTerminology().getTermDefinitions().get(language).containsKey(code) &&
                         AOMUtils.getSpecializationDepthFromCode(code) == archetype.specializationDepth()) {
-                    Archetype flatParent = repo.getArchetype(archetype.getParentArchetypeId());
+                    Archetype flatParent = repo.getFlatArchetype(archetype.getParentArchetypeId());
                     createTermForNewCodeWithFlatParent(archetype, code, flatParent);
                 }
                 for(String valueCode:archetype.getTerminology().getValueSets().get(code).getMembers()) {
                     if(!archetype.getTerminology().getTermDefinitions().get(language).containsKey(valueCode) &&
                             AOMUtils.getSpecializationDepthFromCode(valueCode) == archetype.specializationDepth()) {
-                        Archetype flatParent = repo.getArchetype(archetype.getParentArchetypeId());
+                        Archetype flatParent = repo.getFlatArchetype(archetype.getParentArchetypeId());
                         createTermForNewCodeWithFlatParent(archetype, valueCode, flatParent);
                     }
                 }
@@ -93,7 +93,7 @@ public class ArchetypeTermFixer {
         }
     }
 
-    private void fixTerms(Archetype archetype, InMemoryFullArchetypeRepository repo, CComplexObject cObject) {
+    private void fixTerms(Archetype archetype, FlatArchetypeProvider repo, CComplexObject cObject) {
         String language = originalLanguage;
         if(!archetype.getTerminology().getTermDefinitions().containsKey(originalLanguage)) {
             language = archetype.getTerminology().getTermDefinitions().keySet().iterator().next();
@@ -102,7 +102,7 @@ public class ArchetypeTermFixer {
             if(!archetype.getTerminology().getTermDefinitions().get(language).containsKey(cObject.getNodeId()) &&
                     archetype.specializationDepth() == AOMUtils.getSpecializationDepthFromCode(cObject.getNodeId())
             ) {
-                Archetype referencedArchetype = repo.getArchetype(((CArchetypeRoot) cObject).getArchetypeRef());
+                Archetype referencedArchetype = repo.getFlatArchetype(((CArchetypeRoot) cObject).getArchetypeRef());
                 createTermForNewCodeWithRoot(archetype, cObject.getNodeId(), referencedArchetype);
                 //TODO: fix lots of problems where node ids are set wrong, for example id2.1 to set the occurrences of id2 to {0} is a problem!
             }
@@ -111,7 +111,7 @@ public class ArchetypeTermFixer {
             if(!archetype.getTerminology().getTermDefinitions().get(language).containsKey(cObject.getNodeId()) &&
                     archetype.specializationDepth() == AOMUtils.getSpecializationDepthFromCode(cObject.getNodeId())
             ) {
-                Archetype flatParent = repo.getArchetype(archetype.getParentArchetypeId());
+                Archetype flatParent = repo.getFlatArchetype(archetype.getParentArchetypeId());
                 createTermForNewCodeWithFlatParent(archetype, cObject.getNodeId(), flatParent);
                 //TODO: fix lots of problems where node ids are set wrong, for example id2.1 to set the occurrences of id2 to {0} is a problem!
             }
@@ -121,7 +121,7 @@ public class ArchetypeTermFixer {
         }
     }
 
-    private void fixTerms(Archetype archetype, InMemoryFullArchetypeRepository repo, CAttribute cAttribute) {
+    private void fixTerms(Archetype archetype, FlatArchetypeProvider repo, CAttribute cAttribute) {
 
         for(CObject cObject:cAttribute.getChildren()) {
             if(cObject instanceof CComplexObject) {
@@ -143,6 +143,9 @@ public class ArchetypeTermFixer {
                 ArchetypeTerm rootTerm = null;
                 if (referencedArchetype != null) {
                     rootTerm = referencedArchetype.getTerm(referencedArchetype.getDefinition(), language);
+                    if(rootTerm == null) {
+                       rootTerm = referencedArchetype.getDefinition().getTerm();
+                    }
                 }
 
                 newTerm.setText(rootTerm == null ? "* missing code" : rootTerm.getText());

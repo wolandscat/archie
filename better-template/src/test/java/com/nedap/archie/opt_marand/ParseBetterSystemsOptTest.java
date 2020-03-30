@@ -22,6 +22,7 @@ import com.nedap.archie.aom.TemplateOverlay;
 import com.nedap.archie.aom.primitives.CTerminologyCode;
 import com.nedap.archie.archetypevalidator.ValidationResult;
 import com.nedap.archie.base.terminology.TerminologyCode;
+import com.nedap.archie.flattener.ArchetypeHRIDMap;
 import com.nedap.archie.flattener.Flattener;
 import com.nedap.archie.flattener.FlattenerConfiguration;
 import com.nedap.archie.template.betterjson.ArchetypeTermFixer;
@@ -33,6 +34,7 @@ import com.nedap.archie.rm.datavalues.DvCodedText;
 import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.serializer.adl.ADLArchetypeSerializer;
 import com.nedap.archie.template.betterjson.ExternalTermBindingTranslationFixer;
+import com.nedap.archie.template.betterjson.FlatArchetypeProvider;
 import com.nedap.archie.template.betterjson.LanguageConsistencyFixer;
 import com.nedap.archie.template.betterjson.NodeIdFixer;
 import com.nedap.archie.template.betterjson.SpecializedTerminologyCodeFixer;
@@ -207,10 +209,11 @@ public class ParseBetterSystemsOptTest {
 
             //FIRST remove node ids that shouldn't have been created
             //THEN add terms
-            new NodeIdFixer().fixNodeIds(foundTemplate, adl2Repository);
-            new ArchetypeTermFixer().fixTerms(foundTemplate, adl2Repository);
+
+            new NodeIdFixer().fixNodeIds(foundTemplate, new FlatArchetypeProvider(adl2Repository));
+            new ArchetypeTermFixer().fixTerms(foundTemplate, new FlatArchetypeProvider(adl2Repository));
             new LanguageConsistencyFixer().fixLanguageConsistency(foundTemplate);
-            new SpecializedTerminologyCodeFixer().fixTerminologyCodes(foundTemplate, adl2Repository);
+            new SpecializedTerminologyCodeFixer().fixTerminologyCodes(foundTemplate, new FlatArchetypeProvider(adl2Repository));
             new ExternalTermBindingTranslationFixer().fixTranslations(templateconfig, foundTemplate);
 
 
@@ -219,7 +222,10 @@ public class ParseBetterSystemsOptTest {
 
             adl2Repository.compile(BuiltinReferenceModels.getMetaModels());
             output(foundTemplate);
-            System.out.println(ADLArchetypeSerializer.serialize(foundTemplate, adl2Repository::getFlattenedArchetype));
+
+            FlatArchetypeProvider provider = new FlatArchetypeProvider(adl2Repository);
+
+            System.out.println(ADLArchetypeSerializer.serialize(foundTemplate, provider::getFlatArchetype));
             FlattenerConfiguration flattenerConfiguration = FlattenerConfiguration.forOperationalTemplate();
             flattenerConfiguration.setRemoveLanguagesFromMetaData(true);
             String[] langaugesToKeep = {"en"};
@@ -232,8 +238,38 @@ public class ParseBetterSystemsOptTest {
             for(ValidationResult validationResult:adl2Repository.getAllValidationResults()) {
                 if(!validationResult.passes()) {
 
-       //             throw new RuntimeException(MessageFormat.format("error validating {0}: {1}", validationResult.getArchetypeId(), validationResult));
+                    throw new RuntimeException(MessageFormat.format("error validating {0}: {1}", validationResult.getArchetypeId(), validationResult));
                 }
+            }
+        }
+    }
+
+    class FlatArchetypeProvider implements com.nedap.archie.template.betterjson.FlatArchetypeProvider {
+        private InMemoryFullArchetypeRepository repo;
+        private ArchetypeHRIDMap<Archetype> flatArchetypes = new ArchetypeHRIDMap<>();
+        private MetaModels metaModels = BuiltinReferenceModels.getMetaModels();
+
+        public FlatArchetypeProvider(InMemoryFullArchetypeRepository repo) {
+            this.repo = repo;
+        }
+
+        public Archetype getFlatArchetype(String id) {
+            Archetype flattenedArchetype = repo.getFlattenedArchetype(id);
+            if(flattenedArchetype != null) {
+                return flattenedArchetype;
+            }
+            flattenedArchetype = flatArchetypes.get(id);
+            if(flattenedArchetype != null) {
+                return flattenedArchetype;
+            }
+            Archetype archetype = repo.getArchetype(id);
+            try {
+                flattenedArchetype = new Flattener(repo, metaModels).flatten(archetype);
+                flatArchetypes.put(flattenedArchetype.getArchetypeId(), flattenedArchetype);
+                return flattenedArchetype;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
             }
         }
 

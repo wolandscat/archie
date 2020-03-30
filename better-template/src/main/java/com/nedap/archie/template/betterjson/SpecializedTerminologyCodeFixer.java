@@ -2,10 +2,7 @@ package com.nedap.archie.template.betterjson;
 
 import com.google.common.collect.Lists;
 import com.nedap.archie.adl14.ADL14NodeIDConverter;
-import com.nedap.archie.adl14.OutsideRangeIdCodeGenerator;
 import com.nedap.archie.adl14.log.ConvertedCodeResult;
-import com.nedap.archie.adl14.log.CreatedCode;
-import com.nedap.archie.adl14.log.ReasonForCodeCreation;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.ArchetypeModelObject;
 import com.nedap.archie.aom.CAttribute;
@@ -16,8 +13,6 @@ import com.nedap.archie.aom.primitives.CTerminologyCode;
 import com.nedap.archie.aom.terminology.ArchetypeTerm;
 import com.nedap.archie.aom.terminology.ValueSet;
 import com.nedap.archie.aom.utils.AOMUtils;
-import com.nedap.archie.base.OpenEHRBase;
-import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,7 +26,7 @@ public class SpecializedTerminologyCodeFixer {
 
     Map<String, ConvertedCodeResult> convertedCodes;
 
-    public void fixTerminologyCodes(Archetype archetype, InMemoryFullArchetypeRepository repo) {
+    public void fixTerminologyCodes(Archetype archetype, FlatArchetypeProvider repo) {
         fixInner(archetype, getFlatParent(archetype, repo));
         if(archetype instanceof Template) {
             Template template = (Template) archetype;
@@ -42,10 +37,10 @@ public class SpecializedTerminologyCodeFixer {
 
     }
 
-    private Archetype getFlatParent(Archetype archetype, InMemoryFullArchetypeRepository repo) {
+    private Archetype getFlatParent(Archetype archetype, FlatArchetypeProvider repo) {
         Archetype flatParent =  null;
         if(archetype.getParentArchetypeId() != null) {
-            flatParent = repo.getFlattenedArchetype(archetype.getParentArchetypeId());
+            flatParent = repo.getFlatArchetype(archetype.getParentArchetypeId());
         }
         return flatParent;
     }

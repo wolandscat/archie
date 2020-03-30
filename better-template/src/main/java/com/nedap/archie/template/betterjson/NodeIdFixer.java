@@ -18,10 +18,10 @@ public class NodeIdFixer {
     private Archetype archetype;
     private Archetype flatParent;
 
-    public void fixNodeIds(Archetype archetype, InMemoryFullArchetypeRepository repo) {
+    public void fixNodeIds(Archetype archetype, FlatArchetypeProvider repo) {
         this.archetype = archetype;
         if(archetype.getParentArchetypeId() != null) {
-            this.flatParent = repo.getFlattenedArchetype(archetype.getParentArchetypeId());
+            this.flatParent = repo.getFlatArchetype(archetype.getParentArchetypeId());
         }
 
         fixNodeId(archetype.getDefinition());
@@ -32,7 +32,7 @@ public class NodeIdFixer {
             for(TemplateOverlay overlay:template.getTemplateOverlays()) {
                 this.archetype = overlay;
                 if(archetype.getParentArchetypeId() != null) {
-                    this.flatParent = repo.getFlattenedArchetype(overlay.getParentArchetypeId());
+                    this.flatParent = repo.getFlatArchetype(overlay.getParentArchetypeId());
                 }
                 fixNodeId(overlay.getDefinition());
             }
