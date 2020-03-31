@@ -20,6 +20,12 @@ import java.util.Map;
 
 public class CTerminologyCodeConverter {
 
+    private final boolean replaceTermCodes;
+
+    public CTerminologyCodeConverter(boolean replaceTermCodes) {
+        this.replaceTermCodes = replaceTermCodes;
+    }
+
     public void fixCTerminologyCodes(Archetype archetype) {
         fixInner(archetype);
         if(archetype instanceof Template) {
@@ -53,39 +59,44 @@ public class CTerminologyCodeConverter {
             }
             fixInner(archetype, cObject);
         }
-        for(Map.Entry<TemplateCTerminologyCode, CTerminologyCode> replacement:replacements.entrySet()) {
-            int index = attribute.getChildren().indexOf(replacement.getKey());
-            attribute.getChildren().set(index, replacement.getValue());
+        if(replaceTermCodes) {
+            for (Map.Entry<TemplateCTerminologyCode, CTerminologyCode> replacement : replacements.entrySet()) {
+                int index = attribute.getChildren().indexOf(replacement.getKey());
+                attribute.getChildren().set(index, replacement.getValue());
+            }
         }
     }
 
     public CTerminologyCode convert(TemplateCTerminologyCode value) {
-        if(value.getTerminologyId() != null && value.getIncludedExternalTerminologyCodes() != null) {
-            //convert external term codes to the non-parsed format. The converter will handle that
-            //assuming only one terminology id for now - might not be correct!
-            List<String> constraints = new ArrayList<>();
-            boolean first = true;
-            for(TemplateTermCode templateTermCode:value.getIncludedExternalTerminologyCodes()) {
-                if(first) {
-                    constraints.add("[" + value.getTerminologyId().getValue() + "::" + templateTermCode.getCode() + "]");
-                    first = false;
-                } else {
-                    constraints.add( templateTermCode.getCode());
+        //TODO: this should be split into two separate converters/fixers
+        if(!replaceTermCodes) {
+            if (value.getTerminologyId() != null && value.getIncludedExternalTerminologyCodes() != null) {
+                //convert external term codes to the non-parsed format. The converter will handle that
+                //assuming only one terminology id for now - might not be correct!
+                List<String> constraints = new ArrayList<>();
+                boolean first = true;
+                for (TemplateTermCode templateTermCode : value.getIncludedExternalTerminologyCodes()) {
+                    if (first) {
+                        constraints.add("[" + value.getTerminologyId().getValue() + "::" + templateTermCode.getCode() + "]");
+                        first = false;
+                    } else {
+                        constraints.add(templateTermCode.getCode());
+                    }
                 }
+
+                value.setConstraint(constraints);
+
+                //TODO: check if it's possible that this is just a term binding to a terminology id?
+            } else if (value.getTerminologyId() != null && !value.getTerminologyId().getValue().equalsIgnoreCase("local") && value.getConstraint() != null && !value.getConstraint().isEmpty()) {
+                List<String> constraints = new ArrayList<>();
+                constraints.addAll(value.getConstraint());
+                String first = "[" + value.getTerminologyId() + "::" + constraints.get(0) + "]";
+                constraints.set(0, first);
+
+                value.setConstraint(constraints);
+
+
             }
-
-            value.setConstraint(constraints);
-
-            //TODO: check if it's possible that this is just a term binding to a terminology id?
-        } else if (value.getTerminologyId() != null && !value.getTerminologyId().getValue().equalsIgnoreCase("local") && value.getConstraint() != null && !value.getConstraint().isEmpty()) {
-            List<String> constraints = new ArrayList<>();
-            constraints.addAll(value.getConstraint());
-            String first = "[" + value.getTerminologyId() + "::" + constraints.get(0) + "]";
-            constraints.set(0, first);
-
-            value.setConstraint(constraints);
-
-
         }
         CTerminologyCode result = new CTerminologyCode();
         result.setConstraint(value.getConstraint());
