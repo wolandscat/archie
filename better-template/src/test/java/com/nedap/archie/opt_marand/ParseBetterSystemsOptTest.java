@@ -235,11 +235,9 @@ public class ParseBetterSystemsOptTest {
             //System.out.println("\n\n\n==========================================\nOPT 2\n==================\n\n");
             output(optCreator.flatten(foundTemplate), "opt_thingy");
 
-            for(ValidationResult validationResult:adl2Repository.getAllValidationResults()) {
-                if(!validationResult.passes()) {
-
-                    throw new RuntimeException(MessageFormat.format("error validating {0}: {1}", validationResult.getArchetypeId(), validationResult));
-                }
+            ValidationResult validationResult = adl2Repository.getValidationResult("openEHR-EHR-COMPOSITION.t_encounter.v1.0.0");
+            if(!validationResult.passes()) {
+                throw new RuntimeException(MessageFormat.format("error validating {0}: {1}", validationResult.getArchetypeId(), validationResult));
             }
         }
     }

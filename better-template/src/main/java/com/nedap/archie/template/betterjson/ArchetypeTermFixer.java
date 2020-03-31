@@ -38,7 +38,7 @@ public class ArchetypeTermFixer {
             for(TemplateOverlay overlay:template.getTemplateOverlays()) {
                 addTerminologyIfNotPresent(overlay);
                 fixTerms(overlay, repo, overlay.getDefinition());
-                fixValueSetCodes(archetype, repo);
+                fixValueSetCodes(overlay, repo);
             }
         }
     }
@@ -130,7 +130,7 @@ public class ArchetypeTermFixer {
         }
     }
 
-    private static Pattern synthesizedCodesPattern = Pattern.compile("(at|ac|id)(0\\.)*9[0-9]3");
+    private static Pattern synthesizedCodesPattern = Pattern.compile("(at|ac|id)(0\\.)*9[0-9][0-9][0-9](\\.[0-9]*)*");
 
     private void createTermForNewCodeWithRoot(Archetype archetype, String code, Archetype referencedArchetype) {
         if(!synthesizedCodesPattern.matcher(code).matches()) {
@@ -146,6 +146,10 @@ public class ArchetypeTermFixer {
                     if(rootTerm == null) {
                        rootTerm = referencedArchetype.getDefinition().getTerm();
                     }
+                    if(rootTerm == null) {
+                        //yeas this is persistent
+                        rootTerm = referencedArchetype.getTerminology().getTermDefinition("en", "id1");
+                    }
                 }
 
                 newTerm.setText(rootTerm == null ? "* missing code" : rootTerm.getText());
@@ -159,7 +163,8 @@ public class ArchetypeTermFixer {
 
     private void createTermForNewCodeWithFlatParent(Archetype archetype, String code, Archetype flatParent) {
         if(!synthesizedCodesPattern.matcher(code).matches()) {
-            //if(cObject.getParent().isMultiple()) {
+            //TODO: better would be, but difficult to do correctly:
+            // if(cObject.getParent().isMultiple()) {
             for (String language : archetype.getTerminology().getTermDefinitions().keySet()) {
                 //TODO: add new archetype term to conversion log?
 
@@ -167,10 +172,14 @@ public class ArchetypeTermFixer {
                 newTerm.setCode(code);
                 ArchetypeTerm parentTerm = null;
                 if (flatParent != null) {
-                    ArchetypeTerminology terminology = flatParent.getTerminology();
-                    parentTerm = terminology == null ?
-                            null :
-                            terminology.getTermDefinition(language, AOMUtils.codeAtLevel(code, flatParent.specializationDepth()));
+                    ArchetypeTerminology parentTerminology = flatParent.getTerminology();
+                    if(parentTerminology != null) {
+                        if(parentTerminology.getTermDefinitions().get(language) != null) {
+                            parentTerm = parentTerminology.getTermDefinition(language, AOMUtils.codeAtLevel(code, flatParent.specializationDepth()));
+                        } else {
+                            parentTerm = parentTerminology.getTermDefinition(flatParent.getOriginalLanguage().getCodeString(), AOMUtils.codeAtLevel(code, flatParent.specializationDepth()));
+                        }
+                    }
                 }
 
                 newTerm.setText(parentTerm == null ? "* missing code" : parentTerm.getText());

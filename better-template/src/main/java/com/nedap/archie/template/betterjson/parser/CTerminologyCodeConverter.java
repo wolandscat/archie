@@ -14,7 +14,9 @@ import com.nedap.archie.aom.primitives.CTerminologyCode;
 import com.nedap.archie.rm.support.identification.TerminologyId;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CTerminologyCodeConverter {
 
@@ -33,23 +35,31 @@ public class CTerminologyCodeConverter {
     }
 
     private void fixInner(Archetype archetype, CObject cObject) {
-        if(cObject instanceof TemplateCTerminologyCode) {
-            TemplateCTerminologyCode templateCode = (TemplateCTerminologyCode) cObject;
-            CAttribute parent = cObject.getParent();
-            convert(templateCode);
-        }
+
         for(CAttribute attribute:cObject.getAttributes()) {
             fixInner(archetype, attribute);
         }
     }
 
     private void fixInner(Archetype archetype, CAttribute attribute) {
-        for(CObject object:attribute.getChildren()) {
-            fixInner(archetype, object);
+        Map<TemplateCTerminologyCode, CTerminologyCode> replacements = new LinkedHashMap<>();
+        for(CObject cObject:attribute.getChildren()) {
+            if(cObject instanceof TemplateCTerminologyCode) {
+                TemplateCTerminologyCode templateCode = (TemplateCTerminologyCode) cObject;
+
+                CTerminologyCode result = convert(templateCode);
+                replacements.put(templateCode, result);
+
+            }
+            fixInner(archetype, cObject);
+        }
+        for(Map.Entry<TemplateCTerminologyCode, CTerminologyCode> replacement:replacements.entrySet()) {
+            int index = attribute.getChildren().indexOf(replacement.getKey());
+            attribute.getChildren().set(index, replacement.getValue());
         }
     }
 
-    public void convert(TemplateCTerminologyCode value) {
+    public CTerminologyCode convert(TemplateCTerminologyCode value) {
         if(value.getTerminologyId() != null && value.getIncludedExternalTerminologyCodes() != null) {
             //convert external term codes to the non-parsed format. The converter will handle that
             //assuming only one terminology id for now - might not be correct!
@@ -77,6 +87,12 @@ public class CTerminologyCodeConverter {
 
 
         }
+        CTerminologyCode result = new CTerminologyCode();
+        result.setConstraint(value.getConstraint());
+        result.setAssumedValue(value.getAssumedValue());
+        result.setDefaultValue(value.getDefaultValue());
+        result.setOccurrences(value.getOccurrences());
+        return result;
     }
 
 }
