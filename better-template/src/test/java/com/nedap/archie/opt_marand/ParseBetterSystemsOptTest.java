@@ -224,8 +224,6 @@ public class ParseBetterSystemsOptTest {
 
 
 
-
-
             adl2Repository.compile(BuiltinReferenceModels.getMetaModels());
             output(foundTemplate);
 

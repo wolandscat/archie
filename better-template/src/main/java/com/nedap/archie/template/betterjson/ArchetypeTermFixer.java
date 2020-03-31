@@ -130,7 +130,7 @@ public class ArchetypeTermFixer {
         }
     }
 
-    private static Pattern synthesizedCodesPattern = Pattern.compile("(at|ac|id)(0\\.)*9[0-9][0-9][0-9](\\.[0-9]*)*");
+    private static Pattern synthesizedCodesPattern = Pattern.compile("(id)(0\\.)*9[0-9][0-9][0-9](\\.[0-9]*)*");
 
     private void createTermForNewCodeWithRoot(Archetype archetype, String code, Archetype referencedArchetype) {
         if(!synthesizedCodesPattern.matcher(code).matches()) {
