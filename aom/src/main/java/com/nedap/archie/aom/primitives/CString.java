@@ -97,16 +97,31 @@ public class CString extends CPrimitiveObject<String, String> {
             return true;
         }
 
-        if(!(constraint.size() < otherString.constraint.size())) {
-            return false;
-        }
-
         for(String constraint:constraint) {
-            if(!otherString.constraint.contains(constraint)) {
+            if(!hasMatchingConstraint(constraint, otherString)) {
                 return false;
             }
         }
         return true;
+    }
+
+    private boolean hasMatchingConstraint(String constraint, CString otherString) {
+        boolean isRegexp = CString.isRegexConstraint(constraint);
+
+        for(String otherConstraint:otherString.constraint) {
+            boolean otherIsRegexp = CString.isRegexConstraint(otherConstraint);
+            if(otherIsRegexp && !isRegexp) {
+                if(otherConstraint.matches(constraint)) {
+                    return true;
+                }
+            } else if (otherIsRegexp && isRegexp) {
+                //this is very hard to validate. Just return true for now
+                return true;
+            } else if(otherConstraint.equals(constraint)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -123,3 +138,5 @@ public class CString extends CPrimitiveObject<String, String> {
         return Objects.hash(assumedValue, constraint);
     }
 }
+
+
