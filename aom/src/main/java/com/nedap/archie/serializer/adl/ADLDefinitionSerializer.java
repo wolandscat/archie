@@ -63,8 +63,7 @@ public class ADLDefinitionSerializer {
             return null;
         }
         Archetype archetype = cobj.getArchetype();
-        String originalLanguage = ofNullable(cobj)
-                .flatMap(c -> ofNullable(archetype))
+        String originalLanguage = ofNullable(archetype)
                 .flatMap(a -> ofNullable(a.getOriginalLanguage()))
                 .map(TerminologyCode::getCodeString)
                 .orElse(null);
