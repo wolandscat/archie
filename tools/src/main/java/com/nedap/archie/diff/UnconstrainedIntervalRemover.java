@@ -54,7 +54,7 @@ public class UnconstrainedIntervalRemover {
                 }
                 constraint.removeAll(toRemove);
                 if(constraint.isEmpty()) {
-                    toRemove.add(cPrimitiveObject);
+                    cObjectsToRemove.add(cPrimitiveObject);
                 }
             }
         }
