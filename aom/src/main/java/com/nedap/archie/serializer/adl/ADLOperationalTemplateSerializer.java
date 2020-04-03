@@ -1,14 +1,17 @@
 package com.nedap.archie.serializer.adl;
 
+import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.OperationalTemplate;
+
+import java.util.function.Function;
 
 /**
  * @author markopi
  */
 class ADLOperationalTemplateSerializer extends ADLAuthoredArchetypeSerializer<OperationalTemplate> {
 
-    public ADLOperationalTemplateSerializer(OperationalTemplate archetype) {
-        super(archetype);
+    public ADLOperationalTemplateSerializer(OperationalTemplate archetype, Function<String, Archetype> flatArchetypeProvider) {
+        super(archetype, flatArchetypeProvider);
     }
 
     @Override

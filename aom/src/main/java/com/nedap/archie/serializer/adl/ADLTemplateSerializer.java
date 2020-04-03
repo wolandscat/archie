@@ -1,14 +1,18 @@
 package com.nedap.archie.serializer.adl;
 
+import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.Template;
 import com.nedap.archie.aom.TemplateOverlay;
+
+import java.util.function.Function;
 
 /**
  * @author markopi
  */
 class ADLTemplateSerializer extends ADLAuthoredArchetypeSerializer<Template> {
-    public ADLTemplateSerializer(Template archetype) {
-        super(archetype);
+
+    public ADLTemplateSerializer(Template archetype, Function<String, Archetype> flatArchetypeProvider) {
+        super(archetype, flatArchetypeProvider);
     }
 
     @Override
@@ -26,6 +30,6 @@ class ADLTemplateSerializer extends ADLAuthoredArchetypeSerializer<Template> {
     private void appendTemplateOverlay(TemplateOverlay templateOverlay) {
         builder.newline()
                 .append("------------------------------------------------------------------------").newline()
-                .append(ADLArchetypeSerializer.serialize(templateOverlay));
+                .append(ADLArchetypeSerializer.serialize(templateOverlay, flatArchetypeProvider));
     }
 }
