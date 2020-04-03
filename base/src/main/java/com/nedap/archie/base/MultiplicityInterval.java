@@ -41,7 +41,7 @@ public class MultiplicityInterval extends Interval<Integer> implements Serializa
 
     @JsonCreator
     public static MultiplicityInterval createFromString(String interval) {
-        Pattern pattern =  Pattern.compile("(?<lower>[0-9\\*]+)\\.\\.(?<upper>[0-9\\*]+)");
+        Pattern pattern = Pattern.compile("(?<lower>[0-9]+)\\.\\.(?<upper>[0-9]+|\\*)");
         Matcher matcher = pattern.matcher(interval);
         if(!matcher.matches()) {
             throw new IllegalArgumentException("Cannot parse interval " + interval);
