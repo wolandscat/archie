@@ -8,7 +8,6 @@ import com.nedap.archie.aom.primitives.CTerminologyCode;
 import com.nedap.archie.aom.terminology.ArchetypeTerm;
 import com.nedap.archie.aom.terminology.ValueSet;
 import com.nedap.archie.aom.utils.AOMUtils;
-import com.nedap.archie.aom.utils.NodeIdUtil;
 import com.nedap.archie.base.OpenEHRBase;
 import com.nedap.archie.base.terminology.TerminologyCode;
 import org.slf4j.Logger;
@@ -22,7 +21,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ADL14TermConstraintConverter {
@@ -140,7 +138,7 @@ public class ADL14TermConstraintConverter {
                     try {
                         //do not create a value set, create a code plus binding to the old non-local code
                         URI uri = new ADL14ConversionUtil(converter.getConversionConfiguration()).convertToUri(termCode);
-                        Map<String, URI> termBindingsMap = findOrCreateTermbindings(termCode);
+                        Map<String, URI> termBindingsMap = findOrCreateTermBindings(termCode);
 
                         //TODO: check if this is a converted or old term binding - old is unusual, but could be possible!
                         String termBinding = findOrAddTermBindingAndCode(termCode, uri, termBindingsMap);
@@ -151,7 +149,7 @@ public class ADL14TermConstraintConverter {
                     }
                 } else {
                     String terminologyId = termCode.getTerminologyId();
-                    Map<String, URI> termBindingsMap = findOrCreateTermbindings(termCode);
+                    Map<String, URI> termBindingsMap = findOrCreateTermBindings(termCode);
                     List<String> atCodes = new ArrayList<>();
                     List<String> constraints = new ArrayList<>(cTerminologyCode.getConstraint());
                     cTerminologyCode.setConstraint(atCodes);
@@ -186,7 +184,7 @@ public class ADL14TermConstraintConverter {
                     assumedValue.setTerminologyId(null);
                 } else {
                     try {
-                        Map<String, URI> termBindingsMap = findOrCreateTermbindings(assumedValue);
+                        Map<String, URI> termBindingsMap = findOrCreateTermBindings(assumedValue);
                         URI uri = new ADL14ConversionUtil(converter.getConversionConfiguration()).convertToUri(assumedValue);
                         assumedValue.setCodeString(findOrAddTermBindingAndCode(assumedValue, uri, termBindingsMap));
                         assumedValue.setTerminologyId(null);
@@ -200,7 +198,7 @@ public class ADL14TermConstraintConverter {
         }
     }
 
-    private Map<String, URI> findOrCreateTermbindings(TerminologyCode termCode) {
+    private Map<String, URI> findOrCreateTermBindings(TerminologyCode termCode) {
         Map<String, URI> termBindings =  archetype.getTerminology().getTermBindings().get(termCode.getTerminologyId());
 
         if(termBindings == null) {
