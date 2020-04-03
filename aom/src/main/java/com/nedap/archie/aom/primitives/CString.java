@@ -111,7 +111,7 @@ public class CString extends CPrimitiveObject<String, String> {
         for(String otherConstraint:otherString.constraint) {
             boolean otherIsRegexp = CString.isRegexConstraint(otherConstraint);
             if(otherIsRegexp && !isRegexp) {
-                if(otherConstraint.matches(constraint)) {
+                if(constraint.matches(otherConstraint)) {
                     return true;
                 }
             } else if (otherIsRegexp && isRegexp) {
@@ -138,5 +138,4 @@ public class CString extends CPrimitiveObject<String, String> {
         return Objects.hash(assumedValue, constraint);
     }
 }
-
 
