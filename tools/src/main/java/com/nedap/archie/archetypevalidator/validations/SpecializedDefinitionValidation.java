@@ -162,9 +162,9 @@ public class SpecializedDefinitionValidation extends ValidatingVisitor {
 
     }
 
-    private boolean hasConformingParent(CAttribute parentAttribute, CPrimitiveObject member) {
+    private boolean hasConformingParent(CAttribute parentAttribute, CPrimitiveObject<?, ?> member) {
         for(CObject parentCObject:parentAttribute.getChildren()) {
-            if(member.cConformsTo(parentCObject, (a, b) -> combinedModels.rmTypesConformant((String) a, (String) b))) {//TODO: why is casting necessary for compiler?
+            if(member.cConformsTo(parentCObject, (a, b) -> combinedModels.rmTypesConformant(a, b))) {
                 return true;
             }
         }
