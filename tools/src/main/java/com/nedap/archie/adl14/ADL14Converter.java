@@ -30,6 +30,13 @@ public class ADL14Converter {
     }
 
 
+    /**
+     * Set the base repository for this converter. If you don't set it yourself, the converter will create an empty repository.
+     * The archetypes in the repository will be used as base archetypes, but will not be converted themselves. Please
+     * note that this repository will be modified, it will have all the converted archetypes added to it!
+     *
+     * @param existingRepository the existing repository to use
+     */
     public void setExistingRepository(InMemoryFullArchetypeRepository existingRepository) {
         this.existingRepository = existingRepository;
     }
