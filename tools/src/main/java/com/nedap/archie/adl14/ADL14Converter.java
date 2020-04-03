@@ -7,7 +7,6 @@ import com.nedap.archie.aom.ResourceDescription;
 import com.nedap.archie.aom.Template;
 import com.nedap.archie.aom.TemplateOverlay;
 import com.nedap.archie.aom.utils.ArchetypeParsePostProcesser;
-import com.nedap.archie.diff.DifferentialPathGenerator;
 import com.nedap.archie.diff.Differentiator;
 import com.nedap.archie.flattener.Flattener;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
@@ -48,18 +47,20 @@ public class ADL14Converter {
         }
         List<Archetype> unprocessed = new ArrayList<>(archetypes);
 
-        List<Archetype> newOnes = new ArrayList<>();
+        List<Archetype> templateOverlays = new ArrayList<>();
         for(Archetype ar:unprocessed) {
-            //add the overlays in the right order, at least for now
+            //ADL 1.4 does not really have templates. This code is here for the Better Care template conversion
+            //also it can be used to write our own template converter later.
+            //So add the overlays in the right order here
             if(ar instanceof Template) {
                 Template t = (Template) ar;
                 for(TemplateOverlay overlay:t.getTemplateOverlays()) {
-                    newOnes.add(overlay);
+                    templateOverlays.add(overlay);
                     overlay.setRmRelease(t.getRmRelease());
                 }
             }
         }
-        unprocessed.addAll(newOnes);
+        unprocessed.addAll(templateOverlays);
 
         //process the archetypes ordered by specialization level
         unprocessed.sort(Comparator.comparingInt(a -> a.specializationDepth()));
@@ -82,7 +83,6 @@ public class ADL14Converter {
                             result.setArchetype(differentiator.differentiate(result.getArchetype(), flatParent, true));
                         } else {
                             result.setArchetype(differentiator.differentiate(result.getArchetype(), flatParent, false));
-//                            new DifferentialPathGenerator().replace(result.getArchetype());
                         }
                     }
                     resultList.addConversionResult(result);
