@@ -120,8 +120,8 @@ public class CString extends CPrimitiveObject<String, String> {
                     return true;
                 }
             } else if (otherIsRegexp && isRegexp) {
-                //this is very hard to validate. Just return true for now
-                return true;
+                //this is very hard to validate. Don't allow it until the spec gets updated to allow this
+                return false;
             } else if(otherConstraint.equals(constraint)) {
                 return true;
             }
