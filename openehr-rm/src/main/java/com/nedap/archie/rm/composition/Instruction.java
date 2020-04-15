@@ -97,7 +97,7 @@ public class Instruction extends CareEntry {
 
     public void addActivity(Activity activity) {
         activities.add(activity);
-        setThisAsParent(activity, "activity");
+        setThisAsParent(activity, "activities");
     }
 
     @Override
