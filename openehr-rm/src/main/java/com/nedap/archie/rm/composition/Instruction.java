@@ -91,7 +91,7 @@ public class Instruction extends CareEntry {
     public void setActivities(List<Activity> activities) {
         this.activities = activities;
         for (Activity activity : activities) {
-            setThisAsParent(activity, "activity");
+            setThisAsParent(activity, "activities");
         }
     }
 
