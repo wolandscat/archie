@@ -40,10 +40,10 @@ public class MetaModel implements MetaModelInterface {
         this.selectedAomProfile = selectedAomProfile;
     }
 
-    public MetaModel(ModelInfoLookup selectedModel, BmmModel selectedBmmModel, AomProfile selectedAomProfile, ObjectMapper odinInputObjectMapper, ObjectMapper odinOutputObjectMapper) {
+    public MetaModel(ModelInfoLookup selectedModel, BmmModel selectedBmmModel, AomProfile selectedAomProfile, RMObjectMapperProvider provider) {
         this(selectedModel, selectedBmmModel, selectedAomProfile);
-        this.odinInputObjectMapper = odinInputObjectMapper;
-        this.odinOutputObjectMapper = odinOutputObjectMapper;
+        this.odinInputObjectMapper = provider.getInputOdinObjectMapper();
+        this.odinOutputObjectMapper = provider.getOutputOdinObjectMapper();
     }
 
     public ModelInfoLookup getSelectedModel() {

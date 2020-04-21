@@ -27,13 +27,11 @@ public class CComplexObjectParser extends BaseTreeWalker {
 
     private final PrimitivesConstraintParser primitivesConstraintParser;
     private final MetaModels metaModels;
-    private final ObjectMapper defaultValueObjectMapper;
 
-    public CComplexObjectParser(ANTLRParserErrors errors, MetaModels metaModels, ObjectMapper defaultValueObjectMapper) {
+    public CComplexObjectParser(ANTLRParserErrors errors, MetaModels metaModels) {
         super(errors);
         primitivesConstraintParser = new PrimitivesConstraintParser(errors);
         this.metaModels = metaModels;
-        this.defaultValueObjectMapper = defaultValueObjectMapper;
     }
 
     public RulesSection parseRules(Rules_sectionContext context) {
@@ -101,6 +99,7 @@ public class CComplexObjectParser extends BaseTreeWalker {
             parent.addAttributeTuple(parseAttributeTuple(parent, attributeDefContext.c_attribute_tuple()));
         } else if (attributeDefContext.default_value() != null) {
             try {
+                ObjectMapper defaultValueObjectMapper = getDefaultValueObjectMapper();
                 if(defaultValueObjectMapper != null) {
                     OpenEHRBase value = defaultValueObjectMapper.readValue(
                             new AdlOdinToJsonConverter().convert(attributeDefContext.default_value().odin_text()), OpenEHRBase.class
@@ -118,6 +117,17 @@ public class CComplexObjectParser extends BaseTreeWalker {
                 //throw new RuntimeException(e);
             }
         }
+    }
+
+    private ObjectMapper getDefaultValueObjectMapper() {
+        if(metaModels == null) {
+            return null;
+        }
+        if(metaModels.getSelectedModel() == null) {
+            return null;
+        }
+        return metaModels.getSelectedModel().getOdinInputObjectMapper();
+
     }
 
     public static String getFirstAttributeOfPath(String path) {

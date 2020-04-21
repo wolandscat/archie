@@ -30,11 +30,13 @@ public class ADLListener extends AdlBaseListener {
     private Archetype archetype;
     private CComplexObjectParser cComplexObjectParser;
     private TerminologyParser terminologyParser;
+    private MetaModels metaModels;
 
     public ADLListener(ANTLRParserErrors errors, MetaModels metaModels) {
         this.errors = errors;
-        cComplexObjectParser = new CComplexObjectParser(errors, metaModels, null);
+        cComplexObjectParser = new CComplexObjectParser(errors, metaModels);
         terminologyParser = new TerminologyParser(errors);
+        this.metaModels = metaModels;
     }
 
     /** top-level constructs */
@@ -93,6 +95,9 @@ public class ADLListener extends AdlBaseListener {
         if(hrId != null) {
             ArchetypeHRID archetypeID = new ArchetypeHRID(hrId.getText());
             archetype.setArchetypeId(archetypeID);
+            if(metaModels != null) {
+                metaModels.selectModel(archetype);
+            }
         }
     }
 

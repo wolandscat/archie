@@ -4,6 +4,7 @@ import com.nedap.archie.aom.profile.AomProfile;
 import com.nedap.archie.aom.profile.AomProfiles;
 import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.rminfo.ModelInfoLookup;
+import com.nedap.archie.rminfo.RMObjectMapperProvider;
 import com.nedap.archie.rminfo.ReferenceModels;
 import org.openehr.bmm.v2.persistence.odin.BmmOdinParser;
 import org.openehr.bmm.v2.validation.BmmRepository;
@@ -123,18 +124,29 @@ public class BuiltinReferenceModels {
      */
     public static ReferenceModels getAvailableModelInfoLookups() {
         ReferenceModels result = new ReferenceModels();
-        addModelInfoLookupIfExists(result, "com.nedap.archie.rminfo.ArchieRMInfoLookup");
-        addModelInfoLookupIfExists(result, "com.nedap.archie.openehrtestrm.TestRMInfoLookup");
+        addModelInfoLookupIfExists(result, "com.nedap.archie.rminfo.ArchieRMInfoLookup", "com.nedap.archie.json.ArchieRMObjectMapperProvider");
+        addModelInfoLookupIfExists(result, "com.nedap.archie.openehrtestrm.TestRMInfoLookup", null );
         return result;
     }
 
-    private static void addModelInfoLookupIfExists(ReferenceModels result, String className) {
+    private static void addModelInfoLookupIfExists(ReferenceModels result, String className, String objectMapperProviderClassName) {
         try {
             Class<?> openEhrRMLookup = Class.forName(className);
             Method getInstance = openEhrRMLookup.getDeclaredMethod("getInstance");
-            result.registerModel((ModelInfoLookup) getInstance.invoke(null));
+            ModelInfoLookup modelInfo = (ModelInfoLookup) getInstance.invoke(null);
+            RMObjectMapperProvider provider = null;
+            if(objectMapperProviderClassName != null) {
+                try {
+                    Class<?> objectMapperProvider = Class.forName(objectMapperProviderClassName);
+                    Method getProviderInstance = objectMapperProvider.getDeclaredMethod("getInstance");
+                    provider = (RMObjectMapperProvider) getInstance.invoke(null);
+                } catch (ClassNotFoundException | NoSuchMethodException |  IllegalAccessException | InvocationTargetException e) {
+                    //not present, that's fine. Maybe do a bit of debug logging?
+                }
+            }
+            result.registerModel(modelInfo, provider);
         } catch (ClassNotFoundException | NoSuchMethodException |  IllegalAccessException | InvocationTargetException e) {
-            //not present, don't care
+            //not present, that's fine. Maybe do a bit of debug logging?
         }
     }
 

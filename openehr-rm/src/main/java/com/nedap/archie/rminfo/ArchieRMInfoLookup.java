@@ -1,5 +1,6 @@
 package com.nedap.archie.rminfo;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.ArchetypeHRID;
 import com.nedap.archie.aom.AuthoredResource;
