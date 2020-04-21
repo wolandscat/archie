@@ -1,5 +1,6 @@
 package com.nedap.archie.rminfo;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nedap.archie.aom.CPrimitiveObject;
 import com.nedap.archie.aom.primitives.CInteger;
 import com.nedap.archie.aom.primitives.CString;
@@ -26,6 +27,8 @@ public class MetaModel implements MetaModelInterface {
     private ModelInfoLookup selectedModel;
     private BmmModel selectedBmmModel;
     private AomProfile selectedAomProfile;
+    private ObjectMapper odinInputObjectMapper;
+    private ObjectMapper odinOutputObjectMapper;
 
     public MetaModel(ModelInfoLookup selectedModel, BmmModel selectedBmmModel) {
         this(selectedModel, selectedBmmModel, null);
@@ -35,6 +38,12 @@ public class MetaModel implements MetaModelInterface {
         this.selectedModel = selectedModel;
         this.selectedBmmModel = selectedBmmModel;
         this.selectedAomProfile = selectedAomProfile;
+    }
+
+    public MetaModel(ModelInfoLookup selectedModel, BmmModel selectedBmmModel, AomProfile selectedAomProfile, ObjectMapper odinInputObjectMapper, ObjectMapper odinOutputObjectMapper) {
+        this(selectedModel, selectedBmmModel, selectedAomProfile);
+        this.odinInputObjectMapper = odinInputObjectMapper;
+        this.odinOutputObjectMapper = odinOutputObjectMapper;
     }
 
     public ModelInfoLookup getSelectedModel() {
@@ -47,6 +56,26 @@ public class MetaModel implements MetaModelInterface {
 
     public AomProfile getSelectedAomProfile() {
         return selectedAomProfile;
+    }
+
+    /**
+     * Get the object mapper to use for JSON converted from ODIN to parse this model
+     * It would be better if this was one object mapper, together with the odinInputObjectMapper, but unfortunately there is not
+     * yet one ObjectMapper that can both input converted json and output ODIN directly. Sorry about that.
+     * @return the object mapper to use for JSON converted from ODIN to parse this model
+     */
+    public ObjectMapper getOdinInputObjectMapper() {
+        return odinInputObjectMapper;
+    }
+
+    /**
+     * Get the object mapper to output ODIN from this model.
+     * It would be better if this was one object mapper, together with the odinInputObjectMapper, but unfortunately there is not
+     * yet one ObjectMapper that can both input converted json and output ODIN directly. Sorry about that.
+     * @return Get the object mapper to output ODIN from this model
+     */
+    public ObjectMapper getOdinOutputObjectMapper() {
+        return odinOutputObjectMapper;
     }
 
     @Override

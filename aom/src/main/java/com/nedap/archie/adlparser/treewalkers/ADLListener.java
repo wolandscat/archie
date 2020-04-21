@@ -28,12 +28,12 @@ public class ADLListener extends AdlBaseListener {
     private Archetype rootArchetype;
 
     private Archetype archetype;
-    private CComplexObjectParser subTreeWalker;
+    private CComplexObjectParser cComplexObjectParser;
     private TerminologyParser terminologyParser;
 
     public ADLListener(ANTLRParserErrors errors, MetaModels metaModels) {
         this.errors = errors;
-        subTreeWalker = new CComplexObjectParser(errors, metaModels);
+        cComplexObjectParser = new CComplexObjectParser(errors, metaModels, null);
         terminologyParser = new TerminologyParser(errors);
     }
 
@@ -140,7 +140,7 @@ public class ADLListener extends AdlBaseListener {
      */
     @Override
     public void enterDefinition_section(Definition_sectionContext ctx) {
-        CComplexObject definition = subTreeWalker.parseComplexObject(ctx.c_complex_object());
+        CComplexObject definition = cComplexObjectParser.parseComplexObject(ctx.c_complex_object());
         archetype.setDefinition(definition);
     }
 
@@ -167,7 +167,7 @@ public class ADLListener extends AdlBaseListener {
     }
 
     public void enterRules_section(Rules_sectionContext ctx) {
-        archetype.setRules(subTreeWalker.parseRules(ctx));
+        archetype.setRules(cComplexObjectParser.parseRules(ctx));
     }
 
 

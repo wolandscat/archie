@@ -1,14 +1,20 @@
 package com.nedap.archie.adlparser.treewalkers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
 import com.nedap.archie.adlparser.antlr.AdlParser.*;
 import com.nedap.archie.aom.*;
+import com.nedap.archie.aom.terminology.ArchetypeTerminology;
 import com.nedap.archie.base.Cardinality;
 import com.nedap.archie.base.MultiplicityInterval;
+import com.nedap.archie.base.OpenEHRBase;
 import com.nedap.archie.rminfo.MetaModels;
 import com.nedap.archie.rules.Assertion;
+import com.nedap.archie.serializer.odin.AdlOdinToJsonConverter;
+import com.nedap.archie.serializer.odin.OdinObjectParser;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,11 +27,13 @@ public class CComplexObjectParser extends BaseTreeWalker {
 
     private final PrimitivesConstraintParser primitivesConstraintParser;
     private final MetaModels metaModels;
+    private final ObjectMapper defaultValueObjectMapper;
 
-    public CComplexObjectParser(ANTLRParserErrors errors, MetaModels metaModels) {
+    public CComplexObjectParser(ANTLRParserErrors errors, MetaModels metaModels, ObjectMapper defaultValueObjectMapper) {
         super(errors);
         primitivesConstraintParser = new PrimitivesConstraintParser(errors);
         this.metaModels = metaModels;
+        this.defaultValueObjectMapper = defaultValueObjectMapper;
     }
 
     public RulesSection parseRules(Rules_sectionContext context) {
@@ -91,8 +99,25 @@ public class CComplexObjectParser extends BaseTreeWalker {
             }
         } else if (attributeDefContext.c_attribute_tuple() != null) {
             parent.addAttributeTuple(parseAttributeTuple(parent, attributeDefContext.c_attribute_tuple()));
-        }
+        } else if (attributeDefContext.default_value() != null) {
+            try {
+                if(defaultValueObjectMapper != null) {
+                    OpenEHRBase value = defaultValueObjectMapper.readValue(
+                            new AdlOdinToJsonConverter().convert(attributeDefContext.default_value().odin_text()), OpenEHRBase.class
+                    );
 
+                    parent.setDefaultValue(value);
+                } else {
+                    parent.setDefaultValue(new DefaultValueContainer(DefaultValueContainer.ODIN, attributeDefContext.default_value().odin_text().getText()));
+                }
+            } catch (IOException e) {
+                //TODO: find how to add line number/character position information here
+                addError("error parsing json in default value: " + e.getMessage() );
+                //and just store it as a DefaultValueContainer
+                parent.setDefaultValue(new DefaultValueContainer(DefaultValueContainer.ODIN, attributeDefContext.default_value().odin_text().getText()));
+                //throw new RuntimeException(e);
+            }
+        }
     }
 
     public static String getFirstAttributeOfPath(String path) {
