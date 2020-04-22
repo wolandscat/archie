@@ -1,5 +1,6 @@
 package com.nedap.archie.serializer.adl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nedap.archie.adlparser.ADLParser;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.CComplexObject;
@@ -31,6 +32,35 @@ public class DefaultValueSerializerTest {
             String serialized = ADLArchetypeSerializer.serialize(archetype, null, new ArchieRMObjectMapperProvider());
             System.out.println(serialized);
             assertTrue(serialized.contains("_default = "));
+            assertTrue(serialized.contains("\"some default value\""));
+
+
+            Archetype parsed = adlParser.parse(serialized);
+            assertTrue(adlParser.getErrors().hasNoErrors());
+            assertNotNull(((CComplexObject) archetype.itemAtPath("/items[id2]/value[id21]")).getDefaultValue());
+            DvText defaultValue = (DvText) ((CComplexObject) archetype.itemAtPath("/items[id2]/value[id21]")).getDefaultValue();
+            assertEquals("some default value", defaultValue.getValue());
+        }
+
+    }
+
+    @Test
+    public void serializeDefaultJsonValue() throws Exception {
+        ADLParser adlParser = new ADLParser(BuiltinReferenceModels.getMetaModels());
+        try(InputStream stream = getClass().getResourceAsStream("openEHR-EHR-CLUSTER.simple.v1.adls")) {
+            Archetype archetype = adlParser.parse(stream);
+            CComplexObject cComplexObject = archetype.itemAtPath("/items[id2]/value[id21]");
+            DvText dvText = new DvText();
+            dvText.setValue("some default value");
+            cComplexObject.setDefaultValue(dvText);
+            String serialized = ADLArchetypeSerializer.serialize(archetype, null, new ArchieRMObjectMapperProvider() {
+                @Override
+                public ObjectMapper getOutputOdinObjectMapper() {
+                    return null;
+                }
+            });
+            System.out.println(serialized);
+            assertTrue(serialized.contains("_default = < (json) <#"));
             assertTrue(serialized.contains("\"some default value\""));
 
 

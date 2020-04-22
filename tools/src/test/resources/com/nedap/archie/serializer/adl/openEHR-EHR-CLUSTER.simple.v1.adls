@@ -26,7 +26,7 @@ definition
 		    }
 		    ELEMENT[id3] matches {
 		        value matches {
-		            DV_TEXT[id31]
+		            DV_CODED_TEXT[id31]
                 }
 		    }
 		}

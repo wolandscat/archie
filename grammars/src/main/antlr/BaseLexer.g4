@@ -183,3 +183,7 @@ SYM_LEFT_PAREN: '(';
 SYM_RIGHT_PAREN: ')';
 SYM_COLON: ':';
 SYM_COMMA: ',';
+
+INCLUDED_LANGUAGE_FRAGMENT: '(' ALPHANUM_CHAR+ ')' (WS|LINE)* '<#' .*? '#>';
+
+

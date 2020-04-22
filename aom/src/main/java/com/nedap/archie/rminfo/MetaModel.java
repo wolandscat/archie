@@ -29,6 +29,7 @@ public class MetaModel implements MetaModelInterface {
     private AomProfile selectedAomProfile;
     private ObjectMapper odinInputObjectMapper;
     private ObjectMapper odinOutputObjectMapper;
+    private ObjectMapper jsonObjectMapper;
 
     public MetaModel(ModelInfoLookup selectedModel, BmmModel selectedBmmModel) {
         this(selectedModel, selectedBmmModel, null);
@@ -44,6 +45,7 @@ public class MetaModel implements MetaModelInterface {
         this(selectedModel, selectedBmmModel, selectedAomProfile);
         this.odinInputObjectMapper = provider.getInputOdinObjectMapper();
         this.odinOutputObjectMapper = provider.getOutputOdinObjectMapper();
+        this.jsonObjectMapper = provider.getJsonObjectMapper();
     }
 
     public ModelInfoLookup getSelectedModel() {
@@ -76,6 +78,10 @@ public class MetaModel implements MetaModelInterface {
      */
     public ObjectMapper getOdinOutputObjectMapper() {
         return odinOutputObjectMapper;
+    }
+
+    public ObjectMapper getJsonObjectMapper() {
+        return jsonObjectMapper;
     }
 
     @Override

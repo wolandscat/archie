@@ -105,9 +105,9 @@ public class CComplexObjectSerializer<T extends CComplexObject> extends Constrai
             builder.unindent();
             builder.append(" >");
         } else {
-            builder.append("_default = (");
+            builder.append("_default = < (");
             builder.append(container.getFormat());
-            builder.append(") = <#");
+            builder.append(") <#");
             if(container.getFormat().equalsIgnoreCase(DefaultValueContainer.JSON)) {
                 builder.newIndentedLine();
                 builder.appendMultipleLines(container.getContent());
@@ -116,7 +116,7 @@ public class CComplexObjectSerializer<T extends CComplexObject> extends Constrai
                 //don't apply indentation - we have no idea of knowing whether this should indent or not for unknown formats
                 builder.append(container.getContent());
             }
-            builder.append(") = #>");
+            builder.append("#> >");
         }
     }
 
