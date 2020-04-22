@@ -322,7 +322,7 @@ public class ADLDefinitionSerializerTest {
     }
 
     private String serializeConstraint(CObject cons) {
-        ADLDefinitionSerializer serializer = new ADLDefinitionSerializer(new ADLStringBuilder(), s -> null);
+        ADLDefinitionSerializer serializer = new ADLDefinitionSerializer(new ADLStringBuilder(), s -> null, null);
         serializer.appendCObject(cons);
         return serializer.getBuilder().toString();
     }

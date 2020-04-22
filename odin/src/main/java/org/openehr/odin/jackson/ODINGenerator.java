@@ -119,6 +119,7 @@ public class ODINGenerator extends GeneratorBase
      * need to output one.
      */
     protected String _typeId;
+    protected String _typeIdAtRoot;
 
     /*
     /**********************************************************
@@ -375,7 +376,7 @@ public class ODINGenerator extends GeneratorBase
             builder.newline().append("[" + (_writeContext.getCurrentIndex() + 1) + "] = ");
         }
 
-        if(!_writeContext.inRoot()) {
+        if(!_writeContext.inRoot() || (_writeContext.inRoot() && _typeIdAtRoot != null)) {
             builder.append("<").indent();
         }
         _writeContext = _writeContext.createChildObjectContext();
@@ -389,15 +390,19 @@ public class ODINGenerator extends GeneratorBase
         if (!_writeContext.inObject()) {
             _reportError("Current context not Object but "+_writeContext.typeDesc());
         }
-        // just to make sure we don't "leak" type ids
-        _typeId = null;
+
         _writeContext = _writeContext.getParent();
 
         if(_writeContext.inArray()) {
             builder.newUnindentedLine().append(">");
-        } else if(!_writeContext.inRoot()) {
+        } else if (_writeContext.inRoot() && _typeIdAtRoot != null) {
+            builder.newUnindentedLine().append(">");
+        } else if(!_writeContext.inRoot())  {
             builder.newUnindentedLine().append(">");
         }
+        // just to make sure we don't "leak" type ids
+        _typeId = null;
+
 
     }
 
@@ -652,6 +657,10 @@ public class ODINGenerator extends GeneratorBase
     {
         // should we verify there's no preceding type id?
         _typeId = String.valueOf(id);
+        if(_writeContext.inRoot()) {
+            //TODO: make _typeId a proper stack so we always know the current type id at end object?
+            _typeIdAtRoot = _typeId;
+        }
         builder.append("(").append(id.toString()).append(") ");
     }
 

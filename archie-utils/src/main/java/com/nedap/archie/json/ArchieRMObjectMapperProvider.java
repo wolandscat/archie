@@ -48,4 +48,9 @@ public class ArchieRMObjectMapperProvider implements RMObjectMapperProvider {
         JacksonUtil.configureObjectMapper(odinMapper);
         return odinMapper;
     }
+
+    @Override
+    public ObjectMapper getJsonObjectMapper() {
+        return JacksonUtil.getObjectMapper(RMJacksonConfiguration.createStandardsCompliant());
+    }
 }

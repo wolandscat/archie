@@ -2,6 +2,7 @@ package com.nedap.archie.serializer.adl;
 
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.OperationalTemplate;
+import com.nedap.archie.rminfo.RMObjectMapperProvider;
 
 import java.util.function.Function;
 
@@ -10,8 +11,8 @@ import java.util.function.Function;
  */
 class ADLOperationalTemplateSerializer extends ADLAuthoredArchetypeSerializer<OperationalTemplate> {
 
-    public ADLOperationalTemplateSerializer(OperationalTemplate archetype, Function<String, Archetype> flatArchetypeProvider) {
-        super(archetype, flatArchetypeProvider);
+    public ADLOperationalTemplateSerializer(OperationalTemplate archetype, Function<String, Archetype> flatArchetypeProvider, RMObjectMapperProvider rmObjectMapperProvider) {
+        super(archetype, flatArchetypeProvider, rmObjectMapperProvider);
     }
 
     @Override

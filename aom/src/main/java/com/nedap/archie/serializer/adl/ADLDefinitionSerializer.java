@@ -1,11 +1,14 @@
 package com.nedap.archie.serializer.adl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nedap.archie.aom.*;
 import com.nedap.archie.aom.primitives.*;
 import com.nedap.archie.aom.terminology.ArchetypeTerm;
 import com.nedap.archie.aom.terminology.ArchetypeTerminology;
 import com.nedap.archie.aom.utils.AOMUtils;
+import com.nedap.archie.base.OpenEHRBase;
 import com.nedap.archie.base.terminology.TerminologyCode;
+import com.nedap.archie.rminfo.RMObjectMapperProvider;
 import com.nedap.archie.serializer.adl.constraints.*;
 
 import java.util.HashMap;
@@ -22,10 +25,12 @@ public class ADLDefinitionSerializer {
 
     private final Map<Class, ConstraintSerializer> constraintSerializers;
     private Function<String, Archetype> flatArchetypeProvider;
+    private RMObjectMapperProvider rmObjectMapperProvider;
 
-    public ADLDefinitionSerializer(ADLStringBuilder builder, Function<String, Archetype> flatArchetypeProvider) {
+    public ADLDefinitionSerializer(ADLStringBuilder builder, Function<String, Archetype> flatArchetypeProvider, RMObjectMapperProvider rmObjectMapperProvider) {
         this.builder = builder;
         this.flatArchetypeProvider = flatArchetypeProvider;
+        this.rmObjectMapperProvider = rmObjectMapperProvider;
 
         constraintSerializers = new HashMap<>();
         constraintSerializers.put(ArchetypeSlot.class, new ArchetypeSlotSerializer(this));
@@ -45,7 +50,7 @@ public class ADLDefinitionSerializer {
 
     public static String serialize(CObject cons) {
         final ADLStringBuilder builder = new ADLStringBuilder();
-        ADLDefinitionSerializer serializer = new ADLDefinitionSerializer(builder, null);
+        ADLDefinitionSerializer serializer = new ADLDefinitionSerializer(builder, null, null);
         serializer.appendCObject(cons);
         return builder.toString();
     }
@@ -121,4 +126,7 @@ public class ADLDefinitionSerializer {
         return result;
     }
 
+    public RMObjectMapperProvider getRmObjectMapperProvider() {
+        return rmObjectMapperProvider;
+    }
 }
