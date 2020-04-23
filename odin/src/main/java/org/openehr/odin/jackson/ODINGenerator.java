@@ -12,8 +12,6 @@ import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 public class ODINGenerator extends GeneratorBase
@@ -77,6 +75,8 @@ public class ODINGenerator extends GeneratorBase
 
     final protected IOContext _ioContext;
 
+    protected OdinObjectWriteContext typeIdContext;
+
     /**
      * Bit flag composed of bits that indicate which
      * {@link ODINGenerator.Feature}s
@@ -138,6 +138,7 @@ public class ODINGenerator extends GeneratorBase
 
 
         builder = new OdinStringBuilder(new StructuredStringWriter(out));
+        typeIdContext = OdinObjectWriteContext.createRootContext();
     }
 
 
@@ -342,7 +343,7 @@ public class ODINGenerator extends GeneratorBase
         //ODIN marks lists with only one element with '<"ELEMENT", ...>'
         //but not for lists with more than one element
         //not sure what it does for empty lists...
-        if(index == 0) {
+        if(index == 0 && !this.typeIdContext.arrayHasObjects()) {
             builder.append(", ...");
         }
         //TODO: if this was a list of objects and not just primitives, add an unindentednewline here
@@ -360,6 +361,12 @@ public class ODINGenerator extends GeneratorBase
         if (anchor != null) {
             _objectId = null;
         }
+        //set that this thing has at least one object as child. needed to determine whether we need to add
+        //... to an array, or if it's a map in case of a single element or even empty array
+        typeIdContext.markHasChildObjects(true);
+        typeIdContext = typeIdContext.createChild(_typeId);
+        _typeId = null;
+
 
         if(_writeContext.inArray()) {
             //ODIN REQUIRES keyed lists when these are objects
@@ -376,9 +383,12 @@ public class ODINGenerator extends GeneratorBase
             builder.newline().append("[" + (_writeContext.getCurrentIndex() + 1) + "] = ");
         }
 
-        if(!_writeContext.inRoot() || (_writeContext.inRoot() && _typeIdAtRoot != null)) {
+        if(typeIdContext.hasTypeId()) {
+            builder.append("(").append(typeIdContext.getTypeId().toString()).append(") <").indent();
+        } else if(!_writeContext.inRoot()) {
             builder.append("<").indent();
         }
+
         _writeContext = _writeContext.createChildObjectContext();
 
 
@@ -402,6 +412,7 @@ public class ODINGenerator extends GeneratorBase
         }
         // just to make sure we don't "leak" type ids
         _typeId = null;
+        typeIdContext = typeIdContext.getParent();
 
 
     }
@@ -661,7 +672,7 @@ public class ODINGenerator extends GeneratorBase
             //TODO: make _typeId a proper stack so we always know the current type id at end object?
             _typeIdAtRoot = _typeId;
         }
-        builder.append("(").append(id.toString()).append(") ");
+        //don't write yet, this will happen when the object is written
     }
 
     @Override
