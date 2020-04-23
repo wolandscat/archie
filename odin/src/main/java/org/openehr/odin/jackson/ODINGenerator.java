@@ -705,7 +705,7 @@ public class ODINGenerator extends GeneratorBase
         if (status == JsonWriteContext.STATUS_EXPECT_NAME) {
             _reportError("Can not "+typeMsg+", expecting field name");
         }
-        if(status == JsonWriteContext.STATUS_OK_AFTER_COMMA && _writeContext.inArray()) {
+        if(status == JsonWriteContext.STATUS_OK_AFTER_COMMA && _writeContext.inArray() && !this.typeIdContext.arrayHasObjects()) {
             builder.append(", ");
         }
     }

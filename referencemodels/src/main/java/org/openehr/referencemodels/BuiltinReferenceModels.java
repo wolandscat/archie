@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -138,9 +139,9 @@ public class BuiltinReferenceModels {
             if(objectMapperProviderClassName != null) {
                 try {
                     Class<?> objectMapperProvider = Class.forName(objectMapperProviderClassName);
-                    Method getProviderInstance = objectMapperProvider.getDeclaredMethod("getInstance");
-                    provider = (RMObjectMapperProvider) getInstance.invoke(null);
-                } catch (ClassNotFoundException | NoSuchMethodException |  IllegalAccessException | InvocationTargetException e) {
+                    Constructor<?> getProviderInstance = objectMapperProvider.getConstructor();
+                    provider = (RMObjectMapperProvider) getProviderInstance.newInstance();
+                } catch (InstantiationException | ClassNotFoundException | NoSuchMethodException |  IllegalAccessException | InvocationTargetException e) {
                     //not present, that's fine. Maybe do a bit of debug logging?
                 }
             }

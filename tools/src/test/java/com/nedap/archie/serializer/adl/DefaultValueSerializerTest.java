@@ -42,8 +42,8 @@ public class DefaultValueSerializerTest {
 
             Archetype parsed = adlParser.parse(serialized);
             assertTrue(adlParser.getErrors().hasNoErrors());
-            assertNotNull(((CComplexObject) archetype.itemAtPath("/items[id2]/value[id21]")).getDefaultValue());
-            DvText defaultValue = (DvText) ((CComplexObject) archetype.itemAtPath("/items[id2]/value[id21]")).getDefaultValue();
+            assertNotNull(((CComplexObject) parsed.itemAtPath("/items[id2]/value[id21]")).getDefaultValue());
+            DvText defaultValue = (DvText) ((CComplexObject) parsed.itemAtPath("/items[id2]/value[id21]")).getDefaultValue();
             assertEquals("some default value", defaultValue.getValue());
         }
 
@@ -72,8 +72,8 @@ public class DefaultValueSerializerTest {
 
             Archetype parsed = adlParser.parse(serialized);
             assertTrue(adlParser.getErrors().hasNoErrors());
-            assertNotNull(((CComplexObject) archetype.itemAtPath("/items[id2]/value[id21]")).getDefaultValue());
-            DvText defaultValue = (DvText) ((CComplexObject) archetype.itemAtPath("/items[id2]/value[id21]")).getDefaultValue();
+            assertNotNull(((CComplexObject) parsed.itemAtPath("/items[id2]/value[id21]")).getDefaultValue());
+            DvText defaultValue = (DvText) ((CComplexObject) parsed.itemAtPath("/items[id2]/value[id21]")).getDefaultValue();
             assertEquals("some default value", defaultValue.getValue());
         }
 
@@ -103,8 +103,8 @@ public class DefaultValueSerializerTest {
 
             Archetype parsed = adlParser.parse(serialized);
             assertTrue(adlParser.getErrors().hasNoErrors());
-            assertNotNull(((CComplexObject) archetype.itemAtPath("/items[id2]/value[id21]")).getDefaultValue());
-            DvText defaultValue = (DvText) ((CComplexObject) archetype.itemAtPath("/items[id2]/value[id21]")).getDefaultValue();
+            assertNotNull(((CComplexObject) parsed.itemAtPath("/items[id2]/value[id21]")).getDefaultValue());
+            DvText defaultValue = (DvText) ((CComplexObject) parsed.itemAtPath("/items[id2]/value[id21]")).getDefaultValue();
             assertEquals("some default value", defaultValue.getValue());
         }
 
@@ -128,8 +128,8 @@ public class DefaultValueSerializerTest {
 
             Archetype parsed = adlParser.parse(serialized);
             assertTrue(adlParser.getErrors().hasNoErrors());
-            assertNotNull(((CComplexObject) archetype.itemAtPath("/items[id2]/value[id21]")).getDefaultValue());
-            DvText defaultValue = (DvText) ((CComplexObject) archetype.itemAtPath("/items[id2]/value[id21]")).getDefaultValue();
+            assertNotNull(((CComplexObject) parsed.itemAtPath("/items[id2]/value[id21]")).getDefaultValue());
+            DvText defaultValue = (DvText) ((CComplexObject) parsed.itemAtPath("/items[id2]/value[id21]")).getDefaultValue();
             assertEquals("some default value", defaultValue.getValue());
         }
 
@@ -144,6 +144,9 @@ public class DefaultValueSerializerTest {
             Cluster cluster = new Cluster();
             cluster.setArchetypeNodeId("id1");
             cluster.addItem(new Element("id2", new DvText("dv text name"), new DvText("some default value")));
+            cluster.addItem(new Element("id3",
+                    new DvText("dv coded text name"),
+                    new DvCodedText("some default value", new CodePhrase(new TerminologyId("local"), "at5"))));
 
             cComplexObject.setDefaultValue(cluster);
             String serialized = ADLArchetypeSerializer.serialize(archetype, null, new ArchieRMObjectMapperProvider() {
@@ -160,8 +163,9 @@ public class DefaultValueSerializerTest {
 
             Archetype parsed = adlParser.parse(serialized);
             assertTrue(adlParser.getErrors().hasNoErrors());
-            assertNotNull(archetype.getDefinition().getDefaultValue());
-            Cluster defaultValue = (Cluster) ((CComplexObject) archetype.getDefinition()).getDefaultValue();
+            assertNotNull(parsed.getDefinition().getDefaultValue());
+            Cluster defaultValue = (Cluster) ((CComplexObject) parsed.getDefinition()).getDefaultValue();
+            assertEquals(2, defaultValue.getItems().size());
         }
     }
 
@@ -173,7 +177,12 @@ public class DefaultValueSerializerTest {
             CComplexObject cComplexObject = archetype.getDefinition();
             Cluster cluster = new Cluster();
             cluster.setArchetypeNodeId("id1");
-            cluster.addItem(new Element("id2", new DvText("dv text name"), new DvText("some default value")));
+            cluster.addItem(new Element("id2",
+                    new DvText("dv text name"),
+                    new DvText("some default value")));
+            cluster.addItem(new Element("id3",
+                    new DvText("dv coded text name"),
+                    new DvCodedText("some default value", new CodePhrase(new TerminologyId("local"), "at5"))));
 
             cComplexObject.setDefaultValue(cluster);
             String serialized = ADLArchetypeSerializer.serialize(archetype, null, new ArchieRMObjectMapperProvider());
@@ -184,9 +193,10 @@ public class DefaultValueSerializerTest {
 
 
             Archetype parsed = adlParser.parse(serialized);
-            assertTrue(adlParser.getErrors().hasNoErrors());
-            assertNotNull(archetype.getDefinition().getDefaultValue());
-            Cluster defaultValue = (Cluster) ((CComplexObject) archetype.getDefinition()).getDefaultValue();
+            assertTrue(adlParser.getErrors().toString(), adlParser.getErrors().hasNoErrors());
+            assertNotNull(parsed.getDefinition().getDefaultValue());
+            Cluster defaultValue = (Cluster) ((CComplexObject) parsed.getDefinition()).getDefaultValue();
+            assertEquals(2, defaultValue.getItems().size());
             //assertEquals("some default value", defaultValue.getValue());
         }
 
