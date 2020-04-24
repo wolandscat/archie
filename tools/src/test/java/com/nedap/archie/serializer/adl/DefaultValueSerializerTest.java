@@ -65,7 +65,7 @@ public class DefaultValueSerializerTest {
                 }
             });
             System.out.println(serialized);
-            assertTrue(serialized.contains("_default = < (json) <#"));
+            assertTrue(serialized.contains("_default = (json) <#"));
             assertTrue(serialized.contains("\"some default value\""));
             assertTrue(serialized.contains("\"_type\" : \"DV_TEXT\""));
 
@@ -96,7 +96,7 @@ public class DefaultValueSerializerTest {
                 }
             });
             System.out.println(serialized);
-            assertTrue(serialized.contains("_default = < (json) <#"));
+            assertTrue(serialized.contains("_default = (json) <#"));
             assertTrue(serialized.contains("\"some default value\""));
             assertTrue(serialized.contains("\"_type\" : \"DV_CODED_TEXT\""));
 
@@ -104,8 +104,10 @@ public class DefaultValueSerializerTest {
             Archetype parsed = adlParser.parse(serialized);
             assertTrue(adlParser.getErrors().hasNoErrors());
             assertNotNull(((CComplexObject) parsed.itemAtPath("/items[id2]/value[id21]")).getDefaultValue());
-            DvText defaultValue = (DvText) ((CComplexObject) parsed.itemAtPath("/items[id2]/value[id21]")).getDefaultValue();
+            DvCodedText defaultValue = (DvCodedText) ((CComplexObject) parsed.itemAtPath("/items[id2]/value[id21]")).getDefaultValue();
             assertEquals("some default value", defaultValue.getValue());
+            assertEquals("at5", defaultValue.getDefiningCode().getCodeString());
+            assertEquals("local", defaultValue.getDefiningCode().getTerminologyId().getValue());
         }
 
     }
@@ -129,8 +131,10 @@ public class DefaultValueSerializerTest {
             Archetype parsed = adlParser.parse(serialized);
             assertTrue(adlParser.getErrors().hasNoErrors());
             assertNotNull(((CComplexObject) parsed.itemAtPath("/items[id2]/value[id21]")).getDefaultValue());
-            DvText defaultValue = (DvText) ((CComplexObject) parsed.itemAtPath("/items[id2]/value[id21]")).getDefaultValue();
+            DvCodedText defaultValue = (DvCodedText) ((CComplexObject) parsed.itemAtPath("/items[id2]/value[id21]")).getDefaultValue();
             assertEquals("some default value", defaultValue.getValue());
+            assertEquals("at5", defaultValue.getDefiningCode().getCodeString());
+            assertEquals("local", defaultValue.getDefiningCode().getTerminologyId().getValue());
         }
 
     }
@@ -156,7 +160,7 @@ public class DefaultValueSerializerTest {
                 }
             });
             System.out.println(serialized);
-            assertTrue(serialized.contains("_default = < (json) <#"));
+            assertTrue(serialized.contains("_default = (json) <#"));
             assertTrue(serialized.contains("\"some default value\""));
             assertTrue(serialized.contains("\"_type\" : \"CLUSTER\""));
 

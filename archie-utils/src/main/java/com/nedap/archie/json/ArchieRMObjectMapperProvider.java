@@ -7,6 +7,13 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.nedap.archie.odin.CodePhraseSerializer;
+import com.nedap.archie.odin.OdinParsingClusterMixin;
+import com.nedap.archie.odin.OdinParsingItemTreeMixin;
+import com.nedap.archie.rm.datastructures.Cluster;
+import com.nedap.archie.rm.datastructures.ItemTree;
+import com.nedap.archie.rm.datatypes.CodePhrase;
 import com.nedap.archie.rminfo.RMObjectMapperProvider;
 import org.openehr.odin.jackson.ODINMapper;
 
@@ -28,6 +35,12 @@ public class ArchieRMObjectMapperProvider implements RMObjectMapperProvider {
 //        } else {
             odinMapper.disable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
 //        }
+        //TODO: add Mixins for *all* list properties that contain things other than primitive objects!
+        //Or switch to JSON - the much easier option for everyone involved.
+        SimpleModule odinRmSupport = new SimpleModule();
+        odinRmSupport.setMixInAnnotation(Cluster.class, OdinParsingClusterMixin.class);
+        odinRmSupport.setMixInAnnotation(ItemTree.class, OdinParsingItemTreeMixin.class);
+        odinMapper.registerModule(odinRmSupport);
 
         //ignore the @type field when not needed
         odinMapper.addHandler(new DeserializationProblemHandler() {
@@ -49,6 +62,12 @@ public class ArchieRMObjectMapperProvider implements RMObjectMapperProvider {
         config.setAlwaysIncludeTypeProperty(false);
         config.setSerializeEmptyCollections(false);
         JacksonUtil.configureObjectMapper(odinMapper, config);
+
+        SimpleModule odinRmSupport = new SimpleModule();
+        //TODO: check if this covers all native odin types, together with the types already included in the default OdinMapper
+        odinRmSupport.addSerializer(CodePhrase.class, new CodePhraseSerializer());
+        odinMapper.registerModule(odinRmSupport);
+
         return odinMapper;
     }
 

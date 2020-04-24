@@ -248,7 +248,7 @@ public class ODINGenerator extends GeneratorBase
     /* Overridden methods; writing field names
     /**********************************************************************
      */
-@Override
+    @Override
     public void writeObject(Object pojo) throws IOException {
 
     }
@@ -260,8 +260,6 @@ public class ODINGenerator extends GeneratorBase
     @Override
     public final void writeFieldName(String name) throws IOException
     {
-
-
         int status = _writeContext.writeFieldName(name);
         if (status == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field name, expecting a value");

@@ -53,7 +53,7 @@ c_attribute: (ADL_PATH | attribute_id) c_existence? c_cardinality? ( SYM_MATCHES
 
 c_attribute_tuple : '[' attribute_id ( ',' attribute_id )* ']' SYM_MATCHES '{' c_object_tuple ( ',' c_object_tuple )* '}' ;
 
-default_value: SYM_DEFAULT SYM_EQ '<' odin_text '>';
+default_value: SYM_DEFAULT SYM_EQ ('<')? odin_text ('>')?;
 
 c_object_tuple : '[' c_object_tuple_items ']' ;
 
