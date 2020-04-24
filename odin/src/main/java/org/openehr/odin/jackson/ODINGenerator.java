@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 public class ODINGenerator extends GeneratorBase
 {
+    public static final String WRITE_START_OBJECT_TYPE_MSG = "start an object";
     private OdinStringBuilder builder;
 
     /**
@@ -355,7 +356,7 @@ public class ODINGenerator extends GeneratorBase
     @Override
     public final void writeStartObject() throws IOException
     {
-        _verifyValueWrite("start an object");
+        _verifyValueWrite(WRITE_START_OBJECT_TYPE_MSG);
 
         String anchor = _objectId;
         if (anchor != null) {
@@ -705,7 +706,8 @@ public class ODINGenerator extends GeneratorBase
         if (status == JsonWriteContext.STATUS_EXPECT_NAME) {
             _reportError("Can not "+typeMsg+", expecting field name");
         }
-        if(status == JsonWriteContext.STATUS_OK_AFTER_COMMA && _writeContext.inArray() && !this.typeIdContext.arrayHasObjects()) {
+        //TODO: this string comparison is very slow. Fix?
+        if(status == JsonWriteContext.STATUS_OK_AFTER_COMMA && _writeContext.inArray() && !typeMsg.equals(this.WRITE_START_OBJECT_TYPE_MSG)) {
             builder.append(", ");
         }
     }
