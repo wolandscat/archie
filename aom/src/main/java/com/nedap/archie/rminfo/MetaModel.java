@@ -43,9 +43,11 @@ public class MetaModel implements MetaModelInterface {
 
     public MetaModel(ModelInfoLookup selectedModel, BmmModel selectedBmmModel, AomProfile selectedAomProfile, RMObjectMapperProvider provider) {
         this(selectedModel, selectedBmmModel, selectedAomProfile);
-        this.odinInputObjectMapper = provider.getInputOdinObjectMapper();
-        this.odinOutputObjectMapper = provider.getOutputOdinObjectMapper();
-        this.jsonObjectMapper = provider.getJsonObjectMapper();
+        if(provider != null) {
+            this.odinInputObjectMapper = provider.getInputOdinObjectMapper();
+            this.odinOutputObjectMapper = provider.getOutputOdinObjectMapper();
+            this.jsonObjectMapper = provider.getJsonObjectMapper();
+        }
     }
 
     public ModelInfoLookup getSelectedModel() {
