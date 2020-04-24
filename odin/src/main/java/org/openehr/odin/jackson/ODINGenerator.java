@@ -322,7 +322,7 @@ public class ODINGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an array");
         _writeContext = _writeContext.createChildArrayContext();
-
+        typeIdContext = typeIdContext.createChild(null);
         String anchor = _objectId;
         if (anchor != null) {
             _objectId = null;
@@ -351,6 +351,7 @@ public class ODINGenerator extends GeneratorBase
         //requires a custom writeContext to do properly though
         builder.append(">");
         _writeContext = _writeContext.getParent();
+        typeIdContext = typeIdContext.getParent();
     }
 
     @Override
@@ -706,8 +707,7 @@ public class ODINGenerator extends GeneratorBase
         if (status == JsonWriteContext.STATUS_EXPECT_NAME) {
             _reportError("Can not "+typeMsg+", expecting field name");
         }
-        //TODO: this string comparison is very slow. Fix?
-        if(status == JsonWriteContext.STATUS_OK_AFTER_COMMA && _writeContext.inArray() && !typeMsg.equals(this.WRITE_START_OBJECT_TYPE_MSG)) {
+        if(status == JsonWriteContext.STATUS_OK_AFTER_COMMA && _writeContext.inArray() && !typeIdContext.arrayHasObjects()) {
             builder.append(", ");
         }
     }
