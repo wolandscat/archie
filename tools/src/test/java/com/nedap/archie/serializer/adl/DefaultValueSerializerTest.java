@@ -191,7 +191,7 @@ public class DefaultValueSerializerTest {
             cComplexObject.setDefaultValue(cluster);
             String serialized = ADLArchetypeSerializer.serialize(archetype, null, new ArchieRMObjectMapperProvider());
             System.out.println(serialized);
-            assertTrue(serialized.contains("_default = <"));
+            assertTrue(serialized.contains("_default ="));
             assertTrue(serialized.contains("\"some default value\""));
             assertTrue(serialized.contains("(CLUSTER)"));
 
