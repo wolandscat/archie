@@ -32,7 +32,7 @@ public class NcSDTGeneratorTest {
             Map<String, Object> generate = exampleGenerator.generate(bloodPressureOpt);
             String rmObjectJson = JacksonUtil.getObjectMapper().writeValueAsString(generate);
             RMObject rmObject = JacksonUtil.getObjectMapper().readValue(rmObjectJson, RMObject.class);
-            Map<String, Object> stringObjectMap = new NcSDTGenerator(ArchieRMInfoLookup.getInstance(), false).buildPathsAndValues(rmObject);
+            Map<String, Object> stringObjectMap = new NcSDTGenerator(ArchieRMInfoLookup.getInstance(), false, false).buildPathsAndValues(rmObject);
             System.out.println(JacksonUtil.getObjectMapper().writeValueAsString(stringObjectMap));
         }
 
@@ -52,7 +52,26 @@ public class NcSDTGeneratorTest {
             Map<String, Object> generate = exampleGenerator.generate(bloodPressureOpt);
             String rmObjectJson = JacksonUtil.getObjectMapper().writeValueAsString(generate);
             RMObject rmObject = JacksonUtil.getObjectMapper().readValue(rmObjectJson, RMObject.class);
-            Map<String, Object> stringObjectMap = new NcSDTGenerator(ArchieRMInfoLookup.getInstance(), true).buildPathsAndValues(rmObject);
+            Map<String, Object> stringObjectMap = new NcSDTGenerator(ArchieRMInfoLookup.getInstance(), true, false).buildPathsAndValues(rmObject);
+            System.out.println(JacksonUtil.getObjectMapper().writeValueAsString(stringObjectMap));
+        }
+
+    }
+
+    @Test
+    public void testBloodPressureHumanReadable() throws Exception {
+
+        try(InputStream stream = getClass().getResourceAsStream(BLOOD_PRESSURE_PATH)) {
+            Archetype bloodPressure = new ADLParser(BuiltinReferenceModels.getMetaModels()).parse(stream);
+            Flattener flattener = new Flattener(new SimpleArchetypeRepository(), BuiltinReferenceModels.getMetaModels(), FlattenerConfiguration.forOperationalTemplate());
+            OperationalTemplate bloodPressureOpt = (OperationalTemplate) flattener.flatten(bloodPressure);
+
+            ExampleJsonInstanceGenerator exampleGenerator = new ExampleJsonInstanceGenerator(BuiltinReferenceModels.getMetaModels(), "en");
+            exampleGenerator.setUseTypeNameWhenTermMissing(true);
+            Map<String, Object> generate = exampleGenerator.generate(bloodPressureOpt);
+            String rmObjectJson = JacksonUtil.getObjectMapper().writeValueAsString(generate);
+            RMObject rmObject = JacksonUtil.getObjectMapper().readValue(rmObjectJson, RMObject.class);
+            Map<String, Object> stringObjectMap = new NcSDTGenerator(ArchieRMInfoLookup.getInstance(), false, true).buildPathsAndValues(rmObject);
             System.out.println(JacksonUtil.getObjectMapper().writeValueAsString(stringObjectMap));
         }
 

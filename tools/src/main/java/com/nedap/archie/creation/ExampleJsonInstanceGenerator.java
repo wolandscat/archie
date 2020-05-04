@@ -61,6 +61,8 @@ public  class ExampleJsonInstanceGenerator {
     private BmmModel bmm;
     private AomProfile aomProfile;
 
+    private boolean useTypeNameWhenTermMissing = false;
+
     private String typePropertyName = "@type";
 
     public ExampleJsonInstanceGenerator(MetaModels models, String language) {
@@ -74,6 +76,15 @@ public  class ExampleJsonInstanceGenerator {
         aomProfile = models.getSelectedAomProfile();
         bmm = models.getSelectedBmmModel();
         return generate(archetype.getDefinition());
+    }
+
+
+    public boolean isUseTypeNameWhenTermMissing() {
+        return useTypeNameWhenTermMissing;
+    }
+
+    public void setUseTypeNameWhenTermMissing(boolean useTypeNameWhenTermMissing) {
+        this.useTypeNameWhenTermMissing = useTypeNameWhenTermMissing;
     }
 
     public void setTypePropertyName(String typePropertyName) {
@@ -451,7 +462,7 @@ public  class ExampleJsonInstanceGenerator {
                     Map<String, Object> definingCode = (Map<String, Object>) codePhrase;
                     String codeString = (String) definingCode.get("code_string");//TODO: check terminology code to be local?
                     ArchetypeTerm term = archetype.getTerm(child, codeString, language);
-                    dvCodedText.put("value", term == null ? MISSING_TERM_IN_ARCHETYPE_FOR_LANGUAGE + language: term.getText());
+                    dvCodedText.put("value", term == null ? getMissingTermText(child) : term.getText());
                 }
 
                 return dvCodedText;
@@ -462,6 +473,14 @@ public  class ExampleJsonInstanceGenerator {
 
         return null;
     }
+
+    private String getMissingTermText(CObject cObject) {
+        if(this.useTypeNameWhenTermMissing && !(cObject instanceof CPrimitiveObject)) {
+            return cObject.getRmTypeName();
+        }
+        return MISSING_TERM_IN_ARCHETYPE_FOR_LANGUAGE + language;
+    }
+
     /** Add any properties required for this specific RM based on the CObject. For openEHR RM, this should at least
      * set the name if present
      */

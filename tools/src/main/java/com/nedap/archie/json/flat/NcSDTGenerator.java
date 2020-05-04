@@ -19,16 +19,27 @@ public class NcSDTGenerator {
     //TODO: this is model-specific, remove from here
     private Set<String> ignoredFieldNames = Sets.newHashSet("archetype_details", "archetype_node_id");
     private final boolean writePipesForPrimitiveTypes;
+    private final boolean humanReadableFormat;
 
 
-    public NcSDTGenerator(ModelInfoLookup modelInfoLookup, boolean writePipesForPrimitiveTypes) {
+    public NcSDTGenerator(ModelInfoLookup modelInfoLookup, boolean writePipesForPrimitiveTypes, boolean humanReadableFormat) {
         this.modelInfoLookup = modelInfoLookup;
         this.writePipesForPrimitiveTypes = writePipesForPrimitiveTypes;
+        this.humanReadableFormat = humanReadableFormat;
     }
 
     public Map<String, Object> buildPathsAndValues(OpenEHRBase rmObject) {
         Map<String, Object> result = new LinkedHashMap<>();
         buildPathsAndValuesInner(result,null, "/", rmObject);
+
+        if(humanReadableFormat) {
+            String rootName = modelInfoLookup.getNameFromRMObject(rmObject);
+            if(rootName != null) {
+                Map<String, Object> humanReadableResult = new LinkedHashMap<>();
+                result.forEach((key, value) -> humanReadableResult.put(addUnderScores(rootName) + key, value));
+                return humanReadableResult;
+            }
+        }
         return result;
 
     }
@@ -129,10 +140,12 @@ public class NcSDTGenerator {
     }
 
     private String joinPath(String pathSoFar, String attributeName, OpenEHRBase rmObject, Integer index, String pathSeparator) {
-        String newPathSegment = attributeName;
+        String name = modelInfoLookup.getNameFromRMObject(rmObject);
+        boolean wroteHumanReadableName = name != null && humanReadableFormat;
+        String newPathSegment = wroteHumanReadableName ? addUnderScores(name) : attributeName;
         String nodeId = modelInfoLookup.getArchetypeNodeIdFromRMObject(rmObject);
 
-        if(nodeId != null) {
+        if(nodeId != null && !wroteHumanReadableName) {
             newPathSegment = newPathSegment + "[" + nodeId + "]";
             if(index != null) {
                 newPathSegment = newPathSegment + ":" + index;
@@ -145,6 +158,13 @@ public class NcSDTGenerator {
             return pathSoFar + newPathSegment;
         }
         return pathSoFar + pathSeparator + newPathSegment;
+    }
+
+    private String addUnderScores(String name) {
+        if(name == null) {
+            return null;
+        }
+        return name.replaceAll("[^a-zA-Z0-9]", "_");
     }
 }
 
