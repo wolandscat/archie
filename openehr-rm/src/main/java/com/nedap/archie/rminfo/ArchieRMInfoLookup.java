@@ -304,6 +304,17 @@ public class ArchieRMInfoLookup extends ReflectionModelInfoLookup {
     }
 
     @Override
+    public String getArchetypeIdFromArchetypedRmObject(Object rmObject) {
+        if(rmObject instanceof Locatable) {
+            Locatable locatable = (Locatable) rmObject;
+            if(locatable.getArchetypeDetails() != null) {
+                return locatable.getArchetypeDetails().getArchetypeId().getFullId();
+            }
+        }
+        return null;
+    }
+
+    @Override
     public String getNameFromRMObject(Object rmObject) {
         if(rmObject == null) {
             return null;

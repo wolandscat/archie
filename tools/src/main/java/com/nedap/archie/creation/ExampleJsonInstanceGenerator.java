@@ -178,15 +178,25 @@ public  class ExampleJsonInstanceGenerator {
         //add all mandatory properties from the RM
         for (BmmProperty property : properties.values()) {
             if (property.getMandatory() && !result.containsKey(property.getName())) {
-                addRequiredProperty(result, property);
+                if(property.getName().equalsIgnoreCase("archetype_node_id")) {
+                    addRequiredProperty(result, property, "idX");
+                } else {
+                    addRequiredProperty(result, property);
+                }
             }
         }
     }
 
     private void addRequiredProperty(Map<String, Object> result, BmmProperty property) {
+        addRequiredProperty(result, property, null);
+    }
+
+    private void addRequiredProperty(Map<String, Object> result, BmmProperty property, String value) {
         BmmType type = property.getType();
         BmmClass propertyClass = type.getBaseClass();
-        if (property instanceof BmmContainerProperty) {
+        if(value != null) {
+            result.put(property.getName(), value);
+        } else if (property instanceof BmmContainerProperty) {
             List<Object> children = new ArrayList<>();
             MultiplicityInterval cardinality = ((BmmContainerProperty) property).getCardinality();
             if(cardinality.isMandatory() ) {
