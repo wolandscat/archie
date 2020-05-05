@@ -16,7 +16,7 @@ import org.openehr.referencemodels.BuiltinReferenceModels;
 import java.io.InputStream;
 import java.util.Map;
 
-public class NcSDTGeneratorTest {
+public class FlatJsonGeneratorTest {
 
     private static final String BLOOD_PRESSURE_PATH = "/ckm-mirror/local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.blood_pressure.v1.1.0.adls";
 
@@ -32,7 +32,7 @@ public class NcSDTGeneratorTest {
             Map<String, Object> generate = exampleGenerator.generate(bloodPressureOpt);
             String rmObjectJson = JacksonUtil.getObjectMapper().writeValueAsString(generate);
             RMObject rmObject = JacksonUtil.getObjectMapper().readValue(rmObjectJson, RMObject.class);
-            Map<String, Object> stringObjectMap = new NcSDTGenerator(ArchieRMInfoLookup.getInstance(), false, false).buildPathsAndValues(rmObject);
+            Map<String, Object> stringObjectMap = new FlatJsonGenerator(ArchieRMInfoLookup.getInstance()).buildPathsAndValues(rmObject);
             System.out.println(JacksonUtil.getObjectMapper().writeValueAsString(stringObjectMap));
         }
 
@@ -52,7 +52,9 @@ public class NcSDTGeneratorTest {
             Map<String, Object> generate = exampleGenerator.generate(bloodPressureOpt);
             String rmObjectJson = JacksonUtil.getObjectMapper().writeValueAsString(generate);
             RMObject rmObject = JacksonUtil.getObjectMapper().readValue(rmObjectJson, RMObject.class);
-            Map<String, Object> stringObjectMap = new NcSDTGenerator(ArchieRMInfoLookup.getInstance(), true, false).buildPathsAndValues(rmObject);
+            FlatJsonGenerator flatJsonGenerator = new FlatJsonGenerator(ArchieRMInfoLookup.getInstance());
+            flatJsonGenerator.setWritePipesForPrimitiveTypes(true);
+            Map<String, Object> stringObjectMap = flatJsonGenerator.buildPathsAndValues(rmObject);
             System.out.println(JacksonUtil.getObjectMapper().writeValueAsString(stringObjectMap));
         }
 
@@ -71,7 +73,10 @@ public class NcSDTGeneratorTest {
             Map<String, Object> generate = exampleGenerator.generate(bloodPressureOpt);
             String rmObjectJson = JacksonUtil.getObjectMapper().writeValueAsString(generate);
             RMObject rmObject = JacksonUtil.getObjectMapper().readValue(rmObjectJson, RMObject.class);
-            Map<String, Object> stringObjectMap = new NcSDTGenerator(ArchieRMInfoLookup.getInstance(), false, true).buildPathsAndValues(rmObject);
+
+            FlatJsonGenerator flatJsonGenerator = new FlatJsonGenerator(ArchieRMInfoLookup.getInstance());
+            flatJsonGenerator.setHumanReadableFormat(true);
+            Map<String, Object> stringObjectMap = flatJsonGenerator.buildPathsAndValues(rmObject);
             System.out.println(JacksonUtil.getObjectMapper().writeValueAsString(stringObjectMap));
         }
 

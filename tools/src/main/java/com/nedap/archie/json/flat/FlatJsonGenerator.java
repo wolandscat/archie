@@ -13,18 +13,41 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class NcSDTGenerator {
+public class FlatJsonGenerator {
 
     private final ModelInfoLookup modelInfoLookup;
     //TODO: this is model-specific, remove from here
     private Set<String> ignoredFieldNames = Sets.newHashSet("archetype_details", "archetype_node_id");
-    private final boolean writePipesForPrimitiveTypes;
-    private final boolean humanReadableFormat;
+    private boolean writePipesForPrimitiveTypes = false;
+    private boolean humanReadableFormat = false;
 
 
-    public NcSDTGenerator(ModelInfoLookup modelInfoLookup, boolean writePipesForPrimitiveTypes, boolean humanReadableFormat) {
+    public FlatJsonGenerator(ModelInfoLookup modelInfoLookup) {
         this.modelInfoLookup = modelInfoLookup;
+    }
+
+    /**
+     * Write a '|' separator ast the last separator instead of a '/'. Temporary setup, this is likely to be changed in the future
+     * @param writePipesForPrimitiveTypes
+     */
+    public void setWritePipesForPrimitiveTypes(boolean writePipesForPrimitiveTypes) {
         this.writePipesForPrimitiveTypes = writePipesForPrimitiveTypes;
+    }
+
+    public boolean isWritePipesForPrimitiveTypes() {
+        return writePipesForPrimitiveTypes;
+    }
+
+    /**
+     * Write a human readable format. This format is heavily dependant on archetype wording changes, and should be
+     * used carefully. It's probably better to generate a binding file to the non-human-readable format instead of
+     * directly to the archetype than to use this directly.
+     */
+    public boolean isHumanReadableFormat() {
+        return humanReadableFormat;
+    }
+
+    public void setHumanReadableFormat(boolean humanReadableFormat) {
         this.humanReadableFormat = humanReadableFormat;
     }
 
