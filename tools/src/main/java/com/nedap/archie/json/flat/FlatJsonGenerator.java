@@ -2,11 +2,16 @@ package com.nedap.archie.json.flat;
 
 import com.google.common.collect.Sets;
 import com.nedap.archie.base.OpenEHRBase;
+import com.nedap.archie.datetime.DateTimeSerializerFormatters;
 import com.nedap.archie.rminfo.ModelInfoLookup;
 import com.nedap.archie.rminfo.RMAttributeInfo;
 import com.nedap.archie.rminfo.RMTypeInfo;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -16,39 +21,22 @@ import java.util.Set;
 public class FlatJsonGenerator {
 
     private final ModelInfoLookup modelInfoLookup;
+
     //TODO: this is model-specific, remove from here
-    private Set<String> ignoredFieldNames = Sets.newHashSet("archetype_details", "archetype_node_id");
-    private boolean writePipesForPrimitiveTypes = false;
-    private boolean humanReadableFormat = false;
+    private final Set<String> ignoredFieldNames = Sets.newHashSet("archetype_details", "archetype_node_id");
+
+    private final boolean writePipesForPrimitiveTypes;
+    private final boolean humanReadableFormat;
+    private final IndexNotation indexNotation;
+    private final String typeIdPropertyName;
 
 
-    public FlatJsonGenerator(ModelInfoLookup modelInfoLookup) {
+    public FlatJsonGenerator(ModelInfoLookup modelInfoLookup, FlatJsonFormatConfiguration config) {
         this.modelInfoLookup = modelInfoLookup;
-    }
-
-    /**
-     * Write a '|' separator ast the last separator instead of a '/'. Temporary setup, this is likely to be changed in the future
-     * @param writePipesForPrimitiveTypes
-     */
-    public void setWritePipesForPrimitiveTypes(boolean writePipesForPrimitiveTypes) {
-        this.writePipesForPrimitiveTypes = writePipesForPrimitiveTypes;
-    }
-
-    public boolean isWritePipesForPrimitiveTypes() {
-        return writePipesForPrimitiveTypes;
-    }
-
-    /**
-     * Write a human readable format. This format is heavily dependant on archetype wording changes, and should be
-     * used carefully. It's probably better to generate a binding file to the non-human-readable format instead of
-     * directly to the archetype than to use this directly.
-     */
-    public boolean isHumanReadableFormat() {
-        return humanReadableFormat;
-    }
-
-    public void setHumanReadableFormat(boolean humanReadableFormat) {
-        this.humanReadableFormat = humanReadableFormat;
+        this.writePipesForPrimitiveTypes = config.isWritePipesForPrimitiveTypes();
+        this.humanReadableFormat = config.isHumanReadableFormat();
+        this.indexNotation = config.getIndexNotation();
+        this.typeIdPropertyName = config.getTypeIdPropertyName();
     }
 
     public Map<String, Object> buildPathsAndValues(OpenEHRBase rmObject) {
@@ -74,7 +62,7 @@ public class FlatJsonGenerator {
         }
         RMTypeInfo typeInfo = modelInfoLookup.getTypeInfo(rmObject.getClass());
         if(pathSoFar.equalsIgnoreCase ("/") || (typeHasDescendants(rmAttributeTypeInfo) && !sameType(rmAttributeTypeInfo, rmObject))) {
-            result.put(joinPath(pathSoFar, "@type", null, null, "/"), getTypeIdFromValue(rmObject));
+            result.put(joinPath(pathSoFar, typeIdPropertyName, null, null, "/"), getTypeIdFromValue(rmObject));
         }
 
         for(String attributeName:typeInfo.getAttributes().keySet()) {
@@ -111,7 +99,7 @@ public class FlatJsonGenerator {
 
     private boolean typeHasDescendants(RMTypeInfo typeInfo) {
         if(typeInfo == null) {
-            return true;// we have no idea, so include @type
+            return true;// we have no idea, so include @type/_type
         }
         return !typeInfo.getDirectDescendantClasses().isEmpty();
     }
@@ -148,9 +136,31 @@ public class FlatJsonGenerator {
             }
             //TODO: do we need Map-support as well?
         } else if(child != null) {
-            String newPath = joinPath(pathSoFar, attributeName, null, index, this.writePipesForPrimitiveTypes ? "|" : "/");
-            //not an RMObject, likely a primitive type or something with a good toString option, so do that
-            result.put(newPath, child.toString());
+            String newPath = joinPath(pathSoFar, attributeName, null, index, writePipesForPrimitiveTypes ? "|" : "/");
+
+            if(child instanceof Number) {
+                result.put(newPath, child);
+            } else if (child instanceof TemporalAccessor) {
+                Temporal t = (Temporal) child;
+                boolean hoursSupported = t.isSupported(ChronoUnit.HOURS);
+                boolean monthsSupported = t.isSupported(ChronoUnit.MONTHS);
+
+                if(hoursSupported && monthsSupported) {
+                    //datetime
+                    result.put(newPath, DateTimeSerializerFormatters.ISO_8601_DATE_TIME.format(t));
+                } else if (monthsSupported) {
+                    //date
+                    result.put(newPath, DateTimeSerializerFormatters.ISO_8601_DATE.format(t));
+                } else if (hoursSupported) {
+                    //time
+                    result.put(newPath, DateTimeSerializerFormatters.ISO_8601_TIME.format(t));
+                }
+            } else if (child instanceof TemporalAmount) {
+                //duration or period. now just a toString, should this be a specific formatter?
+                result.put(newPath, child);
+            } else {
+                result.put(newPath, child.toString());
+            }
         }
     }
 
@@ -169,12 +179,25 @@ public class FlatJsonGenerator {
         String nodeId = modelInfoLookup.getArchetypeNodeIdFromRMObject(rmObject);
 
         if(nodeId != null && !wroteHumanReadableName) {
-            newPathSegment = newPathSegment + "[" + nodeId + "]";
-            if(index != null) {
-                newPathSegment = newPathSegment + ":" + index;
+
+            if(indexNotation == IndexNotation.AFTER_A_COLON) {
+                newPathSegment = newPathSegment + "[" + nodeId + "]";
+                if (index != null) {
+                    newPathSegment = newPathSegment + ":" + index;
+                }
+            } else {
+                if(index == null) {
+                    newPathSegment = newPathSegment + "[" + nodeId + "]";
+                } else {
+                    newPathSegment = newPathSegment + "[" + nodeId + "," + index + "]";
+                }
             }
         } else if (index != null) {
-            newPathSegment = newPathSegment + ":" + index;
+            if(indexNotation == IndexNotation.AFTER_A_COLON) {
+                newPathSegment = newPathSegment + ":" + index;
+            } else {
+                newPathSegment = newPathSegment + "[" + index + "]";
+            }
         }
 
         if(pathSoFar.endsWith("/")) {
