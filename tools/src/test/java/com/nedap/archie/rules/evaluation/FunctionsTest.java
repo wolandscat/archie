@@ -163,8 +163,10 @@ public class FunctionsTest {
         ruleEvaluation.evaluate(root, archetype.getRules().getRules());
         ValueList roundedUp = ruleEvaluation.getVariableMap().get("round_up");
         ValueList roundedDown = ruleEvaluation.getVariableMap().get("round_down");
+        ValueList roundedNonDecimal = ruleEvaluation.getVariableMap().get("round_non_decimal");
         assertEquals("round should round up", 2L, (long) roundedUp.getValues().get(0).getValue());
         assertEquals("round should round down", 1L, (long) roundedDown.getValues().get(0).getValue());
+        assertEquals("round non-decimal should also work", 3L, (long) roundedNonDecimal.getValues().get(0).getValue());
     }
 
     @Test
