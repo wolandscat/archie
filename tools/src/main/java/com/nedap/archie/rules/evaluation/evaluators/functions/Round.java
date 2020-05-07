@@ -33,7 +33,7 @@ public class Round implements FunctionImplementation {
         result.setType(PrimitiveType.Integer);
 
         for(Value valueObject : arguments.get(0).getValues()) {
-            result.addValue(new Value(Math.round((Double) valueObject.getValue())));
+            result.addValue(new Value(Math.round(Double.parseDouble(valueObject.getValue().toString()))));
         }
 
         return result;
