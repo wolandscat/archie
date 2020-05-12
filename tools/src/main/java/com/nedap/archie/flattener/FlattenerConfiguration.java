@@ -47,6 +47,11 @@ public class FlattenerConfiguration {
      */
     private boolean closeArchetypeSlots = true;
 
+    /**
+     * Only for Operational templates: replace any empty occurrences with effectiveOccurrences.
+     */
+    private boolean fillEmptyOccurrences = true;
+
     private FlattenerConfiguration() {
 
     }
@@ -144,5 +149,13 @@ public class FlattenerConfiguration {
 
     public void setRemoveZeroOccurrencesInParents(boolean removeZeroOccurrencesInParents) {
         this.removeZeroOccurrencesInParents = removeZeroOccurrencesInParents;
+    }
+
+    public boolean isFillEmptyOccurrences() {
+        return fillEmptyOccurrences;
+    }
+
+    public void setFillEmptyOccurrences(boolean fillEmptyOccurrences) {
+        this.fillEmptyOccurrences = fillEmptyOccurrences;
     }
 }
