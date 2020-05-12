@@ -11,12 +11,9 @@ import com.nedap.archie.rm.datatypes.CodePhrase;
 import com.nedap.archie.rm.datavalues.DvCodedText;
 import com.nedap.archie.rm.datavalues.DvText;
 import com.nedap.archie.rm.support.identification.TerminologyId;
-import com.nedap.archie.rminfo.MetaModels;
-import com.nedap.archie.testutil.TestUtil;
 import org.junit.Test;
 import org.openehr.referencemodels.BuiltinReferenceModels;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import static org.junit.Assert.assertEquals;
@@ -34,7 +31,7 @@ public class DefaultValueSerializerTest {
             DvText dvText = new DvText();
             dvText.setValue("some default value");
             cComplexObject.setDefaultValue(dvText);
-            String serialized = ADLArchetypeSerializer.serialize(archetype, null, new ArchieRMObjectMapperProvider());
+            String serialized = ADLArchetypeSerializer.serialize(archetype, null, getOdinProvider());
             System.out.println(serialized);
             assertTrue(serialized.contains("_default = "));
             assertTrue(serialized.contains("\"some default value\""));
@@ -58,12 +55,7 @@ public class DefaultValueSerializerTest {
             DvText dvText = new DvText();
             dvText.setValue("some default value");
             cComplexObject.setDefaultValue(dvText);
-            String serialized = ADLArchetypeSerializer.serialize(archetype, null, new ArchieRMObjectMapperProvider() {
-                @Override
-                public ObjectMapper getOutputOdinObjectMapper() {
-                    return null;
-                }
-            });
+            String serialized = ADLArchetypeSerializer.serialize(archetype, null, new ArchieRMObjectMapperProvider());
             System.out.println(serialized);
             assertTrue(serialized.contains("_default = (json) <#"));
             assertTrue(serialized.contains("\"some default value\""));
@@ -89,12 +81,7 @@ public class DefaultValueSerializerTest {
             DvCodedText dvCodedText = new DvCodedText("some default value", new CodePhrase(new TerminologyId("local"), "at5"));
 
             cComplexObject.setDefaultValue(dvCodedText);
-            String serialized = ADLArchetypeSerializer.serialize(archetype, null, new ArchieRMObjectMapperProvider() {
-                @Override
-                public ObjectMapper getOutputOdinObjectMapper() {
-                    return null;
-                }
-            });
+            String serialized = ADLArchetypeSerializer.serialize(archetype, null, new ArchieRMObjectMapperProvider());
             System.out.println(serialized);
             assertTrue(serialized.contains("_default = (json) <#"));
             assertTrue(serialized.contains("\"some default value\""));
@@ -121,7 +108,7 @@ public class DefaultValueSerializerTest {
             DvCodedText dvCodedText = new DvCodedText("some default value", new CodePhrase(new TerminologyId("local"), "at5"));
 
             cComplexObject.setDefaultValue(dvCodedText);
-            String serialized = ADLArchetypeSerializer.serialize(archetype, null, new ArchieRMObjectMapperProvider());
+            String serialized = ADLArchetypeSerializer.serialize(archetype, null, getOdinProvider());
             System.out.println(serialized);
 
             assertTrue(serialized.contains("\"some default value\""));
@@ -153,12 +140,7 @@ public class DefaultValueSerializerTest {
                     new DvCodedText("some default value", new CodePhrase(new TerminologyId("local"), "at5"))));
 
             cComplexObject.setDefaultValue(cluster);
-            String serialized = ADLArchetypeSerializer.serialize(archetype, null, new ArchieRMObjectMapperProvider() {
-                @Override
-                public ObjectMapper getOutputOdinObjectMapper() {
-                    return null;
-                }
-            });
+            String serialized = ADLArchetypeSerializer.serialize(archetype, null, new ArchieRMObjectMapperProvider());
             System.out.println(serialized);
             assertTrue(serialized.contains("_default = (json) <#"));
             assertTrue(serialized.contains("\"some default value\""));
@@ -189,7 +171,7 @@ public class DefaultValueSerializerTest {
                     new DvCodedText("some default value", new CodePhrase(new TerminologyId("local"), "at5"))));
 
             cComplexObject.setDefaultValue(cluster);
-            String serialized = ADLArchetypeSerializer.serialize(archetype, null, new ArchieRMObjectMapperProvider());
+            String serialized = ADLArchetypeSerializer.serialize(archetype, null, getOdinProvider());
             System.out.println(serialized);
             assertTrue(serialized.contains("_default ="));
             assertTrue(serialized.contains("\"some default value\""));
@@ -205,4 +187,16 @@ public class DefaultValueSerializerTest {
         }
 
     }
+
+
+    private ArchieRMObjectMapperProvider getOdinProvider() {
+        return new ArchieRMObjectMapperProvider() {
+            @Override
+            public ObjectMapper getJsonObjectMapper() {
+                return null;
+            }
+        };
+    }
+
+
 }

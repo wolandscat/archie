@@ -78,14 +78,14 @@ public class CComplexObjectSerializer<T extends CComplexObject> extends Constrai
                     try {
                         String format;
                         String content;
-                        if (rmObjectMapperProvider.getOutputOdinObjectMapper() != null) {
-                            format = DefaultValueContainer.ODIN;
-                            //the writerFor here makes sure type info gets output even for the root type
-                            content = rmObjectMapperProvider.getOutputOdinObjectMapper().writerFor(OpenEHRBase.class).writeValueAsString(cobj.getDefaultValue());
-                        } else {
+                        if (rmObjectMapperProvider.getJsonObjectMapper() != null) {
                             format = DefaultValueContainer.JSON;
                             //the writerFor here makes sure type info gets output even for the root type
                             content = rmObjectMapperProvider.getJsonObjectMapper().writerFor(OpenEHRBase.class).writeValueAsString(cobj.getDefaultValue());
+                        } else {
+                            format = DefaultValueContainer.ODIN;
+                            //the writerFor here makes sure type info gets output even for the root type
+                            content = rmObjectMapperProvider.getOutputOdinObjectMapper().writerFor(OpenEHRBase.class).writeValueAsString(cobj.getDefaultValue());
                         }
 
                         serializeDefaultValueContainer(new DefaultValueContainer(format, content));
