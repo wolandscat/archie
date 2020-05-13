@@ -30,12 +30,10 @@ public class FlatJsonGeneratorTest {
     public void testBloodPressureExample() throws Exception {
 
         OperationalTemplate bloodPressureOpt = parseBloodPressure();
-        RMObject rmObject = createExampleInstance(bloodPressureOpt);
-
         FlatJsonFormatConfiguration config = FlatJsonFormatConfiguration.standardFormatInDevelopment();
         config.setWritePipesForPrimitiveTypes(false);
-        Map<String, Object> stringObjectMap = new FlatJsonGenerator(ArchieRMInfoLookup.getInstance(), config)
-                .buildPathsAndValues(rmObject);
+        Map<String, Object> stringObjectMap = createExampleInstance(bloodPressureOpt, config);
+
         System.out.println(JacksonUtil.getObjectMapper().writeValueAsString(stringObjectMap));
 
         //type property
@@ -62,11 +60,9 @@ public class FlatJsonGeneratorTest {
     public void testBloodPressureExampleWithPipesForFinalFields() throws Exception {
 
         OperationalTemplate bloodPressureOpt = parseBloodPressure();
-        RMObject rmObject = createExampleInstance(bloodPressureOpt);
-
         FlatJsonFormatConfiguration config = FlatJsonFormatConfiguration.standardFormatInDevelopment();
-        Map<String, Object> stringObjectMap = new FlatJsonGenerator(ArchieRMInfoLookup.getInstance(), config)
-                .buildPathsAndValues(rmObject);
+        Map<String, Object> stringObjectMap = createExampleInstance(bloodPressureOpt, config);
+
         System.out.println(JacksonUtil.getObjectMapper().writeValueAsString(stringObjectMap));
 
         //type property
@@ -89,11 +85,10 @@ public class FlatJsonGeneratorTest {
         @Test
     public void testNedapInternalFormat() throws Exception {
         OperationalTemplate bloodPressureOpt = parseBloodPressure();
-        RMObject rmObject = createExampleInstance(bloodPressureOpt);
-
         FlatJsonFormatConfiguration config = FlatJsonFormatConfiguration.nedapInternalFormat();
-        Map<String, Object> stringObjectMap = new FlatJsonGenerator(ArchieRMInfoLookup.getInstance(), config)
-                .buildPathsAndValues(rmObject);
+        config.setWritePipesForPrimitiveTypes(false);
+        Map<String, Object> stringObjectMap = createExampleInstance(bloodPressureOpt, config);
+
         System.out.println(JacksonUtil.getObjectMapper().writeValueAsString(stringObjectMap));
 
         //type property
@@ -121,13 +116,8 @@ public class FlatJsonGeneratorTest {
         }
     }
 
-    private RMObject createExampleInstance(OperationalTemplate bloodPressureOpt) throws IOException {
-        ExampleJsonInstanceGenerator exampleGenerator = new ExampleJsonInstanceGenerator(BuiltinReferenceModels.getMetaModels(), "en");
-        exampleGenerator.setUseTypeNameWhenTermMissing(true);
-        exampleGenerator.setAddUniqueNamesForSiblingNodes(true);
-        Map<String, Object> generate = exampleGenerator.generate(bloodPressureOpt);
-        String rmObjectJson = JacksonUtil.getObjectMapper().writeValueAsString(generate);
-        return JacksonUtil.getObjectMapper().readValue(rmObjectJson, RMObject.class);
+    private Map<String, Object> createExampleInstance(OperationalTemplate bloodPressureOpt, FlatJsonFormatConfiguration config) throws IOException, DuplicateKeyException {
+        return new FlatJsonExampleInstanceGenerator().generateExample(bloodPressureOpt, BuiltinReferenceModels.getMetaModels(), "en", config);
     }
 
 }
