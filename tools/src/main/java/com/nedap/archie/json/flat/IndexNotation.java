@@ -1,5 +1,8 @@
 package com.nedap.archie.json.flat;
 
+/**
+ * the index notation to use for a flat json format
+ */
 public enum IndexNotation {
     /** Write numeric indexes in the flat json format between [], and if node id already present, as [idx, 4] */
     BRACKETED,

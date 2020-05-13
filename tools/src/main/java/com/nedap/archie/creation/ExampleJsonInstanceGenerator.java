@@ -62,6 +62,7 @@ public  class ExampleJsonInstanceGenerator {
     private AomProfile aomProfile;
 
     private boolean useTypeNameWhenTermMissing = false;
+    private boolean addUniqueNamesForSiblingNodes = false;
 
     private String typePropertyName = "@type";
 
@@ -83,12 +84,37 @@ public  class ExampleJsonInstanceGenerator {
         return useTypeNameWhenTermMissing;
     }
 
+    /**
+     * Set whether to add a human readable 'name is missing' message in english for a missing type name, or
+     * to use the RM type name as name
+     * @param useTypeNameWhenTermMissing
+     */
     public void setUseTypeNameWhenTermMissing(boolean useTypeNameWhenTermMissing) {
         this.useTypeNameWhenTermMissing = useTypeNameWhenTermMissing;
     }
 
+
+    /**
+     * The the property name for the type identifier. Defaults to "@type", can be set to "_type" for standard behaviour
+     * @param typePropertyName the name of the type property
+     */
     public void setTypePropertyName(String typePropertyName) {
         this.typePropertyName = typePropertyName;
+    }
+
+
+    public boolean isAddUniqueNamesForSiblingNodes() {
+        return addUniqueNamesForSiblingNodes;
+    }
+
+    /**
+     * Set to false to just include the terms from the archetype as names
+     * Set to true to append a numeric suffix to these terms in case two sibling nodes will have the same name with a different archetype node id
+     *
+     * @param addUniqueNamesForSiblingNodes whether to ensure name uniqueness or not
+     */
+    public void setAddUniqueNamesForSiblingNodes(boolean addUniqueNamesForSiblingNodes) {
+        this.addUniqueNamesForSiblingNodes = addUniqueNamesForSiblingNodes;
     }
 
     private Map<String, Object> generate(CComplexObject cObject) {
@@ -149,6 +175,7 @@ public  class ExampleJsonInstanceGenerator {
             }
 
             if (property instanceof BmmContainerProperty) {
+                ensureNoDuplicateName(children);
                 result.put(attribute.getRmAttributeName(), children);
             } else if (!children.isEmpty()) {
                 result.put(attribute.getRmAttributeName(), children.get(0));
@@ -160,6 +187,41 @@ public  class ExampleJsonInstanceGenerator {
         addAdditionalPropertiesAtEnd(classDefinition, result, cObject);
         return result;
 
+    }
+
+    private void ensureNoDuplicateName(List<Object> children) {
+        if(!this.addUniqueNamesForSiblingNodes) {
+            return;
+        }
+        Map<String, String> nameToNodeIdMap = new LinkedHashMap<>();
+        for(Object child:children) {
+            if(child instanceof Map) {
+                Map json = (Map) child;
+                String archetypeNodeId = (String) json.get("archetype_node_id");
+                Object name = json.get("name");
+                if(archetypeNodeId != null && name instanceof Map) {
+                    Map nameMap = (Map) name;
+                    String nameValue = (String) nameMap.get("value");
+                    if(nameValue != null) {
+                        String existingNodeId = nameToNodeIdMap.get(nameValue);
+                        if(existingNodeId != null && !existingNodeId.equalsIgnoreCase(archetypeNodeId)) { //if the node ids are the same, it's just a second instance, that's fine.
+                            //we now have two nodes with the same name, both with a different node id. That can be a problem in some cases
+
+                            int index = 1;
+                            String newName = nameValue + " " + index;
+                            while(nameToNodeIdMap.containsKey(newName)) {
+                                index++;
+                                newName = nameValue + " " + index;
+                            }
+                            nameMap.put("value", newName);
+                            nameToNodeIdMap.put(newName, archetypeNodeId);
+                        } else {
+                            nameToNodeIdMap.put(nameValue, archetypeNodeId);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     protected String getConcreteTypeName(String rmTypeName) {
@@ -492,7 +554,7 @@ public  class ExampleJsonInstanceGenerator {
             name.put(typePropertyName, "DV_TEXT");
             ArchetypeTerm term = archetype.getTerm(cObject, language);
             if (term == null) {
-                name.put("value", MISSING_TERM_IN_ARCHETYPE_FOR_LANGUAGE + language);
+                name.put("value", getMissingTermText(cObject));
             } else {
                 name.put("value", term.getText());
             }

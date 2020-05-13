@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class FlatJsonGeneratorTest {
 
@@ -41,6 +42,10 @@ public class FlatJsonGeneratorTest {
         assertEquals("OBSERVATION", stringObjectMap.get("/_type"));
         //just a string
         assertEquals("Systolic", stringObjectMap.get("/data[id2]/events[id7]/data[id4]/items[id5]/name/value"));
+        //ignored field
+        assertFalse(stringObjectMap.containsKey("/data[id2]/archetype_node_id"));
+        //ignored field
+        assertFalse(stringObjectMap.containsKey("/archetype_details"));
         //date time format
         assertEquals("2018-01-01T12:00:00Z", stringObjectMap.get("/data[id2]/origin/value"));
         //numbers
@@ -68,6 +73,10 @@ public class FlatJsonGeneratorTest {
         assertEquals("OBSERVATION", stringObjectMap.get("/_type"));
         //just a string
         assertEquals("Systolic", stringObjectMap.get("/data[id2]/events[id7]/data[id4]/items[id5]/name|value"));
+        //ignored field
+        assertFalse(stringObjectMap.containsKey("/data[id2]|archetype_node_id"));
+        //ignored field
+        assertFalse(stringObjectMap.containsKey("/archetype_details"));
         //date time format
         assertEquals("2018-01-01T12:00:00Z", stringObjectMap.get("/data[id2]/origin|value"));
         //numbers
@@ -77,22 +86,7 @@ public class FlatJsonGeneratorTest {
         assertEquals("Systolic", stringObjectMap.get("/data[id2]/events[id7]:1/data[id4]/items[id5]/name|value"));
     }
 
-    @Test
-    public void testBloodPressureHumanReadable() throws Exception {
-
-        OperationalTemplate bloodPressureOpt = parseBloodPressure();
-        RMObject rmObject = createExampleInstance(bloodPressureOpt);
-
-        FlatJsonFormatConfiguration config = FlatJsonFormatConfiguration.humanReadableStandardFormatInDevelopment();
-        Map<String, Object> stringObjectMap = new FlatJsonGenerator(ArchieRMInfoLookup.getInstance(), config)
-                .buildPathsAndValues(rmObject);
-        System.out.println(JacksonUtil.getObjectMapper().writeValueAsString(stringObjectMap));
-
-
-
-    }
-
-    @Test
+        @Test
     public void testNedapInternalFormat() throws Exception {
         OperationalTemplate bloodPressureOpt = parseBloodPressure();
         RMObject rmObject = createExampleInstance(bloodPressureOpt);
@@ -106,6 +100,10 @@ public class FlatJsonGeneratorTest {
         assertEquals("OBSERVATION", stringObjectMap.get("/@type"));
         //just a string
         assertEquals("Systolic", stringObjectMap.get("/data[id2]/events[id7]/data[id4]/items[id5]/name/value"));
+        //ignored field
+        assertFalse(stringObjectMap.containsKey("/data[id2]/archetype_node_id"));
+        //ignored field
+        assertFalse(stringObjectMap.containsKey("/archetype_details"));
         //date time format
         assertEquals("2018-01-01T12:00:00Z", stringObjectMap.get("/data[id2]/origin/value"));
         //numbers
@@ -125,6 +123,8 @@ public class FlatJsonGeneratorTest {
 
     private RMObject createExampleInstance(OperationalTemplate bloodPressureOpt) throws IOException {
         ExampleJsonInstanceGenerator exampleGenerator = new ExampleJsonInstanceGenerator(BuiltinReferenceModels.getMetaModels(), "en");
+        exampleGenerator.setUseTypeNameWhenTermMissing(true);
+        exampleGenerator.setAddUniqueNamesForSiblingNodes(true);
         Map<String, Object> generate = exampleGenerator.generate(bloodPressureOpt);
         String rmObjectJson = JacksonUtil.getObjectMapper().writeValueAsString(generate);
         return JacksonUtil.getObjectMapper().readValue(rmObjectJson, RMObject.class);
