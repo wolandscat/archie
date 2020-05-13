@@ -60,6 +60,7 @@ public class FlatJsonGenerator {
      * Build the actual flat json format for the given RM Object
      * @param rmObject the RM Object to build the flat json format for
      * @return a Map with paths as the key, and primitive objects as the value, to be serialized with an ObjectMapper
+     * @throws DuplicateKeyException in case converting this to flat json would result in having the two exact paths at once. Generally this means a problem in input, this should not happen.
      */
     public Map<String, Object> buildPathsAndValues(OpenEHRBase rmObject) throws DuplicateKeyException {
         Map<String, Object> result = new LinkedHashMap<>();
