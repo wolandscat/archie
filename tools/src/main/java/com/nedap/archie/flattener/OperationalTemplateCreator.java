@@ -82,6 +82,25 @@ class OperationalTemplateCreator {
         }
     }
 
+    /** Zero occurrences and existence constraint processing when creating OPT templates. Removes attributes */
+    public void fillEmptyOccurrences(Archetype archetype) {
+        Stack<CObject> workList = new Stack<>();
+        workList.push(archetype.getDefinition());
+        while (!workList.isEmpty()) {
+            CObject object = workList.pop();
+            if( (object instanceof CComplexObject || object instanceof ArchetypeSlot || object instanceof CComplexObjectProxy)
+                    && object.getOccurrences() == null) {
+                object.setOccurrences(object.effectiveOccurrences(flattener.getMetaModels()::referenceModelPropMultiplicity));
+            }
+            for (CAttribute attribute : object.getAttributes()) {
+
+                for (CObject child : attribute.getChildren()) {
+                    workList.push(child);
+                }
+            }
+        }
+    }
+
 
     private void closeArchetypeSlots(OperationalTemplate archetype) {
         if(!getConfig().isCloseArchetypeSlots()) {

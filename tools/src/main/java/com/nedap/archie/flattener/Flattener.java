@@ -115,6 +115,7 @@ public class Flattener implements IAttributeFlattenerSupport {
                 result = template;
                 //make an operational template by just filling complex object proxies and archetype slots
                 optCreator.fillSlots(template);
+                fillOptEmptyOccurrences(result);
                 TerminologyFlattener.filterLanguages(template, config.isRemoveLanguagesFromMetaData(), config.getLanguagesToKeep());
                 result = template;
             } else {
@@ -169,6 +170,7 @@ public class Flattener implements IAttributeFlattenerSupport {
         //1. redefine structure
         //2. fill archetype slots if we are creating an operational template
         flattenDefinition(result, child);
+
         if(config.isCreateOperationalTemplate() && config.isRemoveZeroOccurrencesObjects()) {
             optCreator.removeZeroOccurrencesConstraints(result);
         } else {
@@ -183,6 +185,7 @@ public class Flattener implements IAttributeFlattenerSupport {
             optCreator.fillSlots((OperationalTemplate) result);
 
         }
+        fillOptEmptyOccurrences(result);
         TerminologyFlattener.flattenTerminology(result, child);
 
         if(config.isCreateOperationalTemplate()) {
@@ -225,6 +228,12 @@ public class Flattener implements IAttributeFlattenerSupport {
                 .setSingleOrMultiple(result.getDefinition());
 
         return result;
+    }
+
+    private void fillOptEmptyOccurrences(Archetype result) {
+        if(config.isCreateOperationalTemplate() && config.isFillEmptyOccurrences()) {
+            optCreator.fillEmptyOccurrences(result);
+        }
     }
 
     /** Zero occurrences and existence constraint processing when flattening. Does not remove attributes*/
