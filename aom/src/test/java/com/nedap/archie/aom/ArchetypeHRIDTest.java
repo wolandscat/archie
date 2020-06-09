@@ -33,6 +33,26 @@ public class ArchetypeHRIDTest {
                 archetypeHRID.getSemanticId());
 
         archetypeHRID = new ArchetypeHRID(
+                "archie.test.namespace::testRmPublisher-testRmPackage-testRmClass.testConceptId.v1.2.3+42");
+        assertEquals("archie.test.namespace",archetypeHRID.getNamespace());
+        assertEquals("testRmPublisher",archetypeHRID.getRmPublisher());
+        assertEquals("testRmPackage",archetypeHRID.getRmPackage());
+        assertEquals("testRmClass",archetypeHRID.getRmClass());
+        assertEquals("testConceptId",archetypeHRID.getConceptId());
+        assertEquals("1.2.3",archetypeHRID.getReleaseVersion());
+        assertEquals(VersionStatus.BUILD,archetypeHRID.getVersionStatus());
+        assertEquals("42",archetypeHRID.getBuildCount());
+        assertEquals("1",archetypeHRID.getMajorVersion());
+        assertEquals("2",archetypeHRID.getMinorVersion());
+        assertEquals("3",archetypeHRID.getPatchVersion());
+        assertEquals("archie.test.namespace::testRmPublisher-testRmPackage-testRmClass.testConceptId",
+                archetypeHRID.getIdUpToConcept());
+        assertEquals("archie.test.namespace::testRmPublisher-testRmPackage-testRmClass.testConceptId.v1.2.3+42",
+                archetypeHRID.getFullId());
+        assertEquals("archie.test.namespace::testRmPublisher-testRmPackage-testRmClass.testConceptId.v1",
+                archetypeHRID.getSemanticId());
+
+        archetypeHRID = new ArchetypeHRID(
                 "archie.test.namespace::testRmPublisher-testRmPackage-testRmClass.testConceptId.v1.2.3-alpha");
         assertEquals("archie.test.namespace",archetypeHRID.getNamespace());
         assertEquals("testRmPublisher",archetypeHRID.getRmPublisher());
@@ -41,7 +61,7 @@ public class ArchetypeHRIDTest {
         assertEquals("testConceptId",archetypeHRID.getConceptId());
         assertEquals("1.2.3",archetypeHRID.getReleaseVersion());
         assertEquals(VersionStatus.ALPHA,archetypeHRID.getVersionStatus());
-        assertEquals(null,archetypeHRID.getBuildCount());
+        assertEquals("",archetypeHRID.getBuildCount());
         assertEquals("1",archetypeHRID.getMajorVersion());
         assertEquals("2",archetypeHRID.getMinorVersion());
         assertEquals("3",archetypeHRID.getPatchVersion());
@@ -61,7 +81,7 @@ public class ArchetypeHRIDTest {
         assertEquals("testConceptId",archetypeHRID.getConceptId());
         assertEquals("1.2.3",archetypeHRID.getReleaseVersion());
         assertEquals(VersionStatus.RELEASED,archetypeHRID.getVersionStatus());
-        assertEquals(null,archetypeHRID.getBuildCount());
+        assertEquals("",archetypeHRID.getBuildCount());
         assertEquals("1",archetypeHRID.getMajorVersion());
         assertEquals("2",archetypeHRID.getMinorVersion());
         assertEquals("3",archetypeHRID.getPatchVersion());

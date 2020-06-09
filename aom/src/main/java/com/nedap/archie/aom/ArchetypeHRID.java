@@ -48,8 +48,24 @@ public class ArchetypeHRID extends ArchetypeModelObject {
     private String buildCount;
     //TODO: XML attribute 'physical id', which is the full id
 
-    private static final Pattern archetypeHRIDPattern = Pattern.compile("((?<namespace>.*)::)?(?<publisher>[^.-]*)-(?<package>[^.-]*)-(?<class>[^.-]*)\\.(?<concept>[^.]*)(\\.v(?<version>[^-]*))?(-(?<versionStatus>[^.]*))?(\\.(?<buildCount>\\d*))?");
-    //TODO: support VersionStatus.BUILD status
+    private static final Pattern namespacePattern = Pattern.compile("((?<namespace>.*)::)?");
+    private static final Pattern publisherPattern = Pattern.compile("(?<publisher>[^.-]*)");
+    private static final Pattern packagePattern = Pattern.compile("(?<package>[^.-]*)");
+    private static final Pattern classPattern = Pattern.compile("(?<class>[^.-]*)");
+    private static final Pattern conceptPattern = Pattern.compile("(?<concept>[^.]*)");
+    private static final Pattern releaseVersionPattern = Pattern.compile("(\\.v(?<version>[^-+]*))?");
+    private static final Pattern versionStatusPattern = Pattern.compile("(?<versionStatus>[^.\\d]*)?");
+    private static final Pattern buildStatusPattern = Pattern.compile("(\\.?(?<buildCount>\\d*))");
+    private static final Pattern archetypeHRIDPattern = Pattern.compile(""
+            + namespacePattern
+            + publisherPattern
+            + "-" + packagePattern
+            + "-" + classPattern
+            + "\\." + conceptPattern
+            + releaseVersionPattern
+            + versionStatusPattern
+            + buildStatusPattern
+    );
 
     public ArchetypeHRID() {
 
@@ -108,11 +124,13 @@ public class ArchetypeHRID extends ArchetypeModelObject {
         if (versionStatus == null || versionStatus.equals(VersionStatus.RELEASED)) {
             return result.toString();
         }
-        result.append("-").append(versionStatus.getValue());
-        if (buildCount == null) {
+        result.append(versionStatus.getValue());
+        if (buildCount == null || buildCount.equals("")) {
             return result.toString();
+        } else if (!versionStatus.equals(VersionStatus.BUILD)) {
+            result.append(".");
         }
-        result.append(".").append(buildCount);
+        result.append(buildCount);
         return result.toString();
     }
 
