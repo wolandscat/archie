@@ -3,6 +3,7 @@ package com.nedap.archie.aom;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
+import com.nedap.archie.definitions.VersionStatus;
 import com.nedap.archie.rminfo.RMPropertyIgnore;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -42,12 +43,13 @@ public class ArchetypeHRID extends ArchetypeModelObject {
     @XmlAttribute(name="release_version")
     private String releaseVersion;
     @XmlAttribute(name="version_status")
-    private String versionStatus;
+    private VersionStatus versionStatus;
     @XmlAttribute(name="build_count")
     private String buildCount;
     //TODO: XML attribute 'physical id', which is the full id
 
-    private static final Pattern archetypeHRIDPattern = Pattern.compile("((?<namespace>.*)::)?(?<publisher>[^.-]*)-(?<package>[^.-]*)-(?<class>[^.-]*)\\.(?<concept>[^.]*)(\\.v(?<version>.*))?");
+    private static final Pattern archetypeHRIDPattern = Pattern.compile("((?<namespace>.*)::)?(?<publisher>[^.-]*)-(?<package>[^.-]*)-(?<class>[^.-]*)\\.(?<concept>[^.]*)(\\.v(?<version>[^-]*))?(-(?<versionStatus>[^.]*))?(\\.(?<buildCount>\\d*))?");
+    //TODO: support VersionStatus.BUILD status
 
     public ArchetypeHRID() {
 
@@ -68,8 +70,9 @@ public class ArchetypeHRID extends ArchetypeModelObject {
 
         conceptId = m.group("concept");
         releaseVersion = m.group("version");
-
-        //TODO: versionStatus and build count
+        String versionStatusMatch = m.group("versionStatus");
+        versionStatus = versionStatusMatch == null ? VersionStatus.RELEASED : VersionStatus.getEnum(versionStatusMatch);
+        buildCount = m.group("buildCount");
     }
 
     @JsonCreator
@@ -79,7 +82,7 @@ public class ArchetypeHRID extends ArchetypeModelObject {
                          @JsonProperty("rm_class") String rmClass,
                          @JsonProperty("concept_id") String conceptId,
                          @JsonProperty("release_version") String releaseVersion,
-                         @JsonProperty("version_status") String versionStatus,
+                         @JsonProperty("version_status") VersionStatus versionStatus,
                          @JsonProperty("build_count") String buildCount) {
         this.namespace = namespace;
         this.rmPublisher = rmPublisher;
@@ -102,6 +105,14 @@ public class ArchetypeHRID extends ArchetypeModelObject {
             result.append(".v");
         }
         result.append(releaseVersion);
+        if (versionStatus == null || versionStatus.equals(VersionStatus.RELEASED)) {
+            return result.toString();
+        }
+        result.append("-").append(versionStatus.getValue());
+        if (buildCount == null) {
+            return result.toString();
+        }
+        result.append(".").append(buildCount);
         return result.toString();
     }
 
@@ -173,11 +184,11 @@ public class ArchetypeHRID extends ArchetypeModelObject {
         this.releaseVersion = releaseVersion;
     }
 
-    public String getVersionStatus() {
+    public VersionStatus getVersionStatus() {
         return versionStatus;
     }
 
-    public void setVersionStatus(String versionStatus) {
+    public void setVersionStatus(VersionStatus versionStatus) {
         this.versionStatus = versionStatus;
     }
 
