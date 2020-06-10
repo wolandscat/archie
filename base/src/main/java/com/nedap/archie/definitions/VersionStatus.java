@@ -21,6 +21,8 @@ package com.nedap.archie.definitions;
  * Author: Claude Nanjo
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Status of a versioned artefact, as one of a number of possible values: uncontrolled, prerelease, release, build.
  *
@@ -56,6 +58,7 @@ public enum VersionStatus {
      */
     BUILD("+");
 
+    @JsonIgnore
     private String value;
 
     VersionStatus(String value) {
