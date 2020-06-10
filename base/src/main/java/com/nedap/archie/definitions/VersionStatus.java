@@ -21,7 +21,7 @@ package com.nedap.archie.definitions;
  * Author: Claude Nanjo
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Status of a versioned artefact, as one of a number of possible values: uncontrolled, prerelease, release, build.
@@ -35,18 +35,18 @@ public enum VersionStatus {
      * e.g. “2.0.1-alpha.154”.
      *
      */
-    ALPHA("-alpha"),
+    ALPHA("alpha"),
     /**
      * Value representing a version which is ‘beta’, i.e. contains an unknown but reducing size of change
      * with respect to its base version. Rendered with the build number as a string in the form “N.M.P-beta.B”
      * e.g. “2.0.1-beta.154”.
      */
-    BETA("-beta"),
+    BETA("beta"),
     /**
      * Value representing a version which is ‘release candidate’, i.e. contains only patch-level changes on
      * the base version. Rendered as a string as “N.M.P-rc.B” e.g. “2.0.1-rc.27”.
      */
-    RELEASE_CANDIDATE("-rc"),
+    RELEASE_CANDIDATE("rc"),
     /**
      * Value representing a version which is ‘released’, i.e. is the definitive base version. Rendered with the
      * build number as a string in the form “N.M.P” e.g. “2.0.1”.
@@ -58,18 +58,21 @@ public enum VersionStatus {
      */
     BUILD("+");
 
-    @JsonIgnore
     private String value;
 
     VersionStatus(String value) {
         this.value = value;
     }
 
+    @JsonValue
     public String getValue() {
         return value;
     }
 
     public static VersionStatus getEnum(String value) {
+        if (value.startsWith("-")) {
+            value = value.substring(1);
+        }
         for (VersionStatus versionStatus : values()) {
             if (versionStatus.getValue().equals(value)) {
                 return versionStatus;

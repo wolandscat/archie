@@ -123,6 +123,8 @@ public class ArchetypeHRID extends ArchetypeModelObject {
         result.append(releaseVersion);
         if (versionStatus == null || versionStatus.equals(VersionStatus.RELEASED)) {
             return result.toString();
+        } else if (!versionStatus.equals(VersionStatus.BUILD)) {
+            result.append("-");
         }
         result.append(versionStatus.getValue());
         if (buildCount == null || buildCount.equals("")) {
