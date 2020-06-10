@@ -113,14 +113,28 @@ public class ArchetypeHRID extends ArchetypeModelObject {
     public String getFullId() {
         StringBuilder result = new StringBuilder(30);
         result.append(getIdUpToConcept());
-        if (releaseVersion == null) {
+        String versionId = getVersionId();
+        if (versionId == null) {
             return result.toString();
-        } else if(releaseVersion.startsWith("v")) {
-            result.append(".");
-        } else {
-            result.append(".v");
         }
-        result.append(releaseVersion);
+        result.append(".v");
+        result.append(versionId);
+        return result.toString();
+    }
+
+    public String getSemanticId() {
+        return getIdUpToConcept() + ((releaseVersion == null) ? "" : ".v" + ((releaseVersion.isEmpty()) ? "" : getMajorVersion()));
+    }
+
+    public String getVersionId() {
+        StringBuilder result = new StringBuilder();
+        if (releaseVersion == null) {
+            return null;
+        } else if (releaseVersion.startsWith("v")) {
+            result.append(releaseVersion.substring(1));
+        } else {
+            result.append(releaseVersion);
+        }
         if (versionStatus == null || versionStatus.equals(VersionStatus.RELEASED)) {
             return result.toString();
         } else if (!versionStatus.equals(VersionStatus.BUILD)) {
@@ -134,10 +148,6 @@ public class ArchetypeHRID extends ArchetypeModelObject {
         }
         result.append(buildCount);
         return result.toString();
-    }
-
-    public String getSemanticId() {
-        return getIdUpToConcept() + ((releaseVersion == null) ? "" : ".v" + ((releaseVersion.isEmpty()) ? "" : getMajorVersion()));
     }
 
     public String getMajorVersion() {
