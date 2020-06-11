@@ -1,6 +1,7 @@
 package com.nedap.archie.aom;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
 import com.nedap.archie.definitions.VersionStatus;
@@ -126,6 +127,7 @@ public class ArchetypeHRID extends ArchetypeModelObject {
         return getIdUpToConcept() + ((releaseVersion == null) ? "" : ".v" + ((releaseVersion.isEmpty()) ? "" : getMajorVersion()));
     }
 
+    @JsonIgnore
     public String getVersionId() {
         StringBuilder result = new StringBuilder();
         if (releaseVersion == null) {
