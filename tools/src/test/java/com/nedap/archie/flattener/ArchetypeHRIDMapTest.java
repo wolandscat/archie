@@ -88,7 +88,8 @@ public class ArchetypeHRIDMapTest {
         map.put(new ArchetypeHRID("archie.test.namespace::testRmPublisher-testRmPackage-testRmClass.testConceptId.v1.2.4-beta"), 1);
         map.put(new ArchetypeHRID("archie.test.namespace::testRmPublisher-testRmPackage-testRmClass.testConceptId.v1.2.4-rc"), 2);
         map.put(new ArchetypeHRID("archie.test.namespace::testRmPublisher-testRmPackage-testRmClass.testConceptId.v1.2.4"), 3);
-        map.put(new ArchetypeHRID("archie.test.namespace::testRmPublisher-testRmPackage-testRmClass.testConceptId.v1.2.4+32"), 4);
-        assertEquals(Integer.valueOf(4), map.getLatestVersion("archie.test.namespace::testRmPublisher-testRmPackage-testRmClass.testConceptId.v1.2.4"));
+        map.put(new ArchetypeHRID("archie.test.namespace::testRmPublisher-testRmPackage-testRmClass.testConceptId.v1.2.4+24"), 4);
+        map.put(new ArchetypeHRID("archie.test.namespace::testRmPublisher-testRmPackage-testRmClass.testConceptId.v1.2.4+32"), 5);
+        assertEquals(Integer.valueOf(5), map.getLatestVersion("archie.test.namespace::testRmPublisher-testRmPackage-testRmClass.testConceptId.v1.2.4"));
     }
 }
