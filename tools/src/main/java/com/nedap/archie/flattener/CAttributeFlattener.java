@@ -1,14 +1,6 @@
 package com.nedap.archie.flattener;
 
-import com.nedap.archie.aom.ArchetypeModelObject;
-import com.nedap.archie.aom.CAttribute;
-import com.nedap.archie.aom.CAttributeTuple;
-import com.nedap.archie.aom.CComplexObject;
-import com.nedap.archie.aom.CComplexObjectProxy;
-import com.nedap.archie.aom.CObject;
-import com.nedap.archie.aom.CPrimitiveObject;
-import com.nedap.archie.aom.CPrimitiveTuple;
-import com.nedap.archie.aom.SiblingOrder;
+import com.nedap.archie.aom.*;
 import com.nedap.archie.aom.utils.AOMUtils;
 import com.nedap.archie.base.MultiplicityInterval;
 import com.nedap.archie.paths.PathSegment;
@@ -133,7 +125,6 @@ public class CAttributeFlattener {
                         } else {
                             attributeInParent.addChild(specializedObject, SiblingOrder.createAfter(findLastSpecializedChildDirectlyAfter(attributeInParent, matchingParentObject)));
                             if(shouldRemoveParent(specializedChildCObject, matchingParentObject, attributeInSpecialization.getChildren())) {
-                                //we should remove the attributeInParent
                                 attributeInParent.removeChild(matchingParentObject.getNodeId());
                             }
                         }
@@ -266,21 +257,21 @@ public class CAttributeFlattener {
             }
 
         }
-        //the last matching child should possibly replace the parent, the rest should just add
-        //if there is just one child, that's fine, it should still work
-        if(allMatchingChildren.get(allMatchingChildren.size()-1).getNodeId().equalsIgnoreCase(specializedChildCObject.getNodeId())) {
-            return shouldReplaceParent(matchingParentObject, allMatchingChildren);
+        boolean hasSameNodeIdInMatchingChildren = allMatchingChildren.stream().anyMatch(c -> c.getNodeId().equals(matchingParentObject.getNodeId()));
+        if(hasSameNodeIdInMatchingChildren) {
+            //if parent contains id2, and child as well, replace the exact same node with the exact child. Otherwise,
+            //add children and replace the last child.
+            return specializedChildCObject.getNodeId().equalsIgnoreCase(matchingParentObject.getNodeId());
+        } else if(allMatchingChildren.get(allMatchingChildren.size()-1).getNodeId().equalsIgnoreCase(specializedChildCObject.getNodeId())) {
+            //the last matching child should possibly replace the parent, the rest should just add
+            //if there is just one child, that's fine, it should still work
+            return shouldReplaceSpecializedParent(matchingParentObject, allMatchingChildren);
         }
         return false;
     }
 
-    private boolean shouldReplaceParent(CObject parent, List<CObject> differentialNodes) {
-        for(CObject differentialNode: differentialNodes) {
-            if(differentialNode.getNodeId().equals(parent.getNodeId())) {
-                //same node id, so no specialization
-                return true;
-            }
-        }
+    private boolean shouldReplaceSpecializedParent(CObject parent, List<CObject> differentialNodes) {
+
         MultiplicityInterval occurrences = parent.effectiveOccurrences(flattener.getMetaModels()::referenceModelPropMultiplicity);
         //isSingle/isMultiple is tricky and not doable just in the parser. Don't use those
         if(isSingle(parent.getParent())) {

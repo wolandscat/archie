@@ -4,6 +4,7 @@ import com.nedap.archie.adlparser.modelconstraints.ReflectionConstraintImposer;
 import com.nedap.archie.aom.ArchetypeModelObject;
 import com.nedap.archie.aom.CAttribute;
 import com.nedap.archie.aom.CComplexObject;
+import com.nedap.archie.aom.CComplexObjectProxy;
 import com.nedap.archie.aom.CObject;
 import com.nedap.archie.aom.CPrimitiveObject;
 import com.nedap.archie.aom.utils.AOMUtils;
@@ -26,7 +27,10 @@ public class ValidateAgainstReferenceModel extends ValidatingVisitor {
     
     @Override
     protected void validate(CComplexObject cObject) {
+        validateTypes(cObject);
+    }
 
+    private void validateTypes(CObject cObject) {
         if (!combinedModels.typeNameExists(cObject.getRmTypeName())) {
             addMessageWithPath(ErrorType.VCORM, cObject.getPath(), I18n.t("Type name {0} does not exist", cObject.getRmTypeName()));
         } else {
@@ -42,13 +46,18 @@ public class ValidateAgainstReferenceModel extends ValidatingVisitor {
                     if(!combinedModels.typeConformant(owningObject.getRmTypeName(), owningAttribute.getRmAttributeName(), cObject.getRmTypeName())) {
                         addMessageWithPath(ErrorType.VCORMT, cObject.getPath(),
                                 I18n.t("Attribute {0}.{1} cannot contain type {2}",
-                                owningObject.getRmTypeName(), owningAttribute.getRmAttributeName(), cObject.getRmTypeName()));
+                                        owningObject.getRmTypeName(), owningAttribute.getRmAttributeName(), cObject.getRmTypeName()));
                     }
 
                 }
 
             }
         }
+    }
+
+    @Override
+    protected void validate(CComplexObjectProxy cObject) {
+        validateTypes(cObject);
     }
 
     @Override
@@ -119,7 +128,7 @@ public class ValidateAgainstReferenceModel extends ValidatingVisitor {
                         }
                     }
                     if(defaultAttribute.isMultiple()) {
-                        if(defaultAttribute.getCardinality() != null && cAttribute.getCardinality() != null && !defaultAttribute.getCardinality().contains(cAttribute.getCardinality())){
+                        if(defaultAttribute.getCardinality() != null && cAttribute.getCardinality() != null && cAttribute.getCardinality().getInterval() != null && !defaultAttribute.getCardinality().contains(cAttribute.getCardinality())){
                             if(defaultAttribute.getCardinality().equals(cAttribute.getCardinality())) {
                                 if(settings.isStrictMultiplicitiesSpecializationValidation()) {
                                     addMessageWithPath(ErrorType.VCACA, cAttribute.path(),

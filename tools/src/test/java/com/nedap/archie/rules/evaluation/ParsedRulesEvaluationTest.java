@@ -41,7 +41,7 @@ public class ParsedRulesEvaluationTest {
     @Before
     public void setup() {
         testUtil = new TestUtil();
-        parser = new ADLParser(new RMConstraintImposer());
+        parser = new ADLParser();
     }
 
     @Test

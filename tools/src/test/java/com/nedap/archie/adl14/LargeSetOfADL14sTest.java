@@ -1,6 +1,7 @@
 package com.nedap.archie.adl14;
 
 import com.nedap.archie.adl14.log.ADL2ConversionLog;
+import com.nedap.archie.adlparser.antlr.Adl14Lexer;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.archetypevalidator.ValidationResult;
@@ -9,6 +10,8 @@ import com.nedap.archie.flattener.Flattener;
 import com.nedap.archie.flattener.InMemoryFullArchetypeRepository;
 import com.nedap.archie.json.JacksonUtil;
 import com.nedap.archie.serializer.adl.ADLArchetypeSerializer;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CodePointCharStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.openehr.referencemodels.BuiltinReferenceModels;
@@ -19,11 +22,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -40,6 +45,61 @@ public class LargeSetOfADL14sTest {
     }
 
     @Test
+    public void parseUri() {
+//        CodePointCharStream codePointCharStream = CharStreams.fromString("terminology://SNOMED-CT.com/408733002?subset=Diabetic");//%20Retinopathy%20Study%20field");
+        CodePointCharStream codePointCharStream = CharStreams.fromString("http://test.com/bla?test=green");
+        Adl14Lexer adl14Lexer = new Adl14Lexer(codePointCharStream);
+        assertEquals(1, adl14Lexer.getAllTokens().size());
+    }
+
+    @Test
+    public void parseUrn() {
+//        CodePointCharStream codePointCharStream = CharStreams.fromString("terminology://SNOMED-CT.com/408733002?subset=Diabetic");//%20Retinopathy%20Study%20field");
+        CodePointCharStream codePointCharStream = CharStreams.fromString("urn:oin:2.3.1.4.4545.22.23");
+        Adl14Lexer adl14Lexer = new Adl14Lexer(codePointCharStream);
+        assertEquals(1, adl14Lexer.getAllTokens().size());
+    }
+
+    @Test
+    public void testRiskFamilyhistory() throws Exception {
+
+        ADL14Parser parser = new ADL14Parser(BuiltinReferenceModels.getMetaModels());
+
+        Archetype riskParent = parser.parse(getClass().getResourceAsStream("/adl14/risk_parent.adl"), conversionConfiguration);
+        Archetype riskFamilyHistory = parser.parse(getClass().getResourceAsStream("/adl14/risk_history.adl"), conversionConfiguration);
+
+        List<Archetype> archetypes = Arrays.asList(riskParent, riskFamilyHistory);
+
+        ADL2ConversionResultList converted = new ADL14Converter(BuiltinReferenceModels.getMetaModels(), conversionConfiguration)
+                .convert(archetypes);
+
+        for(ADL2ConversionResult conversionResult:converted.getConversionResults()) {
+            if(conversionResult.getException() != null) {
+                logger.error("exception in converter for archetype id " + conversionResult.getArchetypeId(), conversionResult.getException());
+            }
+            if (conversionResult.getArchetype() != null) {
+//                System.out.println(ADLArchetypeSerializer.serialize(conversionResult.getArchetype()));
+            } else {
+                logger.warn("archetype null: " + conversionResult.getArchetypeId());
+            }
+        }
+
+        InMemoryFullArchetypeRepository adl2Repository = new InMemoryFullArchetypeRepository();
+        for(ADL2ConversionResult conversionResult:converted.getConversionResults()) {
+            if(conversionResult.getException() == null && conversionResult.getArchetype() != null) {
+                adl2Repository.addArchetype(conversionResult.getArchetype());
+            }
+        }
+        adl2Repository.compile(BuiltinReferenceModels.getMetaModels());
+
+        for(ValidationResult validationResult:adl2Repository.getAllValidationResults()) {
+            if(!validationResult.passes()) {
+                logger.error("error validating {}: {}", validationResult.getArchetypeId(), validationResult.getErrors());
+            }
+        }
+    }
+
+    @Test
     public void parseLots() throws Exception {
         Reflections reflections = new Reflections("adl14", new ResourcesScanner());
         List<String> adlFiles = new ArrayList(reflections.getResources(Pattern.compile(".*\\.adl")));
@@ -47,11 +107,9 @@ public class LargeSetOfADL14sTest {
         Map<String, Exception> exceptions = new LinkedHashMap<>();
         Map<String, ANTLRParserErrors> parseErrors = new LinkedHashMap<>();
 
-        InMemoryFullArchetypeRepository repository = new InMemoryFullArchetypeRepository();
-
         List<Archetype> archetypes = new ArrayList<>();
         for(String file:adlFiles) {
-//            if(!file.contains("pressure")) {
+//            if(!file.contains("avpu")) {
 //                continue;
 //            }
             Archetype archetype = parse(exceptions, parseErrors, file);
@@ -127,7 +185,7 @@ public class LargeSetOfADL14sTest {
         //6 errors in annotations section caused by some property called 'items'
         //some errors due to test cases for wrong syntax
         //some errors due to incompatible ADL 1.5-syntax
-        assertTrue(exceptions.size() <= 21);
+        assertTrue(exceptions.size() <= 2);
 
 
     }

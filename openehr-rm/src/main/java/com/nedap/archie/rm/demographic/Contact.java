@@ -1,5 +1,6 @@
 package com.nedap.archie.rm.demographic;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nedap.archie.rm.archetyped.Locatable;
 import com.nedap.archie.rm.datavalues.DvText;
 import com.nedap.archie.rm.datavalues.quantity.DvInterval;
@@ -9,9 +10,11 @@ import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 08/07/16.
@@ -30,6 +33,8 @@ public class Contact extends Locatable {
     @XmlElement(name="time_validity")
     private DvInterval<DvDate> timeValidity;
 
+    @JsonIgnore
+    @XmlTransient
     public DvText getPurpose() {
         return getName();
     }
@@ -55,5 +60,20 @@ public class Contact extends Locatable {
 
     public void setTimeValidity(@Nullable DvInterval<DvDate> timeValidity) {
         this.timeValidity = timeValidity;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Contact contact = (Contact) o;
+        return Objects.equals(addresses, contact.addresses) &&
+                Objects.equals(timeValidity, contact.timeValidity);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), addresses, timeValidity);
     }
 }

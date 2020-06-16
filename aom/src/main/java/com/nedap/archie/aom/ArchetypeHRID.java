@@ -1,13 +1,17 @@
 package com.nedap.archie.aom;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
+import com.nedap.archie.definitions.VersionStatus;
+import com.nedap.archie.rminfo.RMPropertyIgnore;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,11 +44,29 @@ public class ArchetypeHRID extends ArchetypeModelObject {
     @XmlAttribute(name="release_version")
     private String releaseVersion;
     @XmlAttribute(name="version_status")
-    private String versionStatus;
+    private VersionStatus versionStatus;
     @XmlAttribute(name="build_count")
     private String buildCount;
     //TODO: XML attribute 'physical id', which is the full id
 
+    private static final Pattern namespacePattern = Pattern.compile("((?<namespace>.*)::)?");
+    private static final Pattern publisherPattern = Pattern.compile("(?<publisher>[^.-]*)");
+    private static final Pattern packagePattern = Pattern.compile("(?<package>[^.-]*)");
+    private static final Pattern classPattern = Pattern.compile("(?<class>[^.-]*)");
+    private static final Pattern conceptPattern = Pattern.compile("(?<concept>[^.]*)");
+    private static final Pattern releaseVersionPattern = Pattern.compile("(\\.v(?<version>[^-+]*))?");
+    private static final Pattern versionStatusPattern = Pattern.compile("(?<versionStatus>[^.\\d]*)?");
+    private static final Pattern buildStatusPattern = Pattern.compile("(\\.?(?<buildCount>\\d*))");
+    private static final Pattern archetypeHRIDPattern = Pattern.compile(""
+            + namespacePattern
+            + publisherPattern
+            + "-" + packagePattern
+            + "-" + classPattern
+            + "\\." + conceptPattern
+            + releaseVersionPattern
+            + versionStatusPattern
+            + buildStatusPattern
+    );
 
     public ArchetypeHRID() {
 
@@ -52,9 +74,7 @@ public class ArchetypeHRID extends ArchetypeModelObject {
 
     @JsonCreator
     public ArchetypeHRID(String value) {
-
-        Pattern p = Pattern.compile("((?<namespace>.*)::)?(?<publisher>.*)-(?<package>.*)-(?<class>.*)\\.(?<concept>.*)\\.v(?<version>.*)");
-        Matcher m = p.matcher(value);
+        Matcher m = archetypeHRIDPattern.matcher(value);
 
         if(!m.matches()) {
             throw new IllegalArgumentException(value + " is not a valid archetype human readable id");
@@ -67,7 +87,9 @@ public class ArchetypeHRID extends ArchetypeModelObject {
 
         conceptId = m.group("concept");
         releaseVersion = m.group("version");
-        //TODO: versionStatus and build count
+        String versionStatusMatch = m.group("versionStatus");
+        versionStatus = versionStatusMatch == null ? VersionStatus.RELEASED : VersionStatus.getEnum(versionStatusMatch);
+        buildCount = m.group("buildCount");
     }
 
     @JsonCreator
@@ -77,7 +99,7 @@ public class ArchetypeHRID extends ArchetypeModelObject {
                          @JsonProperty("rm_class") String rmClass,
                          @JsonProperty("concept_id") String conceptId,
                          @JsonProperty("release_version") String releaseVersion,
-                         @JsonProperty("version_status") String versionStatus,
+                         @JsonProperty("version_status") VersionStatus versionStatus,
                          @JsonProperty("build_count") String buildCount) {
         this.namespace = namespace;
         this.rmPublisher = rmPublisher;
@@ -91,43 +113,59 @@ public class ArchetypeHRID extends ArchetypeModelObject {
 
     public String getFullId() {
         StringBuilder result = new StringBuilder(30);
-        if(!Strings.isNullOrEmpty(namespace)) {
-            result.append(namespace);
-            result.append("::");
+        result.append(getIdUpToConcept());
+        String versionId = getVersionId();
+        if (versionId == null) {
+            return result.toString();
         }
-        result.append(rmPublisher);
-        result.append("-");
-        result.append(rmPackage);
-        result.append("-");
-        result.append(rmClass);
-        result.append(".");
-        result.append(conceptId);
-        if(releaseVersion.startsWith("v")) {
-            result.append(".");
-        } else {
-            result.append(".v");
-        }
-        result.append(releaseVersion);
+        result.append(".v");
+        result.append(versionId);
         return result.toString();
     }
 
     public String getSemanticId() {
-        StringBuilder result = new StringBuilder();
-        if(namespace != null) {
-            result.append(namespace);
-            result.append("::");
-        }
-        result.append(rmPublisher);
-        result.append("-");
-        result.append(rmPackage);
-        result.append("-");
-        result.append(rmClass);
-        result.append(".");
-        result.append(conceptId);
-        result.append(".v");
-        result.append(releaseVersion.split("\\.")[0]);
-        return result.toString();
+        return getIdUpToConcept() + ((releaseVersion == null) ? "" : ".v" + ((releaseVersion.isEmpty()) ? "" : getMajorVersion()));
+    }
 
+    @JsonIgnore
+    public String getVersionId() {
+        StringBuilder result = new StringBuilder();
+        if (releaseVersion == null) {
+            return null;
+        } else if (releaseVersion.startsWith("v")) {
+            result.append(releaseVersion.substring(1));
+        } else {
+            result.append(releaseVersion);
+        }
+        if (versionStatus == null || versionStatus.equals(VersionStatus.RELEASED)) {
+            return result.toString();
+        } else if (!versionStatus.equals(VersionStatus.BUILD)) {
+            result.append("-");
+        }
+        result.append(versionStatus.getValue());
+        if (buildCount == null || buildCount.equals("")) {
+            return result.toString();
+        } else if (!versionStatus.equals(VersionStatus.BUILD)) {
+            result.append(".");
+        }
+        result.append(buildCount);
+        return result.toString();
+    }
+
+    public String getMajorVersion() {
+        return (releaseVersion == null || releaseVersion.isEmpty()) ? null : releaseVersion.split("\\.")[0];
+    }
+
+    public String getMinorVersion() {
+        if (releaseVersion == null) return null;
+        String[] splitVersion = releaseVersion.split("\\.");
+        return (splitVersion.length >= 2) ? splitVersion[1] : null;
+    }
+
+    public String getPatchVersion() {
+        if (releaseVersion == null) return null;
+        String[] splitVersion = releaseVersion.split("\\.|\\-");
+        return (splitVersion.length >= 3) ? splitVersion[2] : null;
     }
 
     public String getNamespace() {
@@ -178,11 +216,11 @@ public class ArchetypeHRID extends ArchetypeModelObject {
         this.releaseVersion = releaseVersion;
     }
 
-    public String getVersionStatus() {
+    public VersionStatus getVersionStatus() {
         return versionStatus;
     }
 
-    public void setVersionStatus(String versionStatus) {
+    public void setVersionStatus(VersionStatus versionStatus) {
         this.versionStatus = versionStatus;
     }
 
@@ -198,4 +236,42 @@ public class ArchetypeHRID extends ArchetypeModelObject {
     public String toString() {
         return getFullId();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ArchetypeHRID other = (ArchetypeHRID) o;
+        return Objects.equals(namespace,other.namespace) &&
+                Objects.equals(rmPublisher,other.rmPublisher) &&
+                Objects.equals(rmPackage, other.rmPackage) &&
+                Objects.equals(rmClass,other.rmClass) &&
+                Objects.equals(conceptId,other.conceptId) &&
+                Objects.equals(releaseVersion,other.releaseVersion) &&
+                Objects.equals(versionStatus,other.versionStatus) &&
+                Objects.equals(buildCount,other.buildCount);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(namespace, rmPublisher, rmPackage, rmClass, conceptId, releaseVersion, versionStatus, buildCount);
+    }
+
+    @RMPropertyIgnore
+    public String getIdUpToConcept() {
+        StringBuilder result = new StringBuilder(30);
+        if(!Strings.isNullOrEmpty(namespace)) {
+            result.append(namespace);
+            result.append("::");
+        }
+        result.append(rmPublisher);
+        result.append("-");
+        result.append(rmPackage);
+        result.append("-");
+        result.append(rmClass);
+        result.append(".");
+        result.append(conceptId);
+        return result.toString();
+    }
+
 }

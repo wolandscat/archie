@@ -10,6 +10,18 @@ public class ADL14ConversionConfiguration {
 
     private List<TerminologyUriTemplate> terminologyConversionTemplates = new ArrayList<>();
 
+    /**
+     * Set to true in case you want to accept duplicate fields in ODIN syntax. This can for example be duplicate at-codes
+     * in the terminology.
+     */
+    private boolean allowDuplicateFieldNames;
+
+    /**
+     * Set to false to skip applying the differential format. Use only when you know what you are doing, very nonstandard!
+     */
+    private boolean applyDiff = true;
+
+
     public List<TerminologyUriTemplate> getTerminologyConversionTemplates() {
         return terminologyConversionTemplates;
     }
@@ -28,5 +40,21 @@ public class ADL14ConversionConfiguration {
         return terminologyConversionTemplates.stream().filter(template ->
                 template.getTerminologyId().equalsIgnoreCase(terminologyId) &&
                         (template.getTerminologyVersion() == null)).findFirst().orElse(null);
+    }
+
+    public boolean isAllowDuplicateFieldNames() {
+        return allowDuplicateFieldNames;
+    }
+
+    public void setAllowDuplicateFieldNames(boolean allowDuplicateFieldNames) {
+        this.allowDuplicateFieldNames = allowDuplicateFieldNames;
+    }
+
+    public boolean isApplyDiff() {
+        return applyDiff;
+    }
+
+    public void setApplyDiff(boolean applyDiff) {
+        this.applyDiff = applyDiff;
     }
 }

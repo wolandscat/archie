@@ -39,7 +39,7 @@ public class BasicChecks extends ArchetypeValidationBase {
         //missing mandatory parts are checked in grammar, but check here as well
         if(archetype.getTerminology() == null) {
             addMessage(ErrorType.STCNT, I18n.t("Archetype terminology not defined"));
-        } else if(archetype.getTerminology().getTermDefinitions().isEmpty()) {
+        } else if(archetype.getTerminology().getTermDefinitions() == null || archetype.getTerminology().getTermDefinitions().isEmpty()) {
             addMessage(ErrorType.STCNT,I18n.t("Archetype terminology contains no term definitions"));
         }
     }

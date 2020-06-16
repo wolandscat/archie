@@ -1,5 +1,6 @@
 package com.nedap.archie.rminfo;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nedap.archie.aom.Archetype;
 import com.nedap.archie.aom.ArchetypeHRID;
 import com.nedap.archie.aom.AuthoredResource;
@@ -298,6 +299,17 @@ public class ArchieRMInfoLookup extends ReflectionModelInfoLookup {
         if(rmObject instanceof Locatable) {
             Locatable locatable = (Locatable) rmObject;
             return locatable.getArchetypeNodeId();
+        }
+        return null;
+    }
+
+    @Override
+    public String getArchetypeIdFromArchetypedRmObject(Object rmObject) {
+        if(rmObject instanceof Locatable) {
+            Locatable locatable = (Locatable) rmObject;
+            if(locatable.getArchetypeDetails() != null) {
+                return locatable.getArchetypeDetails().getArchetypeId().getFullId();
+            }
         }
         return null;
     }

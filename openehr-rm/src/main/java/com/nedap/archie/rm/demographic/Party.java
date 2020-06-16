@@ -1,17 +1,21 @@
 package com.nedap.archie.rm.demographic;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nedap.archie.rm.archetyped.Locatable;
 import com.nedap.archie.rm.datastructures.ItemStructure;
 import com.nedap.archie.rm.datavalues.DvText;
 import com.nedap.archie.rm.support.identification.LocatableRef;
+import com.nedap.archie.rminfo.RMPropertyIgnore;
 
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by pieter.bos on 08/07/16.
@@ -106,7 +110,27 @@ public abstract class Party extends Locatable {
     /**
      * Type of party, such as PERSON, ORGANISATION, etc. Role name, e.g. general practitioner , nurse , private citizen . Taken from inherited name attribute.
      */
+    @JsonIgnore
+    @XmlTransient
     public DvText getType() {
         return getName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Party party = (Party) o;
+        return Objects.equals(identities, party.identities) &&
+                Objects.equals(contacts, party.contacts) &&
+                Objects.equals(details, party.details) &&
+                Objects.equals(reverseRelationships, party.reverseRelationships) &&
+                Objects.equals(relationships, party.relationships);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), identities, contacts, details, reverseRelationships, relationships);
     }
 }

@@ -11,7 +11,6 @@ import com.nedap.archie.adlparser.treewalkers.BaseTreeWalker;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
 import com.nedap.archie.aom.terminology.ArchetypeTerminology;
 import com.nedap.archie.base.terminology.TerminologyCode;
-import com.nedap.archie.serializer.odin.OdinObjectParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,16 +27,18 @@ import java.util.Map;
 public class Adl14TerminologyParser extends BaseTreeWalker {
 
     private static final Logger logger = LoggerFactory.getLogger(Adl14TerminologyParser.class);
+    private final Odin14ValueParser odinParser;
 
     private ADL14ConversionUtil conversionUtil;
 
-    public Adl14TerminologyParser(ANTLRParserErrors errors, ADL14ConversionConfiguration configuration) {
+    public Adl14TerminologyParser(ANTLRParserErrors errors, ADL14ConversionConfiguration configuration, Odin14ValueParser odinParser) {
         super(errors);
         conversionUtil = new ADL14ConversionUtil(configuration);
+        this.odinParser = odinParser;
     }
 
     public ArchetypeTerminology parseTerminology(Terminology_sectionContext context) {
-        ArchetypeOntology ontology = OdinObjectParser.convert(context.odin_text().getText(), ArchetypeOntology.class);
+        ArchetypeOntology ontology = odinParser.convert(context.odin_text().getText(), ArchetypeOntology.class);
         ArchetypeTerminology terminology = new ArchetypeTerminology();
         for(String language:ontology.getTermDefinitions().keySet()) {
             terminology.getTermDefinitions().put(language, ontology.getTermDefinitions().get(language).getItems());
@@ -64,7 +65,6 @@ public class Adl14TerminologyParser extends BaseTreeWalker {
     private void convertConstraintBindings(ArchetypeOntology ontology, ArchetypeTerminology terminology) {
         if(ontology.getConstraintBindings() != null) {
             for(Map.Entry<String, ConstraintBindingsList> constraintBinding:ontology.getConstraintBindings().entrySet()) {
-                Map<String, URI> newBindings = new LinkedHashMap<>();
                 ensureTermBindingKeyExists(terminology, constraintBinding.getKey());
                 terminology.getTermBindings().get(constraintBinding.getKey()).putAll(new LinkedHashMap<>(constraintBinding.getValue().getItems()));
             }
@@ -76,17 +76,18 @@ public class Adl14TerminologyParser extends BaseTreeWalker {
             for(Map.Entry<String, TermBindingsList> termBinding:ontology.getTermBindings().entrySet()) {
                 ensureTermBindingKeyExists(terminology, termBinding.getKey());
                 Map<String, URI> newBindings = terminology.getTermBindings().get(termBinding.getKey());
-
-                for(Map.Entry<String, TerminologyCode> oldBinding:termBinding.getValue().getItems().entrySet()) {
-                    try {
-                        URI newBindingValue = conversionUtil.convertToUri(oldBinding.getValue());
-                        newBindings.put(oldBinding.getKey(), newBindingValue);
-                        //So this is an old path, will be converted later
-                        //not inside te parser, obviously
-                        //URIs need to be converted to even fit into the new model
-                    } catch (URISyntaxException e) {
-                        //TODO: add to conversion notes/messages/warnings
-                        logger.warn("error converting term binding to URI", e);
+                if(termBinding.getValue() != null && termBinding.getValue().getItems() != null) {
+                    for (Map.Entry<String, TerminologyCode> oldBinding : termBinding.getValue().getItems().entrySet()) {
+                        try {
+                            URI newBindingValue = conversionUtil.convertToUri(oldBinding.getValue());
+                            newBindings.put(oldBinding.getKey(), newBindingValue);
+                            //So this is an old path, will be converted later
+                            //not inside te parser, obviously
+                            //URIs need to be converted to even fit into the new model
+                        } catch (URISyntaxException e) {
+                            //TODO: add to conversion notes/messages/warnings
+                            logger.warn("error converting term binding to URI", e);
+                        }
                     }
                 }
             }

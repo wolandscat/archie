@@ -54,14 +54,14 @@ archetype_slot:
 
 c_archetype_slot_head: c_archetype_slot_id c_occurrences? ;
 
-c_archetype_slot_id: SYM_ALLOW_ARCHETYPE type_id '[' AT_CODE ']' SYM_CLOSED? ;
+c_archetype_slot_id: SYM_ALLOW_ARCHETYPE type_id ('[' AT_CODE ']')? SYM_CLOSED? ;
 
 c_attribute_def:
       c_attribute
     | c_attribute_tuple
     ;
 
-c_attribute: (ADL_PATH | attribute_id) c_existence? c_cardinality? ( SYM_MATCHES ('{' c_objects '}' | CONTAINED_REGEXP) )? ;
+c_attribute: (ADL_PATH | attribute_id) c_existence? c_cardinality? ( SYM_MATCHES ('{' (c_objects | '*') '}' | CONTAINED_REGEXP) )? ;
 
 c_attribute_tuple : '[' attribute_id ( ',' attribute_id )* ']' SYM_MATCHES '{' c_object_tuple ( ',' c_object_tuple )* '}' ;
 

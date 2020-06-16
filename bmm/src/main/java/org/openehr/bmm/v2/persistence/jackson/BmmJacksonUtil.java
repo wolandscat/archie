@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.nedap.archie.base.OpenEHRBase;
 
@@ -75,7 +76,7 @@ public class BmmJacksonUtil {
      */
     static class BmmTypeResolverBuilder extends ObjectMapper.DefaultTypeResolverBuilder {
         public BmmTypeResolverBuilder() {
-            super(ObjectMapper.DefaultTyping.NON_FINAL);
+            super(ObjectMapper.DefaultTyping.NON_FINAL, BasicPolymorphicTypeValidator.builder().allowIfBaseType(OpenEHRBase.class).build());
         }
 
         @Override

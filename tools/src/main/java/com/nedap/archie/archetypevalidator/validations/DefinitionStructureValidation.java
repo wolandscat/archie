@@ -38,33 +38,34 @@ public class DefinitionStructureValidation extends ValidatingVisitor {
 
                     if(parentAOMObject == null || !(parentAOMObject instanceof CComplexObject)) {
                         addPathNotFoundInParentError(cAttribute);
-                    }
-                    CComplexObject parentObject = (CComplexObject) parentAOMObject;
+                    } else {
+                        CComplexObject parentObject = (CComplexObject) parentAOMObject;
 
 
-                    differentialPathInParent = parentObject.itemAtPath(
-                            //TODO: the ADL workbench does this, so /items[id9.1]/value is a valid differential path even in openEHR-EHR-CLUSTER.exam-uterine_cervix.v1.0.0. Should it be?
-                            AOMUtils.pathAtSpecializationLevel(
-                                    pathSegments,
-                                    flatParent.specializationDepth()
-                            )
-                    );
+                        differentialPathInParent = parentObject.itemAtPath(
+                                //TODO: the ADL workbench does this, so /items[id9.1]/value is a valid differential path even in openEHR-EHR-CLUSTER.exam-uterine_cervix.v1.0.0. Should it be?
+                                AOMUtils.pathAtSpecializationLevel(
+                                        pathSegments,
+                                        flatParent.specializationDepth()
+                                )
+                        );
 
-                    if(differentialPathInParent == null) {
-                        //not found in parent, but the terminal node in the path is allowed to be an unarchetyped constraint, apparently
-                        String pathMinuLastNode = AOMUtils.pathAtSpecializationLevel(pathSegments.subList(0, pathSegments.size()-1), flatParent.specializationDepth());
-                        CObject parent = parentObject.itemAtPath(pathMinuLastNode);
-                        if(parent == null || parent.isRoot()) {
-                            addPathNotFoundInParentError(cAttribute);
-                        } else {
-                            PathSegment terminalNode = pathSegments.get(pathSegments.size() - 1);
-                            if (!combinedModels.attributeExists(parent.getRmTypeName(), terminalNode.getNodeName())) {
+                        if (differentialPathInParent == null) {
+                            //not found in parent, but the terminal node in the path is allowed to be an unarchetyped constraint, apparently
+                            String pathMinuLastNode = AOMUtils.pathAtSpecializationLevel(pathSegments.subList(0, pathSegments.size() - 1), flatParent.specializationDepth());
+                            CObject parent = parentObject.itemAtPath(pathMinuLastNode);
+                            if (parent == null || parent.isRoot()) {
                                 addPathNotFoundInParentError(cAttribute);
+                            } else {
+                                PathSegment terminalNode = pathSegments.get(pathSegments.size() - 1);
+                                if (!combinedModels.attributeExists(parent.getRmTypeName(), terminalNode.getNodeName())) {
+                                    addPathNotFoundInParentError(cAttribute);
+                                }
                             }
+                        } else if (!(differentialPathInParent instanceof CAttribute)) {
+                            addMessageWithPath(ErrorType.VDIFP, cAttribute.getDifferentialPath(),
+                                    I18n.t("Differential path must point to a C_ATTRIBUTE in the flat parent, but it pointed instead to a {0}", differentialPathInParent.getClass()));
                         }
-                    } else if (!(differentialPathInParent instanceof CAttribute)) {
-                        addMessageWithPath(ErrorType.VDIFP, cAttribute.getDifferentialPath(),
-                                I18n.t("Differential path must point to a C_ATTRIBUTE in the flat parent, but it pointed instead to a {0}",  differentialPathInParent.getClass()));
                     }
                 }
             }

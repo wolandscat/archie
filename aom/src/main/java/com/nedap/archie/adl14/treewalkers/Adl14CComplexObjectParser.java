@@ -1,8 +1,11 @@
 package com.nedap.archie.adl14.treewalkers;
 
 import com.google.common.collect.Lists;
+import com.nedap.archie.adl14.aom14.CDVOrdinal;
+import com.nedap.archie.adl14.aom14.CDVOrdinalItem;
 import com.nedap.archie.adl14.aom14.CDVQuantity;
 import com.nedap.archie.adl14.aom14.CDVQuantityItem;
+import com.nedap.archie.adlparser.antlr.Adl14Parser;
 import com.nedap.archie.adlparser.antlr.Adl14Parser.*;
 import com.nedap.archie.adlparser.treewalkers.BaseTreeWalker;
 import com.nedap.archie.antlr.errors.ANTLRParserErrors;
@@ -16,7 +19,7 @@ import com.nedap.archie.base.Interval;
 import com.nedap.archie.base.MultiplicityInterval;
 import com.nedap.archie.base.terminology.TerminologyCode;
 import com.nedap.archie.rules.Assertion;
-import com.nedap.archie.serializer.odin.OdinObjectParser;
+
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
@@ -30,10 +33,12 @@ import java.util.List;
 public class Adl14CComplexObjectParser extends BaseTreeWalker {
 
     private final Adl14PrimitivesConstraintParser primitivesConstraintParser;
+    private Odin14ValueParser odinParser;
 
-    public Adl14CComplexObjectParser(ANTLRParserErrors errors) {
+    public Adl14CComplexObjectParser(ANTLRParserErrors errors, Odin14ValueParser odinParser) {
         super(errors);
         primitivesConstraintParser = new Adl14PrimitivesConstraintParser(errors);
+        this.odinParser = odinParser;
     }
 
     public RulesSection parseRules(Rules_sectionContext context) {
@@ -161,96 +166,9 @@ public class Adl14CComplexObjectParser extends BaseTreeWalker {
             CComplexObject result = new CComplexObject();
             String type = objectContext.domainSpecificExtension().type_id().getText();
             if(type.equalsIgnoreCase("C_DV_QUANTITY")) {
-                result.setRmTypeName("DV_QUANTITY");
-                if(objectContext.domainSpecificExtension().odin_text() != null) {
-                    CDVQuantity cdvQuantity = OdinObjectParser.convert(objectContext.domainSpecificExtension().odin_text().getText(), CDVQuantity.class);
-                    if(cdvQuantity.getProperty() != null) {
-                        CAttribute property = new CAttribute("property");
-                        CTerminologyCode code = new CTerminologyCode();
-                        //will be converted later
-                        code.addConstraint(cdvQuantity.getProperty().toString());
-                        property.addChild(code);
-                        result.addAttribute(property);
-                    }
-                    if (cdvQuantity.getList() != null && !cdvQuantity.getList().isEmpty()) {
-                        if(cdvQuantity.getList().size() == 1) {
-                            CDVQuantityItem item = cdvQuantity.getList().values().iterator().next();
-                            if (item.getMagnitude() != null) {
-                                CAttribute magnitude = new CAttribute("magnitude");
-                                CReal magnitudeAdl2 = item.getMagnitudeAdl2();
-                                magnitude.addChild(magnitudeAdl2);
-                                result.addAttribute(magnitude);
-                                if(cdvQuantity.getAssumedValue() != null && cdvQuantity.getAssumedValue().getMagnitude() != null) {
-                                    Double assumedMagnitude = cdvQuantity.getAssumedValue().getMagnitude();
-                                    magnitudeAdl2.setAssumedValue(assumedMagnitude);
-                                }
-                            }
-                            if (item.getUnits() != null) {
-                                CAttribute units = new CAttribute("units");
-                                CString unitsAdl2 = item.getUnitsAdl2();
-                                units.addChild(unitsAdl2);
-                                result.addAttribute(units);
-                                if(cdvQuantity.getAssumedValue() != null && cdvQuantity.getAssumedValue().getUnits() != null) {
-                                    String assumedUnits = cdvQuantity.getAssumedValue().getUnits();
-                                    unitsAdl2.setAssumedValue(assumedUnits);
-                                }
-                            }
-                            if (item.getPrecision() != null) {
-                                CAttribute precision = new CAttribute("precision");
-                                CInteger precisionAdl2 = item.getPrecisionAdl2();
-                                precision.addChild(precisionAdl2);
-                                result.addAttribute(precision);
-                                if(cdvQuantity.getAssumedValue() != null && cdvQuantity.getAssumedValue().getPrecision() != null) {
-                                    Long assumedPrecision = cdvQuantity.getAssumedValue().getPrecision();
-                                    precisionAdl2.setAssumedValue(assumedPrecision);
-                                }
-                            }
-                        } else {
-                            CAttributeTuple tuple = new CAttributeTuple();
-                            boolean hasMagnitude = cdvQuantity.getList().values().stream().anyMatch(i -> i.getMagnitude() != null);
-                            boolean hasUnits = cdvQuantity.getList().values().stream().anyMatch(i -> i.getUnits() != null);
-                            boolean hasPrecision = cdvQuantity.getList().values().stream().anyMatch(i -> i.getPrecision() != null);
-
-                            if (hasMagnitude) {
-                                tuple.addMember(new CAttribute("magnitude"));
-                            }
-                            if (hasUnits) {
-                                tuple.addMember(new CAttribute("units"));
-                            }
-                            if (hasPrecision) {
-                                tuple.addMember(new CAttribute("precision"));
-                            }
-                            for (CDVQuantityItem item : cdvQuantity.getList().values()) {
-                                CPrimitiveTuple primitiveTuple = new CPrimitiveTuple();
-                                if (item.getMagnitude() != null) {
-                                    primitiveTuple.addMember(item.getMagnitudeAdl2());
-                                } else if (hasMagnitude) {
-                                    CReal cReal = new CReal();
-                                    cReal.addConstraint(Interval.upperUnbounded(0.0, true));
-                                    primitiveTuple.addMember(cReal);
-                                }
-
-                                if (item.getUnits() != null) {
-                                    primitiveTuple.addMember(item.getUnitsAdl2());
-                                } else if (hasUnits) {
-                                    primitiveTuple.addMember(new CString("/.*/"));
-                                }
-
-                                if (item.getPrecision() != null) {
-                                    primitiveTuple.addMember(item.getPrecisionAdl2());
-                                } else if (hasPrecision) {
-                                    CInteger cInteger = new CInteger();
-                                    cInteger.addConstraint(Interval.upperUnbounded(0l, true));
-                                    primitiveTuple.addMember(cInteger);
-                                }
-                                tuple.addTuple(primitiveTuple);
-                            }
-                            result.addAttributeTuple(tuple);
-                        }
-                        //TODO: assumed value is possible in ADL 1.4, but not really in ADL 2, unless there is just one option possible. Cannot be solved until
-                        //ADL 2 spec is changed
-                    }
-                }
+                parseCDVQuantity(objectContext, result);
+            } else if (type.equalsIgnoreCase("C_DV_ORDINAL")) {
+                parseCDVOrdinal(objectContext, result);
             } else {
                 throw new IllegalArgumentException("unknown domain specific type: " + type);
             }
@@ -290,6 +208,139 @@ public class Adl14CComplexObjectParser extends BaseTreeWalker {
         throw new IllegalArgumentException("unknown non-primitive object: " + objectContext.getText());
     }
 
+    private void parseCDVOrdinal(C_non_primitive_objectContext objectContext, CComplexObject result) {
+        result.setRmTypeName("DV_ORDINAL");
+        if(objectContext.domainSpecificExtension().odin_text() != null) {
+            CDVOrdinal cdvOrdinal = odinParser.convert(objectContext.domainSpecificExtension().odin_text().getText(), CDVOrdinal.class);
+            if (cdvOrdinal.getList() != null && !cdvOrdinal.getList().isEmpty()) {
+                CAttributeTuple tuple = new CAttributeTuple();
+                boolean hasValue = cdvOrdinal.getList().values().stream().anyMatch(i -> i.getValue() != null);
+                boolean hasSymbol = cdvOrdinal.getList().values().stream().anyMatch(i -> i.getSymbol() != null);
+
+
+                if (hasValue) {
+                    tuple.addMember(new CAttribute("value"));
+                }
+                if (hasSymbol) {
+                    tuple.addMember(new CAttribute("symbol"));
+                }
+
+                for (CDVOrdinalItem item : cdvOrdinal.getList().values()) {
+                    CPrimitiveTuple primitiveTuple = new CPrimitiveTuple();
+                    if(item.getValue() != null) {
+                        primitiveTuple.addMember(item.getValueAdl2());
+                    } else if (hasValue) {
+                        CInteger integer = new CInteger();
+                        integer.addConstraint(Interval.upperUnbounded(0L, true));
+                        primitiveTuple.addMember(integer);
+                    }
+                    if (item.getSymbol() != null) {
+                        primitiveTuple.addMember(item.getSymbolAdl2());
+                    } else if (hasSymbol) {
+                        CTerminologyCode code = new CTerminologyCode();
+                        primitiveTuple.addMember(code);//nothing we can do here!
+                    }
+
+                    tuple.addTuple(primitiveTuple);
+                }
+                result.addAttributeTuple(tuple);
+            }
+        }
+    }
+
+    private void parseCDVQuantity(C_non_primitive_objectContext objectContext, CComplexObject result) {
+        result.setRmTypeName("DV_QUANTITY");
+        if(objectContext.domainSpecificExtension().odin_text() != null) {
+            CDVQuantity cdvQuantity = odinParser.convert(objectContext.domainSpecificExtension().odin_text().getText(), CDVQuantity.class);
+            if(cdvQuantity.getProperty() != null) {
+                CAttribute property = new CAttribute("property");
+                CTerminologyCode code = new CTerminologyCode();
+                //will be converted later
+                code.addConstraint(cdvQuantity.getProperty().toString());
+                property.addChild(code);
+                result.addAttribute(property);
+            }
+            if (cdvQuantity.getList() != null && !cdvQuantity.getList().isEmpty()) {
+                if(cdvQuantity.getList().size() == 1) {
+                    CDVQuantityItem item = cdvQuantity.getList().values().iterator().next();
+                    if (item.getMagnitude() != null) {
+                        CAttribute magnitude = new CAttribute("magnitude");
+                        CReal magnitudeAdl2 = item.getMagnitudeAdl2();
+                        magnitude.addChild(magnitudeAdl2);
+                        result.addAttribute(magnitude);
+                        if(cdvQuantity.getAssumedValue() != null && cdvQuantity.getAssumedValue().getMagnitude() != null) {
+                            Double assumedMagnitude = cdvQuantity.getAssumedValue().getMagnitude();
+                            magnitudeAdl2.setAssumedValue(assumedMagnitude);
+                        }
+                    }
+                    if (item.getUnits() != null) {
+                        CAttribute units = new CAttribute("units");
+                        CString unitsAdl2 = item.getUnitsAdl2();
+                        units.addChild(unitsAdl2);
+                        result.addAttribute(units);
+                        if(cdvQuantity.getAssumedValue() != null && cdvQuantity.getAssumedValue().getUnits() != null) {
+                            String assumedUnits = cdvQuantity.getAssumedValue().getUnits();
+                            unitsAdl2.setAssumedValue(assumedUnits);
+                        }
+                    }
+                    if (item.getPrecision() != null) {
+                        CAttribute precision = new CAttribute("precision");
+                        CInteger precisionAdl2 = item.getPrecisionAdl2();
+                        precision.addChild(precisionAdl2);
+                        result.addAttribute(precision);
+                        if(cdvQuantity.getAssumedValue() != null && cdvQuantity.getAssumedValue().getPrecision() != null) {
+                            Long assumedPrecision = cdvQuantity.getAssumedValue().getPrecision();
+                            precisionAdl2.setAssumedValue(assumedPrecision);
+                        }
+                    }
+                } else {
+                    CAttributeTuple tuple = new CAttributeTuple();
+                    boolean hasMagnitude = cdvQuantity.getList().values().stream().anyMatch(i -> i.getMagnitude() != null);
+                    boolean hasUnits = cdvQuantity.getList().values().stream().anyMatch(i -> i.getUnits() != null);
+                    boolean hasPrecision = cdvQuantity.getList().values().stream().anyMatch(i -> i.getPrecision() != null);
+
+                    if (hasMagnitude) {
+                        tuple.addMember(new CAttribute("magnitude"));
+                    }
+                    if (hasUnits) {
+                        tuple.addMember(new CAttribute("units"));
+                    }
+                    if (hasPrecision) {
+                        tuple.addMember(new CAttribute("precision"));
+                    }
+                    for (CDVQuantityItem item : cdvQuantity.getList().values()) {
+                        CPrimitiveTuple primitiveTuple = new CPrimitiveTuple();
+                        if (item.getMagnitude() != null) {
+                            primitiveTuple.addMember(item.getMagnitudeAdl2());
+                        } else if (hasMagnitude) {
+                            CReal cReal = new CReal();
+                            cReal.addConstraint(Interval.upperUnbounded(0.0, true));
+                            primitiveTuple.addMember(cReal);
+                        }
+
+                        if (item.getUnits() != null) {
+                            primitiveTuple.addMember(item.getUnitsAdl2());
+                        } else if (hasUnits) {
+                            primitiveTuple.addMember(new CString("/.*/"));
+                        }
+
+                        if (item.getPrecision() != null) {
+                            primitiveTuple.addMember(item.getPrecisionAdl2());
+                        } else if (hasPrecision) {
+                            CInteger cInteger = new CInteger();
+                            cInteger.addConstraint(Interval.upperUnbounded(0l, true));
+                            primitiveTuple.addMember(cInteger);
+                        }
+                        tuple.addTuple(primitiveTuple);
+                    }
+                    result.addAttributeTuple(tuple);
+                }
+                //TODO: assumed value is possible in ADL 1.4, but not really in ADL 2, unless there is just one option possible. Cannot be solved until
+                //ADL 2 spec is changed
+            }
+        }
+    }
+
     private CComplexObjectProxy parseCComplexObjectProxy(C_complex_object_proxyContext proxyContext) {
 
         CComplexObjectProxy proxy = new CComplexObjectProxy();
@@ -322,7 +373,9 @@ public class Adl14CComplexObjectParser extends BaseTreeWalker {
     private ArchetypeSlot parseArchetypeSlot(Archetype_slotContext slotContext) {
         ArchetypeSlot slot = new ArchetypeSlot();
         C_archetype_slot_headContext headContext = slotContext.c_archetype_slot_head();
-        slot.setNodeId(headContext.c_archetype_slot_id().AT_CODE().getText());
+        if(headContext.c_archetype_slot_id().AT_CODE() != null) {
+            slot.setNodeId(headContext.c_archetype_slot_id().AT_CODE().getText());
+        }
         slot.setRmTypeName(headContext.c_archetype_slot_id().type_id().getText());
         if(headContext.c_archetype_slot_id().SYM_CLOSED() != null) {
             slot.setClosed(true);

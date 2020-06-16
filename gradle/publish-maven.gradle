@@ -13,7 +13,7 @@ if(gradle.ext.shouldSign) {
   signing {
       useGpgCmd()
       sign configurations.archives
-  }
+  }  
 }
 
 //upload to sonatype configuration
@@ -61,13 +61,13 @@ def customizePom(pom, gradleProject) {
     // sort to make pom dependencies order consistent to ease comparison of older poms
     generatedPom.dependencies = generatedPom.dependencies.sort { dep ->
       "$dep.scope:$dep.groupId:$dep.artifactId"
-    } 
+    }
 
     // add all items necessary for maven central publication
     generatedPom.project {
       name = gradleProject.name
       description = gradleProject.description
-      url = "https://github.com/nedap/archie"
+      url = "https://github.com/openEHR/archie"
       organization {
         name = "Nedap Healthcare"
         url = "http://www.nedap-healthcare.com"
@@ -80,9 +80,9 @@ def customizePom(pom, gradleProject) {
         }
       }
       scm {
-        url = "https://github.com/nedap/archie"
-        connection = "scm:git:git://github.com/nedap/archie"
-        developerConnection = "scm:git:git://github.com/nedap/archie"
+        url = "https://github.com/openEHR/archie"
+        connection = "scm:git:git://github.com/openEHR/archie"
+        developerConnection = "scm:git:git://github.com/openEHR/archie"
       }
       developers {
         developer {
@@ -98,7 +98,7 @@ def customizePom(pom, gradleProject) {
       }
       issueManagement {
         system = "Github"
-        url = "https://github.com/nedap/archie/issues"
+        url = "https://github.com/openEHR/archie/issues"
       }
     }
   }

@@ -23,9 +23,13 @@ package org.openehr.bmm.core;
 
 import java.io.Serializable;
 
-public class BmmGenericProperty extends BmmProperty implements Serializable {
+public class BmmGenericProperty extends BmmProperty<BmmGenericType> implements Serializable {
 
     private BmmGenericType genericTypeDef;//fix to call it typeDef once fix has been made to this attribute in parent class;
+
+    public BmmGenericProperty(String name, BmmGenericType type) {
+        super(name, type);
+    }
 
     public BmmGenericType getGenericTypeDef() {
         return genericTypeDef;

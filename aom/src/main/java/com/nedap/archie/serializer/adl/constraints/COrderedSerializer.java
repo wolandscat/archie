@@ -60,13 +60,15 @@ public abstract class COrderedSerializer<T extends COrdered<?>> extends Constrai
     }
 
     private boolean isSingleValueInterval(Interval<?> interval) {
-        return interval.getLower() != null && interval.getLower().equals(interval.getUpper());
-    }
-
-    private boolean isSingleValueConstraint(T cobj) {
-        if (cobj.getConstraint().size() != 1) return false;
-        Interval<?> interval = cobj.getConstraint().get(0);
-        return isSingleValueInterval(interval);
+        //In case we know interval is a of a discrete type, such as integers, this can be made to work in case !upperIncluded and !lowerIncluded
+        //but it's fine without. There is a separate solution for MultiplicityInterval and in case this returns false the
+        //only consequence is a slightly less intuitive serialization
+        return interval.getLower() != null &&
+                interval.isUpperIncluded() &&
+                interval.isLowerIncluded() &&
+                !interval.isLowerUnbounded() &&
+                !interval.isUpperUnbounded() &&
+                interval.getLower().equals(interval.getUpper());
     }
 
     @Override

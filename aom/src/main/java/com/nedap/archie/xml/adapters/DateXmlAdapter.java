@@ -1,7 +1,7 @@
 package com.nedap.archie.xml.adapters;
 
-import com.nedap.archie.datetime.DateTimeFormatters;
 import com.nedap.archie.datetime.DateTimeParsers;
+import com.nedap.archie.datetime.DateTimeSerializerFormatters;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.time.LocalDate;
@@ -23,6 +23,6 @@ public class DateXmlAdapter extends XmlAdapter<String, Temporal> {
         if(value instanceof LocalDate || value instanceof YearMonth) {
             return value.toString();
         }
-        return value != null ? DateTimeFormatters.ISO_8601_DATE.format(value):null;
+        return value != null ? DateTimeSerializerFormatters.ISO_8601_DATE.format(value):null;
     }
 }

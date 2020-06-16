@@ -14,6 +14,8 @@ import com.nedap.archie.rm.datavalues.quantity.DvQuantity;
 import com.nedap.archie.rm.datavalues.quantity.datetime.DvDate;
 import com.nedap.archie.rm.datavalues.quantity.datetime.DvDateTime;
 import com.nedap.archie.rm.datavalues.quantity.datetime.DvTime;
+import com.nedap.archie.rm.support.identification.HierObjectId;
+import com.nedap.archie.rm.support.identification.UIDBasedId;
 import com.nedap.archie.rminfo.ArchieRMInfoLookup;
 import com.nedap.archie.testutil.TestUtil;
 import com.nedap.archie.xml.JAXBUtil;
@@ -53,6 +55,9 @@ public class JacksonRMRoundTripTest {
     public void dataValues() throws Exception {
         archetype = parser.parse(JacksonRMRoundTripTest.class.getResourceAsStream("openEHR-EHR-CLUSTER.datavalues.v1.adls"));
         Cluster cluster =  (Cluster) testUtil.constructEmptyRMObject(archetype.getDefinition());
+        UIDBasedId uid = new HierObjectId();
+        uid.setValue("SOME_UUID");
+        cluster.setUid(uid);
         RMQueryContext queryContext = getQueryContext(cluster);
         DvText text = queryContext.find("/items['Text']/value");
         text.setValue("test-text");
@@ -81,6 +86,8 @@ public class JacksonRMRoundTripTest {
         assertThat(parsedQueryContext.<DvDateTime>find("/items['Datetime']/value").getValue(), is(LocalDateTime.of(2016, 1, 1, 12, 00)));
         assertThat(parsedQueryContext.<DvTime>find("/items['Time']/value").getValue(), is(LocalTime.of(12, 0)));
         assertThat(parsedQueryContext.<DvURI>find("/items['Uri']/value").getValue(), is(URI.create("http://test.example.com")));
+        assertThat(parsedCluster.getUid().getValue(), is("SOME_UUID"));
+        assertThat(parsedCluster.getArchetypeNodeId(), is("id1"));
 
     }
 

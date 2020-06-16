@@ -52,6 +52,7 @@ public class ArchetypeValidator {
         //but there's no reason this cannot be parsed, so check them here
         validationsPhase0.add(new AttributeUniquenessValidation());
         validationsPhase0.add(new NodeIdValidation());
+        validationsPhase0.add(new BasicDefinitionObjectValidation());
 
         validationsPhase0.add(new AttributeTupleValidation());
 
@@ -198,7 +199,7 @@ public class ArchetypeValidator {
             result.addOverlayValidations(extraArchetypeRepository.getAllValidationResults());
             for(ValidationResult subResult:extraArchetypeRepository.getAllValidationResults()) {
                 if(!subResult.passes()) {
-                    result.getErrors().add(new ValidationMessage(ErrorType.OTHER, I18n.t("Template overlay {0} had validation errors", subResult.getArchetypeId())));
+                    result.getErrors().add(new ValidationMessage(ErrorType.OVERLAY_VALIDATION_FAILED, I18n.t("Template overlay {0} had validation errors", subResult.getArchetypeId())));
                 }
             }
         }

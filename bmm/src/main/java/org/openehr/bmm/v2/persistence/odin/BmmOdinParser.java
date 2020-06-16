@@ -32,12 +32,19 @@ public class BmmOdinParser {
         ANTLRParserErrors errors = new ANTLRParserErrors();
         ArchieErrorListener listener = new ArchieErrorListener(errors);
         parser.addErrorListener(listener);
-        PBmmSchema converted = convert(parser.odin_text());
-        if (errors.hasErrors()) {
-            throw new RuntimeException("errors parsing ODIN file: " + errors);
-        }
 
-        return converted;
+        try {
+            PBmmSchema converted = convert(parser.odin_text());
+            if (errors.hasErrors()) { //if parse errors, throw those first!
+                throw new RuntimeException("errors parsing ODIN file: " + errors);
+            }
+            return converted;
+        } catch (RuntimeException e) {
+            if (errors.hasErrors()) { //if parse errors, throw those first!
+                throw new RuntimeException("errors parsing ODIN file: " + errors);
+            }
+            throw e;
+        }
     }
 
     public static PBmmSchema convert(String odin) {
@@ -47,12 +54,20 @@ public class BmmOdinParser {
         ANTLRParserErrors errors = new ANTLRParserErrors();
         ArchieErrorListener listener = new ArchieErrorListener(errors);
         parser.addErrorListener(listener);
-        PBmmSchema converted = convert(parser.odin_text());
-        if (errors.hasErrors()) {
-            throw new RuntimeException("errors parsing ODIN file: " + errors);
+        try {
+            PBmmSchema converted = convert(parser.odin_text());
+            if (errors.hasErrors()) { //if parse errors, throw those first!
+                throw new RuntimeException("errors parsing ODIN file: " + errors);
+            }
+            return converted;
+        } catch (RuntimeException e) {
+            if (errors.hasErrors()) { //if parse errors, throw those first!
+                throw new RuntimeException("errors parsing ODIN file: " + errors);
+            }
+            throw e;
         }
 
-        return converted;
+
     }
 
 }

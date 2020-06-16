@@ -243,7 +243,6 @@ public class RMPathQuery {
             int number = segment.getIndex();
             int i = 1;
             for(Object object:collection) {
-                System.out.println("checking " + i + " with " + number);
                 if(number == i) {
                     //TODO: check for other constraints as well
                     return Lists.newArrayList(new RMObjectWithPath(object, path + buildPathConstraint(i-1, lookup.getArchetypeNodeIdFromRMObject(object))));
